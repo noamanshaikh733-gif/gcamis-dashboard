@@ -1,1 +1,1648 @@
-# gcamis-dashboard
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>GCAMIS – Gujarat Circle Aadhaar Camp Monitoring</title>
+    <style>
+        /* ── reset & base ── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 16px;
+            color: #1b2430;
+        }
+        .app { max-width: 1440px; margin: 0 auto; }
+
+        /* ── header ── */
+        .header {
+            background: linear-gradient(135deg, #0f2138, #173355);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand .logo {
+            width: 44px; height: 44px;
+            background: radial-gradient(circle at 35% 30%, #b9812c, #8a5f1c);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800; font-size: 18px;
+            color: #1a1200;
+        }
+        .brand h1 { font-size: 20px; }
+        .brand h1 span { color: #f3e4c6; }
+        .brand small { font-size: 12px; color: #a0b4cc; display: block; }
+        .badge-count {
+            background: rgba(255,255,255,0.12);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ── date filter ── */
+        .date-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: rgba(255,255,255,0.08);
+            padding: 8px 14px;
+            border-radius: 8px;
+            align-items: center;
+        }
+        .date-filter select,
+        .date-filter input {
+            background: transparent;
+            color: #fff;
+            border: none;
+            padding: 4px 8px;
+            font-size: 13px;
+            outline: none;
+        }
+        .date-filter select option { color: #000; background: #fff; }
+        .date-filter button {
+            background: #b9812c;
+            color: #fff;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .date-filter button:hover { opacity: 0.85; }
+
+        /* ── tabs ── */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: #fff;
+            border-radius: 10px;
+            padding: 4px 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow-x: auto;
+        }
+        .tabs button {
+            padding: 10px 18px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 13px;
+            color: #697180;
+            cursor: pointer;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        .tabs button:hover { background: #f0f2f5; color: #1b2430; }
+        .tabs button.active {
+            background: #0f2138;
+            color: #fff;
+        }
+
+        /* ── cards ── */
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .card h2 {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .card h2 .badge {
+            font-size: 11px;
+            font-weight: 600;
+            background: #e3edf7;
+            color: #2a6b9e;
+            padding: 1px 12px;
+            border-radius: 12px;
+        }
+        .card .desc {
+            font-size: 12.5px;
+            color: #697180;
+            margin-bottom: 14px;
+        }
+
+        /* ── KPI grid ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 14px 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 4px solid #2a6b9e;
+        }
+        .kpi-card .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #697180;
+            font-weight: 600;
+        }
+        .kpi-card .value {
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .kpi-card .sub {
+            font-size: 11px;
+            color: #697180;
+        }
+        .kpi-card.green { border-left-color: #1c7a45; }
+        .kpi-card.green .value { color: #1c7a45; }
+        .kpi-card.gold { border-left-color: #b9812c; }
+        .kpi-card.gold .value { color: #b9812c; }
+        .kpi-card.red { border-left-color: #b3392b; }
+        .kpi-card.red .value { color: #b3392b; }
+        .kpi-card.blue { border-left-color: #2a6b9e; }
+        .kpi-card.blue .value { color: #2a6b9e; }
+
+        /* ── alerts ── */
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .alert-card {
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .alert-card .icon { font-size: 24px; }
+        .alert-card .info { flex: 1; }
+        .alert-card .info .title { font-size: 12px; font-weight: 600; opacity: 0.8; }
+        .alert-card .info .desc { font-size: 13px; font-weight: 600; }
+        .alert-card.danger { background: #fbeae7; border-left: 4px solid #b3392b; }
+        .alert-card.danger .info .desc { color: #b3392b; }
+        .alert-card.warning { background: #fdf0e6; border-left: 4px solid #d4772a; }
+        .alert-card.warning .info .desc { color: #d4772a; }
+        .alert-card.success { background: #e5f4eb; border-left: 4px solid #1c7a45; }
+        .alert-card.success .info .desc { color: #1c7a45; }
+
+        /* ── data entry ── */
+        .data-entry-area {
+            width: 100%;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            padding: 12px;
+            border: 2px dashed #e1e4e9;
+            border-radius: 8px;
+            background: #fafbfc;
+            resize: vertical;
+            tab-size: 4;
+        }
+        .data-entry-area:focus {
+            border-color: #b9812c;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(185,129,44,0.2);
+        }
+        .upload-hint {
+            background: #e3edf7;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin: 10px 0;
+        }
+
+        /* ── tables ── */
+        .table-wrap {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        table.data {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        table.data th {
+            text-align: left;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            color: #697180;
+            padding: 8px 10px;
+            border-bottom: 2px solid #e1e4e9;
+            position: sticky;
+            top: 0;
+            background: #fff;
+        }
+        table.data td {
+            padding: 7px 10px;
+            border-bottom: 1px solid #eef0f3;
+        }
+        table.data .num { text-align: right; }
+        table.data .clickable {
+            cursor: pointer;
+            color: #2a6b9e;
+            font-weight: 600;
+        }
+        table.data .clickable:hover { text-decoration: underline; }
+        table.data .total-row td {
+            background: #0f2138;
+            color: #fff;
+            font-weight: 700;
+        }
+        table.data .sub-total td {
+            background: #eef1f5;
+            font-weight: 600;
+        }
+
+        /* ── status pill ── */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-pill.green { background: #e5f4eb; color: #1c7a45; }
+        .status-pill.red { background: #fbeae7; color: #b3392b; }
+        .status-pill.orange { background: #fdf0e6; color: #d4772a; }
+
+        /* ── report preview ── */
+        .report-preview {
+            background: #fafbfc;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #e1e4e9;
+            margin: 10px 0;
+        }
+        .report-preview table {
+            width: 100%;
+            font-size: 12px;
+            border-collapse: collapse;
+        }
+        .report-preview table th,
+        .report-preview table td {
+            padding: 6px 8px;
+            border: 1px solid #e1e4e9;
+            text-align: center;
+        }
+        .report-preview table th {
+            background: #0f2138;
+            color: #fff;
+        }
+
+        /* ── utilities ── */
+        .section { display: none; }
+        .section.active { display: block; }
+        .empty { text-align: center; padding: 40px 20px; color: #697180; }
+        .empty .icon { font-size: 40px; display: block; margin-bottom: 10px; }
+        .msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 10px; }
+        .msg.ok { background: #e5f4eb; color: #1c7a45; }
+        .msg.err { background: #fbeae7; color: #b3392b; }
+        .msg.info { background: #fdf0e6; color: #d4772a; }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding: 6px 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .toolbar button {
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: none;
+            background: #0f2138;
+            color: #fff;
+            cursor: pointer;
+        }
+        .toolbar button:hover { opacity: 0.85; }
+        .toolbar button.success { background: #1c7a45; }
+        .toolbar button.gold { background: #b9812c; }
+        .toolbar button.danger { background: #b3392b; }
+        .toolbar button.secondary { background: #e9ecef; color: #1b2430; }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .preview-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .preview-item .num { font-size: 24px; font-weight: 700; color: #b9812c; }
+
+        @media (max-width: 768px) {
+            .kpi-grid { grid-template-columns: repeat(2,1fr); }
+            .header { flex-direction: column; align-items: stretch; }
+            .tabs button { font-size: 12px; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <!-- ========== HEADER ========== -->
+    <header class="header">
+        <div class="brand">
+            <div class="logo">G</div>
+            <div>
+                <h1>G<span>CAMIS</span></h1>
+                <small>Gujarat Circle Aadhaar Camp Monitoring System</small>
+            </div>
+        </div>
+        <div class="badge-count">📅 <span id="headerDate">Today</span></div>
+        <div class="badge-count">🏛️ <strong id="headerSubDivisions">104</strong> SD</div>
+        <div class="badge-count" id="headerStatus">🟢 Live</div>
+    </header>
+
+    <!-- ========== DATE FILTER ========== -->
+    <div class="card" style="padding:10px 16px;">
+        <div class="date-filter" style="width:100%;justify-content:space-between;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                <label style="font-weight:600;font-size:13px;color:var(--muted);">📅 Date Range:</label>
+                <select id="dateRangeSelect">
+                    <option value="yesterday">Yesterday</option>
+                    <option value="today">Today</option>
+                    <option value="last7">Last 7 Days</option>
+                    <option value="last30">Last 30 Days</option>
+                    <option value="month">This Month</option>
+                    <option value="custom">Custom</option>
+                    <option value="all">All Dates</option>
+                </select>
+                <input type="date" id="dateFrom" style="display:none;background:#fff;color:#000;padding:4px 8px;border-radius:4px;border:1px solid #e1e4e9;">
+                <input type="date" id="dateTo" style="display:none;background:#fff;color:#000;padding:4px 8px;border-radius:4px;border:1px solid #e1e4e9;">
+                <button id="applyDateBtn">Apply</button>
+            </div>
+            <div style="font-size:12px;color:#697180;">
+                📊 <span id="dateRangeDisplay">Yesterday</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TABS ========== -->
+    <nav class="tabs">
+        <button class="active" data-tab="today">📊 Dashboard</button>
+        <button data-tab="entry">📥 Data Entry</button>
+        <button data-tab="report">📋 Daily Report</button>
+        <button data-tab="regions">🌍 Regions</button>
+        <button data-tab="divisions">🏢 Divisions</button>
+        <button data-tab="subdivisions">📍 Sub-Divisions</button>
+        <button data-tab="offenders">⚠️ Non-Organized</button>
+        <button data-tab="export">📤 Export</button>
+    </nav>
+
+    <!-- ========================================================= -->
+    <!-- TAB: DASHBOARD -->
+    <!-- ========================================================= -->
+    <section class="section active" id="tab-today">
+
+        <div class="kpi-grid" id="todayKPIs">
+            <div class="kpi-card green"><div class="label">🏕️ Successful Camps</div><div class="value" id="kpiCamps">0</div><div class="sub" id="kpiCampsSub">Today</div></div>
+            <div class="kpi-card gold"><div class="label">📊 Transactions</div><div class="value" id="kpiTxns">0</div><div class="sub">Total</div></div>
+            <div class="kpi-card blue"><div class="label">📱 MBU</div><div class="value" id="kpiMBU">0</div><div class="sub">Updates</div></div>
+            <div class="kpi-card gold"><div class="label">💰 MBU Revenue</div><div class="value" id="kpiRevenue">₹0</div><div class="sub">@ ₹125/MBU</div></div>
+            <div class="kpi-card green"><div class="label">✅ Active SD</div><div class="value" id="kpiActive">0</div><div class="sub">/ <span id="kpiTotalSD">104</span></div></div>
+            <div class="kpi-card red"><div class="label">⏳ Pending SD</div><div class="value" id="kpiPending">0</div><div class="sub">No successful camp</div></div>
+        </div>
+
+        <div class="alerts-grid" id="alertGrid">
+            <div class="alert-card danger" id="alertNoData"><div class="icon">🔴</div><div class="info"><div class="title">No Data Upload</div><div class="desc" id="alertNoDataCount">0 Sub-Divisions</div></div></div>
+            <div class="alert-card warning" id="alertNoCamps"><div class="icon">🟠</div><div class="info"><div class="title">No Successful Camp</div><div class="desc" id="alertNoCampsCount">0 Sub-Divisions</div></div></div>
+            <div class="alert-card warning" id="alertLowTxns"><div class="icon">🟠</div><div class="info"><div class="title">Low Transactions (&lt;10)</div><div class="desc" id="alertLowTxnsCount">0 Sub-Divisions</div></div></div>
+            <div class="alert-card warning" id="alertLowMBU"><div class="icon">🟠</div><div class="info"><div class="title">Low MBU (&lt;5)</div><div class="desc" id="alertLowMBUCount">0 Sub-Divisions</div></div></div>
+        </div>
+
+        <div class="card">
+            <h2>🏆 Top Performers <span class="badge" id="performerBadge">Today</span></h2>
+            <div class="desc">Best performing regions, divisions, and sub-divisions by transactions.</div>
+            <div id="topPerformers" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+                <div style="background:#f8f9fa;padding:12px;border-radius:8px;"><div style="font-size:11px;color:#697180;">🏆 Best Region</div><div id="bestRegion" style="font-weight:700;font-size:18px;color:#b9812c;">—</div></div>
+                <div style="background:#f8f9fa;padding:12px;border-radius:8px;"><div style="font-size:11px;color:#697180;">🏆 Best Division</div><div id="bestDivision" style="font-weight:700;font-size:18px;color:#b9812c;">—</div></div>
+                <div style="background:#f8f9fa;padding:12px;border-radius:8px;"><div style="font-size:11px;color:#697180;">🏆 Best Sub-Division</div><div id="bestSubDivision" style="font-weight:700;font-size:18px;color:#b9812c;">—</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB: DATA ENTRY -->
+    <!-- ========================================================= -->
+    <section class="section" id="tab-entry">
+        <div class="card">
+            <h2>📥 Data Entry <span class="badge">Paste your Excel data here</span></h2>
+            <div class="upload-hint">
+                <strong>📋 Instructions:</strong><br>
+                1. Open your Excel/CSV file and select <strong>all rows including the header</strong>.<br>
+                2. Press <strong>Ctrl+C</strong> (or Cmd+C) to copy.<br>
+                3. Paste into the box below and click <strong>"Parse Data"</strong>.<br>
+                4. Review the preview, then click <strong>"Save to Portal"</strong>.<br>
+                <br>
+                ✅ <strong>Successful Camp =</strong> Address filled <strong>+</strong> Total Transactions &gt; 0<br>
+                📅 Supports <strong>multiple dates</strong> in one paste – they'll be auto-sorted.
+            </div>
+            <textarea class="data-entry-area" id="pasteArea" placeholder="Paste tab-separated data here (Ctrl+V from Excel)…"></textarea>
+            <div class="toolbar" style="margin-top:12px;">
+                <button class="success" id="parseBtn">▶ Parse Data</button>
+                <button class="secondary" id="clearBtn">✕ Clear</button>
+                <span style="font-size:12px;color:#697180;margin-left:auto;">Header row required • Tab-separated</span>
+            </div>
+            <div id="parseMsg"></div>
+        </div>
+
+        <div class="card" id="previewCard" style="display:none;">
+            <h2>👁️ Preview Before Saving</h2>
+            <div class="desc" id="previewSummary"></div>
+            <div class="preview-grid" id="previewStats"></div>
+            <div style="overflow-x:auto;max-height:300px;overflow-y:auto;">
+                <table class="data" id="previewTable"></table>
+            </div>
+            <div class="toolbar" style="margin-top:14px;">
+                <button class="success" id="saveBtn">💾 Save to Portal</button>
+                <span style="font-size:12px;color:#697180;">Data stored in your browser (localStorage).</span>
+            </div>
+            <div id="saveMsg"></div>
+        </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB: DAILY REPORT -->
+    <!-- ========================================================= -->
+    <section class="section" id="tab-report">
+        <div class="card">
+            <h2>📋 Daily Report <span class="badge">Forward to Sub-Divisional Heads</span></h2>
+            <div class="desc">Generate a formatted daily report similar to the MBU Camp Review format. Select a date to generate the report.</div>
+            <div class="toolbar">
+                <label>📅 Select Date:</label>
+                <select id="reportDateSelect"></select>
+                <button class="gold" id="generateReportBtn">📊 Generate Report</button>
+                <button class="success" id="exportReportBtn">📤 Export as Excel (CSV)</button>
+                <button class="secondary" id="printReportBtn">🖨️ Print Report</button>
+            </div>
+            <div id="reportMsg"></div>
+            <div id="reportContent" style="display:none;">
+                <div class="report-preview" id="reportPreview"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB: REGIONS -->
+    <!-- ========================================================= -->
+    <section class="section" id="tab-regions">
+        <div class="card">
+            <h2>🌍 Region Summary <span class="badge" id="regionBadge">Click a region to drill down</span></h2>
+            <div class="desc">Performance by region. Click a region name to view its divisions.</div>
+            <div class="table-wrap"><table class="data" id="regionTable"></table></div>
+        </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB: DIVISIONS -->
+    <!-- ========================================================= -->
+    <section class="section" id="tab-divisions">
+        <div class="card">
+            <h2>🏢 Division Summary <span class="badge" id="divisionBadge">Select a region first</span></h2>
+            <div class="desc" id="divisionDesc">Click a region in the Regions tab to view its divisions here.</div>
+            <div class="table-wrap"><table class="data" id="divisionTable"></table></div>
+        </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB: SUB-DIVISIONS -->
+    <!-- ========================================================= -->
+    <section class="section" id="tab-subdivisions">
+        <div class="card">
+            <h2>📍 Sub-Division Summary <span class="badge" id="subBadge">Select a division first</span></h2>
+            <div class="desc" id="subDesc">Click a division in the Divisions tab to view its sub-divisions here.</div>
+            <div class="table-wrap"><table class="data" id="subTable"></table></div>
+        </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB: NON-ORGANIZED -->
+    <!-- ========================================================= -->
+    <section class="section" id="tab-offenders">
+        <div class="card">
+            <h2>⚠️ Non-Organized Tracker <span class="badge" id="offenderBadge">Date-wise &amp; All</span></h2>
+            <div class="desc">Sub-divisions that haven't organized successful camps (address + total transactions > 0).</div>
+            <div class="toolbar">
+                <select id="offenderDateSelect"><option value="all">All Dates</option></select>
+                <button class="secondary" id="offenderRefreshBtn">↻ Refresh</button>
+            </div>
+            <div class="table-wrap"><table class="data" id="offenderTable"></table></div>
+        </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB: EXPORT -->
+    <!-- ========================================================= -->
+    <section class="section" id="tab-export">
+        <div class="card">
+            <h2>📤 Export Data</h2>
+            <div class="desc">Download reports as Excel (CSV) or JSON for backup.</div>
+            <div class="toolbar">
+                <button class="success" id="exportExcelBtn">📊 Export as Excel (CSV)</button>
+                <button class="gold" id="exportJSONBtn">📄 Export as JSON</button>
+                <button class="danger" id="clearDataBtn">🗑️ Clear All Data</button>
+            </div>
+            <div id="exportMsg"></div>
+        </div>
+        <div class="card">
+            <h2>📥 Import Data</h2>
+            <div class="desc">Restore from a previously exported JSON backup.</div>
+            <input type="file" id="importFileInput" accept=".json" style="display:block;margin:10px 0;">
+            <button id="importBtn">📥 Import JSON</button>
+            <div id="importMsg"></div>
+        </div>
+    </section>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- JAVASCRIPT (full logic) -->
+<!-- ============================================================ -->
+<script>
+    // ─── MASTER DATA ──────────────────────────────────────────────
+    const MASTER = [
+        {r:"Ahmedabad Region",d:"Ahmedabad City Division",s:"North Sub Division",h:"Shri V S Chauhan",m:"9662513288"},
+        {r:"Ahmedabad Region",d:"Ahmedabad City Division",s:"Odhav Sub Division",h:"Shri H R Parikh",m:"8401433609"},
+        {r:"Ahmedabad Region",d:"Ahmedabad City Division",s:"South Sub Division",h:"Shri H G Rathod",m:"9662953200"},
+        {r:"Ahmedabad Region",d:"Ahmedabad City Division",s:"West Sub Division",h:"Shri A M Parmar",m:"9925203070"},
+        {r:"Ahmedabad Region",d:"Banaskantha Division",s:"ASP Sub division",h:"Shri N D Purani",m:"9904102486"},
+        {r:"Ahmedabad Region",d:"Banaskantha Division",s:"Deesa sub division",h:"Shri A I Ganchi",m:"9909867715"},
+        {r:"Ahmedabad Region",d:"Banaskantha Division",s:"Deodar sub division",h:"Shri Jagdeep",m:"9992096454"},
+        {r:"Ahmedabad Region",d:"Banaskantha Division",s:"Tharad sub Division",h:"Shri Hariom Gurjar",m:"9785316316"},
+        {r:"Ahmedabad Region",d:"Gandhinagar Division",s:"Dhandhuka Sub Division",h:"Shri H M Parmar",m:"8980234374"},
+        {r:"Ahmedabad Region",d:"Gandhinagar Division",s:"Dholka Sub Division",h:"Shri Asit Kumar",m:"8340119687"},
+        {r:"Ahmedabad Region",d:"Gandhinagar Division",s:"Gandhinagar North Sub Division",h:"Shri V K Prajapati",m:"9913368475"},
+        {r:"Ahmedabad Region",d:"Gandhinagar Division",s:"Gandhinagar South Sub Division",h:"Shri D K Chauhan",m:"9724349062"},
+        {r:"Ahmedabad Region",d:"Gandhinagar Division",s:"Kalol Sub Division",h:"Shri N M Shendre",m:"7016655227"},
+        {r:"Ahmedabad Region",d:"Gandhinagar Division",s:"Viramgam Sub Division",h:"Shri D K Chauhan",m:"9724349062"},
+        {r:"Ahmedabad Region",d:"Mahesana Division",s:"Mahesana Sub Division",h:"Shri Dhaval Suthar",m:"9106941823"},
+        {r:"Ahmedabad Region",d:"Mahesana Division",s:"Vijapur Sub Division",h:"Shri Vishal brahmbhatt",m:"9574384555"},
+        {r:"Ahmedabad Region",d:"Mahesana Division",s:"Visnagar Sub Division",h:"Shir Vinubhai Bharwad",m:"99797 06101"},
+        {r:"Ahmedabad Region",d:"Patan Division",s:"Chanasma Sub Division",h:"Shri S I Ghanchi",m:"9924610636"},
+        {r:"Ahmedabad Region",d:"Patan Division",s:"Patan Sub Division",h:"Shri N H Patel",m:"8980360322"},
+        {r:"Ahmedabad Region",d:"Patan Division",s:"Radhanpur Sub Division",h:"J M Adaliya",m:"9737395811"},
+        {r:"Ahmedabad Region",d:"Sabarkantha Division",s:"Bayad Sub Division",h:"Shri C M Suthar",m:"9722574755"},
+        {r:"Ahmedabad Region",d:"Sabarkantha Division",s:"Bhiloda Sub Division",h:"Shri A I Ghanchi",m:"8866407701"},
+        {r:"Ahmedabad Region",d:"Sabarkantha Division",s:"Himatnagar North Sub division",h:"Shri D J Panchal",m:"9429925602"},
+        {r:"Ahmedabad Region",d:"Sabarkantha Division",s:"Himatnagar South Sub division",h:"Shri M G Fakir",m:"9687674133"},
+        {r:"Ahmedabad Region",d:"Sabarkantha Division",s:"Idar Sub Division",h:"Shri Naveen Sangwan",m:"9350609696"},
+        {r:"Ahmedabad Region",d:"Sabarkantha Division",s:"Modasa Sub Division",h:"Shri R M Jadav",m:"9426990020"},
+        {r:"Ahmedabad Region",d:"Ahmedabad GPO",s:"GPO",h:"",m:""},
+        {r:"Rajkot Region",d:"Amreli Division",s:"Amreli Sub Division",h:"Shri D H Bhutaiya",m:"9624912510"},
+        {r:"Rajkot Region",d:"Amreli Division",s:"Dhari Sub Division",h:"Shri Sajjan Kumar",m:"8818020642"},
+        {r:"Rajkot Region",d:"Amreli Division",s:"Lathi Sub Division",h:"Shri B D Mehta",m:"9408682205"},
+        {r:"Rajkot Region",d:"Amreli Division",s:"Rajula Sub Division",h:"Ms. Ridhhi Srivastav",m:"7209323950"},
+        {r:"Rajkot Region",d:"Bhavnagar Division",s:"Bhavnagar South Sub Division",h:"Shri H K Meniya",m:"7046519488"},
+        {r:"Rajkot Region",d:"Bhavnagar Division",s:"Bhavnagar West Sub Division",h:"Shri K Y Sarvaiya",m:"9925730177"},
+        {r:"Rajkot Region",d:"Bhavnagar Division",s:"Botad Sub Division",h:"Shri K Y Sarvaiya",m:"9925730177"},
+        {r:"Rajkot Region",d:"Bhavnagar Division",s:"Mahuva Sub Division",h:"Shri Arup Pal",m:"7865970821"},
+        {r:"Rajkot Region",d:"Bhavnagar Division",s:"Palitana Sub Division",h:"Shri H K Meniya",m:"7046519488"},
+        {r:"Rajkot Region",d:"Gondal Division",s:"Dhoraji Sub Division",h:"Shri Ramesh",m:"8952986820"},
+        {r:"Rajkot Region",d:"Gondal Division",s:"Gondal North Sub Division",h:"Shri H B Dabhi",m:"8511151474"},
+        {r:"Rajkot Region",d:"Gondal Division",s:"Gondal South Sub Division",h:"Shri B R Lakhatariya",m:"9327022277"},
+        {r:"Rajkot Region",d:"Jamnagar",s:"Jamnagar Central Sub Division",h:"Shri Pinakin P Shah",m:"9913790409"},
+        {r:"Rajkot Region",d:"Jamnagar",s:"Jamnagar East Sub Division",h:"Shri Kamal Meena",m:"7240411030"},
+        {r:"Rajkot Region",d:"Jamnagar",s:"Jamnagar North Sub Division",h:"Shri Mukesh Sindhav",m:"8160373630"},
+        {r:"Rajkot Region",d:"Jamnagar",s:"Khambhalia Sub Division",h:"Shri Rakesh Kumar",m:"7807294305"},
+        {r:"Rajkot Region",d:"Junagadh Division",s:"Junagadh East Sub Division",h:"Shri V.K.Solanki",m:"9033366191"},
+        {r:"Rajkot Region",d:"Junagadh Division",s:"Junagadh West Sub Division",h:"Shri K.A.Thariyani",m:"9879698426"},
+        {r:"Rajkot Region",d:"Junagadh Division",s:"Una Sub Division",h:"Arun Kumar",m:"9968736606"},
+        {r:"Rajkot Region",d:"Junagadh Division",s:"Veraval Sub Division",h:"Shri M.D. Chaudhari",m:"8000151200"},
+        {r:"Rajkot Region",d:"Kutch Division",s:"Bhachau Sub Division",h:"Shri Karan kumar",m:"9460061048"},
+        {r:"Rajkot Region",d:"Kutch Division",s:"Bhuj East Sub Division",h:"Shri B H Jadeja",m:"9909071897"},
+        {r:"Rajkot Region",d:"Kutch Division",s:"Bhuj West Sub Division",h:"Shri R N Khoja",m:"8460109619"},
+        {r:"Rajkot Region",d:"Kutch Division",s:"Gandhidham Sub Division",h:"Shri S A Mir",m:"9825929192"},
+        {r:"Rajkot Region",d:"Kutch Division",s:"Kmandvi Sub Division",h:"Shri S H Vaghela",m:"7567723177"},
+        {r:"Rajkot Region",d:"Kutch Division",s:"Nakhtrana Sub Division",h:"Shri D A Jadeja",m:"7359661157"},
+        {r:"Rajkot Region",d:"Porbandar Division",s:"Bantwa Sub Division",h:"Shri Aniket Bajpai",m:"6306316868"},
+        {r:"Rajkot Region",d:"Porbandar Division",s:"Porbandar Sub Division",h:"Shri Prashant Pilojpara",m:"9664889266"},
+        {r:"Rajkot Region",d:"Rajkot Division",s:"Morbi Sub Division",h:"Shri Yogesh Kumar",m:"7999894951"},
+        {r:"Rajkot Region",d:"Rajkot Division",s:"Rajkot East Sub Division",h:"Shri Nilay Parmar",m:"9408005211"},
+        {r:"Rajkot Region",d:"Rajkot Division",s:"Rajkot North Sub Division",h:"Shri J J Dangar",m:"9726604345"},
+        {r:"Rajkot Region",d:"Rajkot Division",s:"Rajkot South Sub Division",h:"Shri J J Dangar",m:"9726604345"},
+        {r:"Rajkot Region",d:"Surendranagar Division",s:"Dhrangadhra Sub Division",h:"Shri P B Baroliya",m:"8530246344"},
+        {r:"Rajkot Region",d:"Surendranagar Division",s:"Limbdi Sub Division",h:"Shri P B Baroliya",m:"8530246344"},
+        {r:"Rajkot Region",d:"Surendranagar Division",s:"North Sub division",h:"Shri B G Chavda",m:"9106811592"},
+        {r:"Rajkot Region",d:"Surendranagar Division",s:"South sub division",h:"Parmjeet",m:"8901122999"},
+        {r:"Vadodara Region",d:"Anand Division",s:"Anand East Sub Division",h:"Shri B A Makwana",m:"8000050540"},
+        {r:"Vadodara Region",d:"Anand Division",s:"Anand West Sub Division",h:"Shri Vivek Saxena",m:"9210811181"},
+        {r:"Vadodara Region",d:"Anand Division",s:"Dakor Sub Division",h:"Shri Pankaj Patel",m:"9408268036"},
+        {r:"Vadodara Region",d:"Anand Division",s:"Vadasinor Sub Division",h:"Shri Mayur Chudhari",m:"8000151200"},
+        {r:"Vadodara Region",d:"Bardoli Division",s:"Ahwa Sub Division",h:"Shri Ravikant Azad",m:"9534468378"},
+        {r:"Vadodara Region",d:"Bardoli Division",s:"Bardoli North Sub Division",h:"Shri Vivek Singh",m:"9643236675"},
+        {r:"Vadodara Region",d:"Bardoli Division",s:"Bardoli South Sub Division",h:"Shri Vidhyadhar Choudhary",m:"6367741719"},
+        {r:"Vadodara Region",d:"Bardoli Division",s:"Mandvi Sub Division",h:"Shri Deepak Gosai",m:"9924658455"},
+        {r:"Vadodara Region",d:"Bardoli Division",s:"Vyara Sub Division",h:"Shri Abhishek Verma",m:"98185 45828"},
+        {r:"Vadodara Region",d:"Bharuch Division",s:"Ankleshwar Sub Division",h:"Shri Rajesh Sharma",m:"8448556244"},
+        {r:"Vadodara Region",d:"Bharuch Division",s:"Jambusar Sub Division",h:"Shri Rahul Kumar Gupta",m:"7426828426"},
+        {r:"Vadodara Region",d:"Bharuch Division",s:"Bharuch Sub Division",h:"Shri M K Makwana",m:"9537378347"},
+        {r:"Vadodara Region",d:"Bharuch Division",s:"Jhagadia Sub Division",h:"Shri Sourabh Pachouri",m:"8085059158"},
+        {r:"Vadodara Region",d:"Bharuch Division",s:"Rajpipla Sub Division",h:"Shri J H Parmar",m:"94281 80409"},
+        {r:"Vadodara Region",d:"Kheda Division",s:"KAPADWANJ SUB DIVISION",h:"Vipul M Tripathi",m:"8966000887"},
+        {r:"Vadodara Region",d:"Kheda Division",s:"KHAMBHAT SUB DIVISION",h:"Bhinwa Ram Khokhar",m:"9799142377"},
+        {r:"Vadodara Region",d:"Kheda Division",s:"KHEDA SUB DIVISION",h:"Shri M S Katara",m:"9427935276"},
+        {r:"Vadodara Region",d:"Kheda Division",s:"Nadiad Sub Division",h:"Shri M S Katara",m:"9427935276"},
+        {r:"Vadodara Region",d:"Kheda Division",s:"PETLAD SUB DIVISION",h:"Shri J R Parajapati",m:"9724069797"},
+        {r:"Vadodara Region",d:"Navsari Division",s:"ASP Navsari Sub Dn",h:"Shri P K Parmar",m:"9909610635"},
+        {r:"Vadodara Region",d:"Navsari Division",s:"Bilimora Sub Dn",h:"Shri Kartik Nain",m:"8816028596"},
+        {r:"Vadodara Region",d:"Navsari Division",s:"Chikhli Sub Dn",h:"Shri Pankaj Patel (I/c)",m:"9537625272"},
+        {r:"Vadodara Region",d:"Panchmahals Division",s:"Dahod SDn Dahod",h:"Shri Brijendra Patel",m:"7089574797"},
+        {r:"Vadodara Region",d:"Panchmahals Division",s:"Devgadhbaria sDn Devgahdbaria",h:"Shri H V Zad",m:"8780284831"},
+        {r:"Vadodara Region",d:"Panchmahals Division",s:"Godhra SDn Godhra",h:"Ms Sushmita Dongare",m:"9404793912"},
+        {r:"Vadodara Region",d:"Panchmahals Division",s:"Halol SDn Halol",h:"Ms Riya Garg",m:"8890181168"},
+        {r:"Vadodara Region",d:"Panchmahals Division",s:"Lunawada SDn Lunawada",h:"Shri Harihar Rathva",m:"7490938421"},
+        {r:"Vadodara Region",d:"Panchmahals Division",s:"Santrampur SDn Santrampur",h:"Shri Rahul Chaudhary",m:"9138159115"},
+        {r:"Vadodara Region",d:"Surat Division",s:"Kosamba Sub Division",h:"Jignesh V Rathod",m:"8866025236"},
+        {r:"Vadodara Region",d:"Surat Division",s:"Surat East Sub Division",h:"Shri Maheshkumar M Rathod",m:"9106815612"},
+        {r:"Vadodara Region",d:"Surat Division",s:"Surat West Sub Division",h:"Shri Harsh K Purohit",m:"9979686059"},
+        {r:"Vadodara Region",d:"Vadodara East Division",s:"Vadodara East Sub Dn",h:"Shri Dipak J Panchal",m:"9737357868"},
+        {r:"Vadodara Region",d:"Vadodara East Division",s:"Chhotaudepur SubDivision",h:"Shri Bharatbhai B Golatar",m:"9714243550"},
+        {r:"Vadodara Region",d:"Vadodara East Division",s:"Dabhoi Sub Division",h:"Shri Nitin Parmar",m:"9898416768"},
+        {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West Central Sub Division",h:"Shri D N Prajapati",m:"9409088920"},
+        {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West North Sub Division",h:"Shri j v parmar",m:"9429083529"},
+        {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West South Sub Division",h:"Shri D N Parmar",m:"9601587327"},
+        {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West West Sub Division",h:"Shri Krati Shri Agnihotri",m:"9098641686"},
+        {r:"Vadodara Region",d:"Valsad Division",s:"Dharampur Sub Division",h:"Shri Rohan Sharma",m:"6395047549"},
+        {r:"Vadodara Region",d:"Valsad Division",s:"Valasad Sub Division",h:"Shri Chandulal D Padvi",m:"6351283422"},
+        {r:"Vadodara Region",d:"Valsad Division",s:"Vapi Sub Division",h:"Shri Vijaypal Singh",m:"9410247811"}
+    ];
+
+    const TOTAL_SD = MASTER.length;
+    document.getElementById('kpiTotalSD').textContent = TOTAL_SD;
+    document.getElementById('headerSubDivisions').textContent = TOTAL_SD;
+
+    // ─── STORAGE ────────────────────────────────────────────────────
+    const DAY_PREFIX = 'camp-day:';
+    function storageSet(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+        catch(e) { return false; }
+    }
+    function storageGet(key) {
+        try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }
+        catch(e) { return null; }
+    }
+    function storageDelete(key) {
+        try { localStorage.removeItem(key); return true; }
+        catch(e) { return false; }
+    }
+    function storageListDates() {
+        const keys = [];
+        for(let i=0; i<localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if(k && k.startsWith(DAY_PREFIX)) keys.push(k.slice(DAY_PREFIX.length));
+        }
+        return keys.sort();
+    }
+    function storageGetAll() {
+        const result = {};
+        for(let i=0; i<localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if(k && k.startsWith(DAY_PREFIX)) {
+                const data = storageGet(k);
+                if(data) result[k.slice(DAY_PREFIX.length)] = data;
+            }
+        }
+        return result;
+    }
+    function storageClearAll() {
+        const keys = [];
+        for(let i=0; i<localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if(k && k.startsWith(DAY_PREFIX)) keys.push(k);
+        }
+        keys.forEach(k => localStorage.removeItem(k));
+        return keys.length;
+    }
+
+    // ─── HELPERS ────────────────────────────────────────────────────
+    function subKey(r,d,s){ return (r||'').trim().toLowerCase()+'||'+(d||'').trim().toLowerCase()+'||'+(s||'').trim().toLowerCase(); }
+    function parseDateFlexible(raw) {
+        if(!raw) return null;
+        raw = raw.trim();
+        let m = raw.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
+        if(m) { const dd=m[1].padStart(2,'0'), mm=m[2].padStart(2,'0'), yyyy=m[3]; return yyyy+'-'+mm+'-'+dd; }
+        m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if(m) { return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'); }
+        if(/^\d+(\.\d+)?$/.test(raw)) {
+            const serial = parseFloat(raw);
+            if(serial > 20000 && serial < 60000) {
+                const epoch = new Date(Date.UTC(1899,11,30));
+                const d = new Date(epoch.getTime() + serial*86400000);
+                return d.toISOString().slice(0,10);
+            }
+        }
+        return null;
+    }
+    function isoToDisplay(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); return d+'.'+m+'.'+y; }
+    function fmtNum(n){ return (n||0).toLocaleString('en-IN'); }
+    function fmtRevenue(n){ return '₹' + fmtNum(Math.round(n||0)); }
+
+    function getDateRange(range) {
+        const now = new Date();
+        const today = now.toISOString().slice(0,10);
+        let from, to = today;
+        switch(range) {
+            case 'today': from = today; to = today; break;
+            case 'yesterday': {
+                const d = new Date(now); d.setDate(d.getDate()-1);
+                from = d.toISOString().slice(0,10); to = from; break;
+            }
+            case 'last7': {
+                const d = new Date(now); d.setDate(d.getDate()-6);
+                from = d.toISOString().slice(0,10); break;
+            }
+            case 'last30': {
+                const d = new Date(now); d.setDate(d.getDate()-29);
+                from = d.toISOString().slice(0,10); break;
+            }
+            case 'month': {
+                from = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0')+'-01';
+                break;
+            }
+            case 'all': from = '2026-01-01'; to = '2026-12-31'; break;
+            default: from = today; to = today;
+        }
+        return {from, to};
+    }
+
+    // ─── AGGREGATION ──────────────────────────────────────────────
+    function aggregateRows(rows) {
+        const bySub = new Map();
+        rows.forEach(r => {
+            const key = subKey(r.region, r.division, r.subDivision);
+            if(!bySub.has(key)) bySub.set(key, []);
+            bySub.get(key).push(r);
+        });
+        return MASTER.map(m => {
+            const key = subKey(m.r,m.d,m.s);
+            const matched = bySub.get(key) || [];
+            const successful = matched.filter(r => r.address && r.address.trim() !== '' && (r.totalTransactions || 0) > 0);
+            const camps = successful.length;
+            const organized = camps > 0;
+            const hasRows = matched.length > 0;
+            const mbu = matched.reduce((a,r) => a + (r.mbu||0), 0);
+            const txns = matched.reduce((a,r) => a + (r.totalTransactions||0), 0);
+            const revenue = mbu * 125;
+            return {
+                region: m.r, division: m.d, subDivision: m.s,
+                head: m.h, mobile: m.m,
+                organized, camps, mbu, transactions: txns, revenue,
+                hasRows, partial: hasRows && !organized
+            };
+        });
+    }
+
+    function aggregateOverDates(dates) {
+        let allRows = [];
+        dates.forEach(iso => {
+            const data = storageGet(DAY_PREFIX+iso);
+            if(data && data.rows) allRows = allRows.concat(data.rows);
+        });
+        return aggregateRows(allRows);
+    }
+
+    function getFilteredDates(range) {
+        const {from, to} = getDateRange(range);
+        return storageListDates().filter(d => d >= from && d <= to);
+    }
+
+    // ─── STATE & RENDER ────────────────────────────────────────────
+    let currentRange = 'yesterday';
+    let currentDates = [];
+    let currentAgg = null;
+
+    function refreshAll() {
+        const range = document.getElementById('dateRangeSelect').value;
+        currentRange = range;
+        const customFrom = document.getElementById('dateFrom').value;
+        const customTo = document.getElementById('dateTo').value;
+        if(range === 'custom' && customFrom && customTo) {
+            currentDates = storageListDates().filter(d => d >= customFrom && d <= customTo);
+        } else {
+            currentDates = getFilteredDates(range);
+        }
+        if(currentDates.length === 0) {
+            currentAgg = null;
+            renderEmptyState();
+            return;
+        }
+        currentAgg = aggregateOverDates(currentDates);
+        renderDashboard();
+        renderRegions();
+        renderDivisions();
+        renderSubDivisions();
+        renderOffenders();
+        updateHeader();
+        updateReportDateSelect();
+    }
+
+    function renderEmptyState() {
+        document.getElementById('kpiCamps').textContent = '0';
+        document.getElementById('kpiTxns').textContent = '0';
+        document.getElementById('kpiMBU').textContent = '0';
+        document.getElementById('kpiRevenue').textContent = '₹0';
+        document.getElementById('kpiActive').textContent = '0';
+        document.getElementById('kpiPending').textContent = TOTAL_SD;
+        document.getElementById('alertNoDataCount').textContent = TOTAL_SD + ' Sub-Divisions';
+        document.getElementById('alertNoCampsCount').textContent = '0';
+        document.getElementById('alertLowTxnsCount').textContent = '0';
+        document.getElementById('alertLowMBUCount').textContent = '0';
+        document.getElementById('bestRegion').textContent = '—';
+        document.getElementById('bestDivision').textContent = '—';
+        document.getElementById('bestSubDivision').textContent = '—';
+        document.getElementById('dateRangeDisplay').textContent = 'No Data';
+        document.getElementById('headerDate').textContent = 'No Data';
+        document.getElementById('headerStatus').innerHTML = '🔴 No Data';
+    }
+
+    function updateHeader() {
+        const range = document.getElementById('dateRangeSelect').value;
+        const display = range === 'custom' ? 
+            (document.getElementById('dateFrom').value + ' to ' + document.getElementById('dateTo').value) :
+            range.replace('_',' ').replace(/^\w/, c => c.toUpperCase());
+        document.getElementById('dateRangeDisplay').textContent = display;
+        const dateLabel = currentDates.length === 1 ? isoToDisplay(currentDates[0]) : currentDates.length + ' days';
+        document.getElementById('headerDate').textContent = dateLabel;
+        document.getElementById('headerStatus').innerHTML = currentDates.length > 0 ? '🟢 Live' : '🔴 No Data';
+        document.getElementById('kpiCampsSub').textContent = currentDates.length === 1 ? isoToDisplay(currentDates[0]) : currentDates.length + ' days';
+        document.getElementById('performerBadge').textContent = currentDates.length === 1 ? isoToDisplay(currentDates[0]) : currentDates.length + ' days';
+    }
+
+    function renderDashboard() {
+        if(!currentAgg) { renderEmptyState(); return; }
+        const t = currentAgg.reduce((acc,s) => {
+            acc.camps += s.camps || 0;
+            acc.mbu += s.mbu || 0;
+            acc.txns += s.transactions || 0;
+            acc.revenue += s.revenue || 0;
+            acc.active += s.organized ? 1 : 0;
+            return acc;
+        }, {camps:0, mbu:0, txns:0, revenue:0, active:0});
+
+        document.getElementById('kpiCamps').textContent = fmtNum(t.camps);
+        document.getElementById('kpiTxns').textContent = fmtNum(t.txns);
+        document.getElementById('kpiMBU').textContent = fmtNum(t.mbu);
+        document.getElementById('kpiRevenue').textContent = fmtRevenue(t.revenue);
+        document.getElementById('kpiActive').textContent = t.active;
+        document.getElementById('kpiPending').textContent = TOTAL_SD - t.active;
+
+        const noData = currentAgg.filter(s => !s.hasRows);
+        const noCamps = currentAgg.filter(s => s.hasRows && !s.organized);
+        const lowTxns = currentAgg.filter(s => s.organized && s.transactions < 10);
+        const lowMBU = currentAgg.filter(s => s.organized && s.mbu < 5);
+
+        document.getElementById('alertNoDataCount').textContent = noData.length + ' Sub-Divisions';
+        document.getElementById('alertNoCampsCount').textContent = noCamps.length + ' Sub-Divisions';
+        document.getElementById('alertLowTxnsCount').textContent = lowTxns.length + ' Sub-Divisions';
+        document.getElementById('alertLowMBUCount').textContent = lowMBU.length + ' Sub-Divisions';
+
+        const byRegion = {};
+        const byDivision = {};
+        currentAgg.forEach(s => {
+            if(!byRegion[s.region]) byRegion[s.region] = {camps:0, txns:0, mbu:0};
+            if(!byDivision[s.division]) byDivision[s.division] = {camps:0, txns:0, mbu:0, region:s.region};
+            byRegion[s.region].camps += s.camps;
+            byRegion[s.region].txns += s.transactions;
+            byRegion[s.region].mbu += s.mbu;
+            byDivision[s.division].camps += s.camps;
+            byDivision[s.division].txns += s.transactions;
+            byDivision[s.division].mbu += s.mbu;
+        });
+
+        let bestRegion = Object.entries(byRegion).sort((a,b) => b[1].txns - a[1].txns)[0];
+        let bestDivision = Object.entries(byDivision).sort((a,b) => b[1].txns - a[1].txns)[0];
+        let bestSub = [...currentAgg].sort((a,b) => b.transactions - a.transactions)[0];
+
+        document.getElementById('bestRegion').textContent = bestRegion ? bestRegion[0] + ' (' + fmtNum(bestRegion[1].txns) + ' txns)' : '—';
+        document.getElementById('bestDivision').textContent = bestDivision ? bestDivision[0] + ' (' + fmtNum(bestDivision[1].txns) + ' txns)' : '—';
+        document.getElementById('bestSubDivision').textContent = bestSub ? bestSub.subDivision + ' (' + fmtNum(bestSub.transactions) + ' txns)' : '—';
+    }
+
+    // ─── REGIONS ────────────────────────────────────────────────────
+    function renderRegions() {
+        if(!currentAgg) {
+            document.getElementById('regionTable').innerHTML = '<tr><td colspan="7" class="empty">No data available</td></tr>';
+            return;
+        }
+        const byRegion = {};
+        currentAgg.forEach(s => {
+            if(!byRegion[s.region]) byRegion[s.region] = {camps:0, mbu:0, txns:0, revenue:0, active:0, total:0, missing:0};
+            byRegion[s.region].camps += s.camps || 0;
+            byRegion[s.region].mbu += s.mbu || 0;
+            byRegion[s.region].txns += s.transactions || 0;
+            byRegion[s.region].revenue += s.revenue || 0;
+            byRegion[s.region].active += s.organized ? 1 : 0;
+            byRegion[s.region].total += 1;
+            if(!s.organized) byRegion[s.region].missing++;
+        });
+
+        let html = `<tr><th>Region</th><th class="num">SD</th><th class="num">Active</th><th class="num">Missing</th><th class="num">Camps</th><th class="num">MBU</th><th class="num">Txns</th><th class="num">Revenue</th></tr>`;
+        Object.entries(byRegion).sort((a,b) => b[1].txns - a[1].txns).forEach(([name, data]) => {
+            html += `<tr>
+                <td class="clickable" onclick="drillToRegion('${name}')">${name}</td>
+                <td class="num">${data.total}</td>
+                <td class="num">${data.active}</td>
+                <td class="num">${data.missing}</td>
+                <td class="num">${fmtNum(data.camps)}</td>
+                <td class="num">${fmtNum(data.mbu)}</td>
+                <td class="num">${fmtNum(data.txns)}</td>
+                <td class="num">${fmtRevenue(data.revenue)}</td>
+            </tr>`;
+        });
+        document.getElementById('regionTable').innerHTML = html;
+        document.getElementById('regionBadge').textContent = Object.keys(byRegion).length + ' regions';
+    }
+
+    // ─── DIVISIONS ──────────────────────────────────────────────────
+    function renderDivisions(region) {
+        if(!currentAgg) {
+            document.getElementById('divisionTable').innerHTML = '<tr><td colspan="8" class="empty">No data available</td></tr>';
+            return;
+        }
+        const filtered = region ? currentAgg.filter(s => s.region === region) : currentAgg;
+        const byDivision = {};
+        filtered.forEach(s => {
+            if(!byDivision[s.division]) byDivision[s.division] = {camps:0, mbu:0, txns:0, revenue:0, active:0, total:0, missing:0, region:s.region};
+            byDivision[s.division].camps += s.camps || 0;
+            byDivision[s.division].mbu += s.mbu || 0;
+            byDivision[s.division].txns += s.transactions || 0;
+            byDivision[s.division].revenue += s.revenue || 0;
+            byDivision[s.division].active += s.organized ? 1 : 0;
+            byDivision[s.division].total += 1;
+            if(!s.organized) byDivision[s.division].missing++;
+        });
+
+        let html = `<tr><th>Division</th><th>Region</th><th class="num">SD</th><th class="num">Active</th><th class="num">Missing</th><th class="num">Camps</th><th class="num">MBU</th><th class="num">Txns</th><th class="num">Revenue</th></tr>`;
+        Object.entries(byDivision).sort((a,b) => b[1].txns - a[1].txns).forEach(([name, data]) => {
+            html += `<tr>
+                <td class="clickable" onclick="drillToDivision('${name}')">${name}</td>
+                <td>${data.region}</td>
+                <td class="num">${data.total}</td>
+                <td class="num">${data.active}</td>
+                <td class="num">${data.missing}</td>
+                <td class="num">${fmtNum(data.camps)}</td>
+                <td class="num">${fmtNum(data.mbu)}</td>
+                <td class="num">${fmtNum(data.txns)}</td>
+                <td class="num">${fmtRevenue(data.revenue)}</td>
+            </tr>`;
+        });
+        document.getElementById('divisionTable').innerHTML = html;
+        document.getElementById('divisionBadge').textContent = Object.keys(byDivision).length + ' divisions';
+        document.getElementById('divisionDesc').textContent = region ? 'Showing divisions for: ' + region : 'Click a region in the Regions tab to filter.';
+    }
+
+    // ─── SUB-DIVISIONS ─────────────────────────────────────────────
+    function renderSubDivisions(division) {
+        if(!currentAgg) {
+            document.getElementById('subTable').innerHTML = '<tr><td colspan="9" class="empty">No data available</td></tr>';
+            return;
+        }
+        const filtered = division ? currentAgg.filter(s => s.division === division) : currentAgg;
+        
+        let html = `<tr><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Status</th><th class="num">Camps</th><th class="num">MBU</th><th class="num">Txns</th><th class="num">Revenue</th></tr>`;
+        filtered.sort((a,b) => b.transactions - a.transactions).forEach(s => {
+            let status = '🔴 No Camp';
+            let cls = 'red';
+            if(s.organized) { status = '✅ Active'; cls = 'green'; }
+            else if(s.hasRows) { status = '🟠 Partial'; cls = 'orange'; }
+            html += `<tr>
+                <td><strong>${s.subDivision}</strong></td>
+                <td>${s.division}</td>
+                <td>${s.region}</td>
+                <td><span class="status-pill ${cls}"><i></i>${status}</span></td>
+                <td class="num">${s.camps}</td>
+                <td class="num">${fmtNum(s.mbu)}</td>
+                <td class="num">${fmtNum(s.transactions)}</td>
+                <td class="num">${fmtRevenue(s.revenue)}</td>
+            </tr>`;
+        });
+        document.getElementById('subTable').innerHTML = html;
+        document.getElementById('subBadge').textContent = filtered.length + ' sub-divisions';
+        document.getElementById('subDesc').textContent = division ? 'Showing sub-divisions for: ' + division : 'Click a division in the Divisions tab to filter.';
+    }
+
+    // ─── OFFENDERS ──────────────────────────────────────────────────
+    function renderOffenders() {
+        const view = document.getElementById('offenderDateSelect').value;
+        let dates = view === 'all' ? currentDates : [view];
+        if(view === 'all' && currentDates.length === 0) {
+            document.getElementById('offenderTable').innerHTML = '<tr><td colspan="5" class="empty">No data available</td></tr>';
+            return;
+        }
+
+        const offenderMap = new Map();
+        MASTER.forEach(m => offenderMap.set(subKey(m.r,m.d,m.s), {m, count:0, dates:[]}));
+
+        dates.forEach(iso => {
+            const data = storageGet(DAY_PREFIX+iso);
+            const rows = data && data.rows ? data.rows : [];
+            const agg = aggregateRows(rows);
+            agg.forEach(s => {
+                if(!s.organized) {
+                    const key = subKey(s.region,s.division,s.subDivision);
+                    const entry = offenderMap.get(key);
+                    if(entry) { entry.count++; entry.dates.push(iso); }
+                }
+            });
+        });
+
+        const list = [...offenderMap.values()].filter(e => e.count > 0).sort((a,b) => b.count - a.count);
+        if(list.length === 0) {
+            document.getElementById('offenderTable').innerHTML = '<tr><td colspan="5" class="empty">🎉 No offenders! All sub-divisions organized successful camps.</td></tr>';
+            return;
+        }
+
+        let html = `<tr><th>#</th><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Missed Days</th><th>Dates</th></tr>`;
+        list.forEach((e, i) => {
+            const datesStr = e.dates.slice(0,5).map(isoToDisplay).join(', ') + (e.dates.length > 5 ? '...' : '');
+            html += `<tr>
+                <td>${i+1}</td>
+                <td><strong>${e.m.s}</strong></td>
+                <td>${e.m.d}</td>
+                <td>${e.m.r}</td>
+                <td class="num">${e.count}/${dates.length}</td>
+                <td style="font-size:11px;">${datesStr}</td>
+            </tr>`;
+        });
+        document.getElementById('offenderTable').innerHTML = html;
+
+        const sel = document.getElementById('offenderDateSelect');
+        const currentVal = sel.value;
+        sel.innerHTML = '<option value="all">All Dates</option>';
+        currentDates.sort().forEach(iso => {
+            const opt = document.createElement('option');
+            opt.value = iso; opt.textContent = isoToDisplay(iso);
+            sel.appendChild(opt);
+        });
+        sel.value = currentVal;
+        document.getElementById('offenderBadge').textContent = list.length + ' offenders';
+    }
+
+    // ─── DRILL-DOWN ─────────────────────────────────────────────────
+    function drillToRegion(name) {
+        renderDivisions(name);
+        document.getElementById('divisionBadge').textContent = 'Drilling: ' + name;
+        document.getElementById('divisionDesc').textContent = 'Showing divisions for: ' + name;
+        switchTab('divisions');
+    }
+
+    function drillToDivision(name) {
+        renderSubDivisions(name);
+        document.getElementById('subBadge').textContent = 'Drilling: ' + name;
+        document.getElementById('subDesc').textContent = 'Showing sub-divisions for: ' + name;
+        switchTab('subdivisions');
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    window.drillToRegion = drillToRegion;
+    window.drillToDivision = drillToDivision;
+
+    // ─── DAILY REPORT ──────────────────────────────────────────────
+    function updateReportDateSelect() {
+        const sel = document.getElementById('reportDateSelect');
+        const currentVal = sel.value;
+        sel.innerHTML = '';
+        const dates = storageListDates().sort().reverse();
+        dates.forEach(iso => {
+            const opt = document.createElement('option');
+            opt.value = iso;
+            opt.textContent = isoToDisplay(iso);
+            sel.appendChild(opt);
+        });
+        if(currentVal && dates.includes(currentVal)) sel.value = currentVal;
+        else if(dates.length > 0) sel.value = dates[0];
+    }
+
+    function generateReport() {
+        const iso = document.getElementById('reportDateSelect').value;
+        const msgEl = document.getElementById('reportMsg');
+        if(!iso) {
+            msgEl.innerHTML = '<div class="msg err">No date selected or no data available.</div>';
+            document.getElementById('reportContent').style.display = 'none';
+            return;
+        }
+
+        const data = storageGet(DAY_PREFIX+iso);
+        if(!data || !data.rows) {
+            msgEl.innerHTML = '<div class="msg err">No data found for ' + isoToDisplay(iso) + '.</div>';
+            document.getElementById('reportContent').style.display = 'none';
+            return;
+        }
+
+        const rows = data.rows;
+        const agg = aggregateRows(rows);
+        
+        const regionData = {};
+        agg.forEach(s => {
+            if(!regionData[s.region]) {
+                regionData[s.region] = {
+                    divisions: {},
+                    totalSD: 0,
+                    activeSD: 0,
+                    camps: 0,
+                    mbu: 0,
+                    txns: 0
+                };
+            }
+            const r = regionData[s.region];
+            r.totalSD++;
+            if(s.organized) r.activeSD++;
+            r.camps += s.camps || 0;
+            r.mbu += s.mbu || 0;
+            r.txns += s.transactions || 0;
+            if(!r.divisions[s.division]) {
+                r.divisions[s.division] = {
+                    totalSD: 0,
+                    activeSD: 0,
+                    camps: 0,
+                    mbu: 0,
+                    txns: 0
+                };
+            }
+            const d = r.divisions[s.division];
+            d.totalSD++;
+            if(s.organized) d.activeSD++;
+            d.camps += s.camps || 0;
+            d.mbu += s.mbu || 0;
+            d.txns += s.transactions || 0;
+        });
+
+        let html = `<h3 style="text-align:center;margin-bottom:10px;">📋 Review of MBU Camp - ${isoToDisplay(iso)}</h3>`;
+        html += `<table>
+            <thead>
+                <tr>
+                    <th>Region / Division</th>
+                    <th>No of SD</th>
+                    <th>Active SD</th>
+                    <th>No of Camps</th>
+                    <th>MBU</th>
+                    <th>Total Txns</th>
+                    <th>Productivity</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        let grandTotal = {sd:0, active:0, camps:0, mbu:0, txns:0};
+
+        Object.entries(regionData).sort((a,b) => b[1].txns - a[1].txns).forEach(([region, rData]) => {
+            Object.entries(rData.divisions).sort((a,b) => b[1].txns - a[1].txns).forEach(([div, dData]) => {
+                const prod = dData.camps > 0 ? (dData.txns / dData.camps).toFixed(1) : '0';
+                html += `<tr>
+                    <td style="text-align:left;padding-left:20px;">${div}</td>
+                    <td>${dData.totalSD}</td>
+                    <td>${dData.activeSD}</td>
+                    <td>${fmtNum(dData.camps)}</td>
+                    <td>${fmtNum(dData.mbu)}</td>
+                    <td>${fmtNum(dData.txns)}</td>
+                    <td>${prod}</td>
+                </tr>`;
+            });
+
+            const rProd = rData.camps > 0 ? (rData.txns / rData.camps).toFixed(1) : '0';
+            html += `<tr class="sub-total">
+                <td style="font-weight:700;">${region}</td>
+                <td>${rData.totalSD}</td>
+                <td>${rData.activeSD}</td>
+                <td>${fmtNum(rData.camps)}</td>
+                <td>${fmtNum(rData.mbu)}</td>
+                <td>${fmtNum(rData.txns)}</td>
+                <td>${rProd}</td>
+            </tr>`;
+
+            grandTotal.sd += rData.totalSD;
+            grandTotal.active += rData.activeSD;
+            grandTotal.camps += rData.camps;
+            grandTotal.mbu += rData.mbu;
+            grandTotal.txns += rData.txns;
+        });
+
+        const gProd = grandTotal.camps > 0 ? (grandTotal.txns / grandTotal.camps).toFixed(2) : '0';
+        html += `<tr class="total-row">
+            <td style="font-weight:700;">Total</td>
+            <td>${grandTotal.sd}</td>
+            <td>${grandTotal.active}</td>
+            <td>${fmtNum(grandTotal.camps)}</td>
+            <td>${fmtNum(grandTotal.mbu)}</td>
+            <td>${fmtNum(grandTotal.txns)}</td>
+            <td>${gProd}</td>
+        </tr>`;
+
+        html += `</tbody></table>`;
+        html += `<div style="margin-top:12px;font-size:12px;color:#697180;text-align:center;">
+            Generated on ${new Date().toLocaleString()} · MBU Revenue: ${fmtRevenue(grandTotal.mbu * 125)}
+        </div>`;
+
+        document.getElementById('reportPreview').innerHTML = html;
+        document.getElementById('reportContent').style.display = 'block';
+        msgEl.innerHTML = '<div class="msg ok">✅ Report generated for ' + isoToDisplay(iso) + '.</div>';
+    }
+
+    function exportReport() {
+        const iso = document.getElementById('reportDateSelect').value;
+        if(!iso) {
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No date selected.</div>';
+            return;
+        }
+        const data = storageGet(DAY_PREFIX+iso);
+        if(!data || !data.rows) {
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data for ' + isoToDisplay(iso) + '.</div>';
+            return;
+        }
+
+        const rows = data.rows;
+        const agg = aggregateRows(rows);
+        
+        let csv = 'Region,Division,SubDivision,Head,Mobile,SuccessfulCamps,MBU,Transactions,Revenue,Status\n';
+        agg.forEach(s => {
+            csv += [s.region, s.division, s.subDivision, s.head||'', s.mobile||'',
+                s.camps, s.mbu, s.transactions, s.revenue,
+                s.organized ? 'Active' : (s.hasRows ? 'Partial' : 'No Data')
+            ].join(',') + '\n';
+        });
+
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'Daily_Report_' + iso + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report exported as CSV for ' + isoToDisplay(iso) + '.</div>';
+    }
+
+    function printReport() {
+        const content = document.getElementById('reportPreview');
+        if(!content || content.innerHTML.trim() === '') {
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>';
+            return;
+        }
+        const printWindow = window.open('', '_blank', 'width=900,height=600');
+        printWindow.document.write('<html><head><title>Daily Report</title>');
+        printWindow.document.write('<style>body{font-family:Arial,sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px 8px;text-align:center;}th{background:#0F2138;color:#fff;}.sub-total td{background:#EEF1F5;font-weight:600;}.total-row td{background:#0F2138;color:#fff;font-weight:700;}</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(content.innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+    // ─── DATA ENTRY ─────────────────────────────────────────────────
+    let parsedPreview = null;
+
+    document.getElementById('parseBtn').addEventListener('click', () => {
+        const text = document.getElementById('pasteArea').value;
+        const msgEl = document.getElementById('parseMsg');
+        if(!text.trim()) { msgEl.innerHTML = '<div class="msg err">Paste data first.</div>'; return; }
+        
+        const result = parseSheet(text);
+        parsedPreview = result;
+        const dates = Object.keys(result.byDate).sort();
+        if(dates.length === 0) {
+            msgEl.innerHTML = '<div class="msg err">No valid rows. Check Region and Sub Division columns.</div>';
+            document.getElementById('previewCard').style.display = 'none';
+            return;
+        }
+
+        let msgHtml = '<div class="msg ok">✅ Parsed ' + result.rowCount + ' rows across ' + dates.length + ' date(s): ' + dates.map(isoToDisplay).join(', ') + '.</div>';
+        if(result.warnings.length > 0) {
+            msgHtml += '<div class="msg info">⚠️ ' + result.warnings.slice(0,4).join('<br>') + (result.warnings.length > 4 ? '<br>+' + (result.warnings.length-4) + ' more...' : '') + '</div>';
+        }
+        msgEl.innerHTML = msgHtml;
+
+        let previewRows = '<tr><th>Date</th><th>Rows</th><th class="num">Camps</th><th class="num">MBU</th><th class="num">Txns</th><th class="num">Revenue</th></tr>';
+        let totalCamps = 0, totalMBU = 0, totalTxns = 0, totalRevenue = 0;
+        dates.forEach(iso => {
+            const rows = result.byDate[iso];
+            const agg = aggregateRows(rows);
+            const t = agg.reduce((a,s) => {
+                a.camps += s.camps || 0;
+                a.mbu += s.mbu || 0;
+                a.txns += s.transactions || 0;
+                a.revenue += s.revenue || 0;
+                return a;
+            }, {camps:0, mbu:0, txns:0, revenue:0});
+            totalCamps += t.camps;
+            totalMBU += t.mbu;
+            totalTxns += t.txns;
+            totalRevenue += t.revenue;
+            previewRows += `<tr>
+                <td>${isoToDisplay(iso)}</td>
+                <td>${rows.length}</td>
+                <td class="num">${fmtNum(t.camps)}</td>
+                <td class="num">${fmtNum(t.mbu)}</td>
+                <td class="num">${fmtNum(t.txns)}</td>
+                <td class="num">${fmtRevenue(t.revenue)}</td>
+            </tr>`;
+        });
+
+        document.getElementById('previewTable').innerHTML = previewRows;
+        document.getElementById('previewStats').innerHTML = `
+            <div class="preview-item"><div class="num">${fmtNum(totalCamps)}</div><div class="label">Total Camps</div></div>
+            <div class="preview-item"><div class="num">${fmtNum(totalMBU)}</div><div class="label">Total MBU</div></div>
+            <div class="preview-item"><div class="num">${fmtNum(totalTxns)}</div><div class="label">Total Txns</div></div>
+            <div class="preview-item"><div class="num">${fmtRevenue(totalRevenue)}</div><div class="label">Total Revenue</div></div>
+        `;
+        document.getElementById('previewSummary').textContent = dates.length + ' date(s) · ' + result.rowCount + ' rows · ' + totalCamps + ' successful camps';
+        document.getElementById('previewCard').style.display = 'block';
+        document.getElementById('saveMsg').innerHTML = '';
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+        document.getElementById('pasteArea').value = '';
+        document.getElementById('parseMsg').innerHTML = '';
+        document.getElementById('previewCard').style.display = 'none';
+        parsedPreview = null;
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', () => {
+        if(!parsedPreview) return;
+        const saveMsg = document.getElementById('saveMsg');
+        saveMsg.innerHTML = '<div class="msg info">⏳ Saving...</div>';
+        const dates = Object.keys(parsedPreview.byDate);
+        try {
+            let overwrites = [];
+            for(const iso of dates) {
+                if(storageListDates().includes(iso)) overwrites.push(iso);
+                const rows = parsedPreview.byDate[iso];
+                storageSet(DAY_PREFIX+iso, {date: iso, rows, savedAt: new Date().toISOString()});
+            }
+            saveMsg.innerHTML = '<div class="msg ok">✅ Saved ' + dates.length + ' date(s)' + (overwrites.length ? ' (overwrote: ' + overwrites.map(isoToDisplay).join(', ') + ')' : '') + '.</div>';
+            refreshAll();
+            switchTab('today');
+            updateReportDateSelect();
+        } catch(e) {
+            saveMsg.innerHTML = '<div class="msg err">❌ Save error: ' + e.message + '</div>';
+        }
+    });
+
+    // ─── PARSE SHEET ────────────────────────────────────────────────
+    function parseSheet(text) {
+        const lines = text.split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
+        if(lines.length === 0) return {byDate:{}, warnings:['No data found.'], rowCount:0};
+        const rows2d = lines.map(l => l.split('\t'));
+        let colMap = detectColumnMap(rows2d[0]);
+        let startIdx = 0;
+        if(!colMap) {
+            colMap = {};
+            ['date','region','division','subDivision','headName','headMobile','stationId','machineId','address','operatorName','operatorContact','newEnrolment','mbu','otherUpdation','totalTransactions'].forEach((k,i) => colMap[k]=i);
+        } else startIdx = 1;
+
+        const byDate = {}, warnings = [];
+        let rowCount = 0;
+        for(let i=startIdx; i<rows2d.length; i++) {
+            const cells = rows2d[i];
+            if(cells.every(c => c.trim() === '')) continue;
+            const get = (k) => (colMap[k] !== undefined && cells[colMap[k]] !== undefined) ? cells[colMap[k]].trim() : '';
+            const rawDate = get('date');
+            const iso = parseDateFlexible(rawDate);
+            const region = get('region'), division = get('division'), subDivision = get('subDivision');
+            if(!region || !subDivision) continue;
+            if(!iso) { warnings.push('Row '+(i+1)+': date "'+rawDate+'" skipped.'); continue; }
+            const stationId = get('stationId'), machineId = get('machineId'), address = get('address');
+            const total = numOrNull(get('totalTransactions'));
+            const organized = !!(stationId || machineId || address || (total && total > 0));
+            const row = {
+                region, division, subDivision,
+                headName: get('headName'), headMobile: get('headMobile'),
+                stationId, machineId, address,
+                operatorName: get('operatorName'), operatorContact: get('operatorContact'),
+                newEnrolment: numOrNull(get('newEnrolment')) || 0,
+                mbu: numOrNull(get('mbu')) || 0,
+                otherUpdation: numOrNull(get('otherUpdation')) || 0,
+                totalTransactions: total || 0,
+                organized
+            };
+            if(!byDate[iso]) byDate[iso] = [];
+            byDate[iso].push(row);
+            rowCount++;
+        }
+        return {byDate, warnings, rowCount};
+    }
+
+    function detectColumnMap(headerCells) {
+        const map = {};
+        const lower = headerCells.map(c => c.trim().toLowerCase());
+        let matchedAny = false;
+        const fieldMap = {
+            'date': ['date'],
+            'region': ['region'],
+            'division': ['division'],
+            'subDivision': ['sub division'],
+            'headName': ['head'],
+            'headMobile': ['mobile', 'mbbile'],
+            'stationId': ['station'],
+            'machineId': ['machine'],
+            'address': ['address'],
+            'operatorName': ['operator name'],
+            'operatorContact': ['operator contact', 'operator no'],
+            'newEnrolment': ['enrol'],
+            'mbu': ['mbu'],
+            'otherUpdation': ['other updation'],
+            'totalTransactions': ['total transaction']
+        };
+        lower.forEach((h, idx) => {
+            for(const [key, patterns] of Object.entries(fieldMap)) {
+                if(!(key in map) && patterns.some(p => h.includes(p))) {
+                    map[key] = idx;
+                    matchedAny = true;
+                    break;
+                }
+            }
+        });
+        return matchedAny && ('region' in map) && ('subDivision' in map) ? map : null;
+    }
+
+    function numOrNull(v) {
+        if(v === undefined || v === null) return null;
+        v = String(v).trim();
+        if(v === '') return null;
+        const n = parseFloat(v.replace(/,/g, ''));
+        return isNaN(n) ? null : n;
+    }
+
+    // ─── EXPORT ─────────────────────────────────────────────────────
+    document.getElementById('exportExcelBtn').addEventListener('click', () => {
+        if(!currentAgg) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data to export.</div>'; return; }
+        let csv = 'Region,Division,SubDivision,Head,Mobile,SuccessfulCamps,MBU,Transactions,Revenue,Status\n';
+        currentAgg.forEach(s => {
+            csv += [s.region, s.division, s.subDivision, s.head||'', s.mobile||'',
+                s.camps, s.mbu, s.transactions, s.revenue,
+                s.organized ? 'Active' : (s.hasRows ? 'Partial' : 'No Data')
+            ].join(',') + '\n';
+        });
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'GCAMIS_export_'+new Date().toISOString().slice(0,10)+'.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported ' + currentAgg.length + ' rows.</div>';
+    });
+
+    document.getElementById('exportJSONBtn').addEventListener('click', () => {
+        const allData = storageGetAll();
+        const json = JSON.stringify(allData, null, 2);
+        const blob = new Blob([json], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'GCAMIS_backup_'+new Date().toISOString().slice(0,10)+'.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported ' + Object.keys(allData).length + ' dates.</div>';
+    });
+
+    document.getElementById('clearDataBtn').addEventListener('click', () => {
+        if(!confirm('⚠️ Delete ALL data? This cannot be undone!')) return;
+        const count = storageClearAll();
+        document.getElementById('exportMsg').innerHTML = '<div class="msg err">🗑️ Deleted ' + count + ' date(s).</div>';
+        refreshAll();
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+        const fileInput = document.getElementById('importFileInput');
+        if(!fileInput.files || !fileInput.files[0]) {
+            document.getElementById('importMsg').innerHTML = '<div class="msg err">Please select a JSON file.</div>';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                let count = 0;
+                for(const [iso, value] of Object.entries(data)) {
+                    if(value && value.rows) {
+                        storageSet(DAY_PREFIX+iso, value);
+                        count++;
+                    }
+                }
+                document.getElementById('importMsg').innerHTML = '<div class="msg ok">✅ Imported ' + count + ' date(s).</div>';
+                refreshAll();
+            } catch(err) {
+                document.getElementById('importMsg').innerHTML = '<div class="msg err">❌ Import error: ' + err.message + '</div>';
+            }
+        };
+        reader.readAsText(fileInput.files[0]);
+    });
+
+    // ─── EVENTS ─────────────────────────────────────────────────────
+    document.getElementById('dateRangeSelect').addEventListener('change', function() {
+        const custom = this.value === 'custom';
+        document.getElementById('dateFrom').style.display = custom ? 'inline-block' : 'none';
+        document.getElementById('dateTo').style.display = custom ? 'inline-block' : 'none';
+        if(!custom) refreshAll();
+    });
+
+    document.getElementById('applyDateBtn').addEventListener('click', refreshAll);
+    document.getElementById('offenderDateSelect').addEventListener('change', renderOffenders);
+    document.getElementById('offenderRefreshBtn').addEventListener('click', renderOffenders);
+    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+    document.getElementById('exportReportBtn').addEventListener('click', exportReport);
+    document.getElementById('printReportBtn').addEventListener('click', printReport);
+    document.getElementById('reportDateSelect').addEventListener('change', generateReport);
+
+    document.querySelectorAll('.tabs button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            if(this.dataset.tab === 'report') {
+                updateReportDateSelect();
+                generateReport();
+            }
+        });
+    });
+
+    // ─── SAMPLE DATA ──────────────────────────────────────────────
+    function loadSampleData() {
+        if(storageListDates().length > 0) return;
+
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().slice(0,10).replace(/-/g, '.').split('.').reverse().join('.');
+
+        const sampleData = [
+            {date: yesterdayStr, region: 'Ahmedabad Region', division: 'Ahmedabad City Dn', subDivision: 'North Sub Division', head: 'Shri V S Chauhan', mobile: '9662513288', stationId: 'S001', machineId: 'M001', address: 'Camp 1, Ahmedabad', operator: 'Op1', operatorContact: '123', newEnrolment: 10, mbu: 30, otherUpdation: 5, totalTransactions: 45, organized: true},
+            {date: yesterdayStr, region: 'Ahmedabad Region', division: 'Ahmedabad City Dn', subDivision: 'Odhav Sub Division', head: 'Shri H R Parikh', mobile: '8401433609', stationId: 'S002', machineId: 'M002', address: 'Camp 2, Odhav', operator: 'Op2', operatorContact: '456', newEnrolment: 15, mbu: 25, otherUpdation: 8, totalTransactions: 48, organized: true},
+            {date: yesterdayStr, region: 'Ahmedabad Region', division: 'Ahmedabad City Dn', subDivision: 'South Sub Division', head: 'Shri H G Rathod', mobile: '9662953200', stationId: 'S003', machineId: 'M003', address: 'Camp 3, South', operator: 'Op3', operatorContact: '789', newEnrolment: 20, mbu: 35, otherUpdation: 10, totalTransactions: 65, organized: true},
+            {date: yesterdayStr, region: 'Ahmedabad Region', division: 'Ahmedabad City Dn', subDivision: 'West Sub Division', head: 'Shri A M Parmar', mobile: '9925203070', stationId: 'S004', machineId: 'M004', address: 'Camp 4, West', operator: 'Op4', operatorContact: '101', newEnrolment: 12, mbu: 29, otherUpdation: 6, totalTransactions: 47, organized: true},
+            {date: yesterdayStr, region: 'Ahmedabad Region', division: 'Ahmedabad GPO', subDivision: 'GPO', head: '', mobile: '', stationId: 'S005', machineId: 'M005', address: 'GPO Camp', operator: 'Op5', operatorContact: '102', newEnrolment: 8, mbu: 38, otherUpdation: 3, totalTransactions: 49, organized: true},
+            {date: yesterdayStr, region: 'Rajkot Region', division: 'Amreli Dn', subDivision: 'Amreli Sub Division', head: 'Shri D H Bhutaiya', mobile: '9624912510', stationId: 'S006', machineId: 'M006', address: 'Camp A', operator: 'Op6', operatorContact: '103', newEnrolment: 10, mbu: 15, otherUpdation: 5, totalTransactions: 30, organized: true},
+            {date: yesterdayStr, region: 'Rajkot Region', division: 'Amreli Dn', subDivision: 'Dhari Sub Division', head: 'Shri Sajjan Kumar', mobile: '8818020642', stationId: 'S007', machineId: 'M007', address: 'Camp B', operator: 'Op7', operatorContact: '104', newEnrolment: 8, mbu: 12, otherUpdation: 4, totalTransactions: 24, organized: true},
+            {date: yesterdayStr, region: 'Vadodara Region', division: 'Anand Dn', subDivision: 'Anand East Sub Division', head: 'Shri B A Makwana', mobile: '8000050540', stationId: 'S008', machineId: 'M008', address: 'Camp C', operator: 'Op8', operatorContact: '105', newEnrolment: 18, mbu: 28, otherUpdation: 9, totalTransactions: 55, organized: true},
+            {date: yesterdayStr, region: 'Vadodara Region', division: 'Anand Dn', subDivision: 'Anand West Sub Division', head: 'Shri Vivek Saxena', mobile: '9210811181', stationId: 'S009', machineId: 'M009', address: 'Camp D', operator: 'Op9', operatorContact: '106', newEnrolment: 22, mbu: 40, otherUpdation: 12, totalTransactions: 74, organized: true},
+            {date: yesterdayStr, region: 'Rajkot Region', division: 'Kutch Dn', subDivision: 'Bhachau Sub Division', head: 'Shri Karan kumar', mobile: '9460061048', stationId: '', machineId: '', address: '', operator: '', operatorContact: '', newEnrolment: 0, mbu: 0, otherUpdation: 0, totalTransactions: 0, organized: false}
+        ];
+
+        const byDate = {};
+        sampleData.forEach(row => {
+            const iso = parseDateFlexible(row.date);
+            if(!iso) return;
+            if(!byDate[iso]) byDate[iso] = [];
+            byDate[iso].push(row);
+        });
+
+        Object.entries(byDate).forEach(([iso, rows]) => {
+            storageSet(DAY_PREFIX+iso, {date: iso, rows, savedAt: new Date().toISOString()});
+        });
+
+        refreshAll();
+        document.getElementById('exportMsg').innerHTML = '<div class="msg info">📥 Sample data loaded for demonstration (yesterday\'s data).</div>';
+    }
+
+    // ─── INIT ──────────────────────────────────────────────────────
+    function init() {
+        if(storageListDates().length === 0) {
+            loadSampleData();
+        }
+        refreshAll();
+        updateReportDateSelect();
+        setTimeout(() => {
+            if(document.getElementById('reportDateSelect').value !== '') {
+                generateReport();
+            }
+        }, 500);
+    }
+
+    init();
+</script>
+</body>
+</html>
