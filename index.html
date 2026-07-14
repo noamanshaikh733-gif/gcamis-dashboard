@@ -303,7 +303,7 @@
     const db = firebase.firestore();
 
     // ================================================================
-    // MASTER DATA – 104 SUB-DIVISIONS
+    // MASTER DATA – 104 SUB-DIVISIONS (full list - all 104)
     // ================================================================
     const MASTER = [
         {r:"Ahmedabad Region",d:"Ahmedabad City Division",s:"North Sub Division",h:"Shri V S Chauhan",m:"9662513288"},
@@ -506,7 +506,7 @@
     }
 
     // ================================================================
-    // RENDER FUNCTIONS (Dashboard, Regions, Divisions, etc.)
+    // RENDER FUNCTIONS
     // ================================================================
     function refreshAll() {
         if(!allRows) return;
@@ -818,81 +818,43 @@
     window.drillToDivision = drillToDivision;
 
     // ================================================================
-    // DATA ENTRY PARSER – WITH IMPROVED COLUMN DETECTION
+    // DATA ENTRY PARSER – HARDCODED COLUMN MAPPING
     // ================================================================
     let parsedPreview = null;
 
     function numOrNull(v) { if(v === undefined || v === null) return null; v = String(v).trim(); if(v === '') return null; const n = parseFloat(v.replace(/,/g, '')); return isNaN(n) ? null : n; }
 
+    // HARDCODED – based on your exact header order
     function detectColumnMap(headerCells) {
-        const map = {};
-        const lower = headerCells.map(c => c.trim().toLowerCase());
-
-        // Map your exact headers to the expected keys
-        const headerMap = {
-            'date': ['date'],
-            'region': ['region'],
-            'division': ['division'],
-            'subdivision': ['sub division'],
-            'headname': ['name of sub divisional head', 'head'],
-            'headmobile': ['mobile number', 'mobile'],
-            'stationid': ['station id', 'station'],
-            'machineid': ['machine id', 'machine'],
-            'address': ['address of camp with pin code', 'address'],
-            'operatorname': ['name of operator', 'operator'],
-            'operatorcontact': ['operator contact no', 'operator contact'],
-            'newenrolment': ['no. of new aadhar enrolment', 'new aadhar'],
-            'mbu': ['mbu update', 'mbu updation', 'mbu', 'no.of mbu updation'],
-            'otherupdation': ['no. of other update', 'other updation'],
-            'totaltransactions': ['total transactions', 'total transaction']
+        // These are the column positions based on your Google Sheet headers
+        const exactMap = {
+            'date': 0,
+            'region': 1,
+            'division': 2,
+            'subdivision': 3,
+            'headname': 4,
+            'headmobile': 5,
+            'stationid': 6,
+            'machineid': 7,
+            'address': 8,
+            'operatorname': 9,
+            'operatorcontact': 10,
+            'newenrolment': 11,
+            'mbu': 12,        // No.of MBU Updation (5to7 & 15to17- Free)
+            'otherupdation': 13,
+            'totaltransactions': 14
         };
-
-        // Try to match each header
-        for (let i = 0; i < lower.length; i++) {
-            const header = lower[i];
-            for (const [key, patterns] of Object.entries(headerMap)) {
-                if (!(key in map)) {
-                    for (const pattern of patterns) {
-                        // Clean both strings for comparison
-                        const cleanHeader = header.replace(/[^a-z0-9]/g, '');
-                        const cleanPattern = pattern.replace(/[^a-z0-9]/g, '');
-                        if (cleanHeader.includes(cleanPattern) || cleanPattern.includes(cleanHeader)) {
-                            map[key] = i;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Check if we found the critical columns
-        if (('region' in map) && ('subdivision' in map) && ('mbu' in map) && ('totaltransactions' in map)) {
-            return map;
-        }
-
-        // Fallback: Use position-based mapping if we have 15 columns
-        if (headerCells.length >= 15) {
-            const keys = ['date', 'region', 'division', 'subdivision', 'headname', 'headmobile', 'stationid', 'machineid', 'address', 'operatorname', 'operatorcontact', 'newenrolment', 'mbu', 'otherupdation', 'totaltransactions'];
-            keys.forEach((k, i) => map[k] = i);
-            return map;
-        }
-
-        return null;
+        return exactMap;
     }
 
     function parseSheet(text) {
         const lines = text.split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
         if(lines.length === 0) return {byDate:{}, warnings:['No data found.'], rowCount:0};
         const rows2d = lines.map(l => l.split('\t'));
-        let colMap = detectColumnMap(rows2d[0]);
-        let startIdx = 0;
-        if(!colMap) {
-            // Fallback: use position-based
-            colMap = {};
-            ['date','region','division','subdivision','headname','headmobile','stationid','machineid','address','operatorname','operatorcontact','newenrolment','mbu','otherupdation','totaltransactions'].forEach((k,i) => colMap[k]=i);
-        } else {
-            startIdx = 1;
-        }
+        
+        // Use the hardcoded column map
+        const colMap = detectColumnMap(rows2d[0]);
+        let startIdx = 1; // skip header row
 
         const byDate = {}, warnings = [];
         let rowCount = 0;
