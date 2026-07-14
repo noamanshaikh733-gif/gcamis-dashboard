@@ -436,7 +436,6 @@
         return MASTER.map(m => {
             const key = subKey(m.r,m.d,m.s);
             const matched = bySub.get(key) || [];
-            // Successful camp = address + totalTransactions > 0
             const successful = matched.filter(r => r.address && r.address.trim() !== '' && (r.totalTransactions || 0) > 0);
             const camps = successful.length;
             const organized = camps > 0;
@@ -818,7 +817,7 @@
     window.drillToDivision = drillToDivision;
 
     // ================================================================
-    // UPDATED DATA ENTRY PARSER - MATCHES YOUR HEADERS EXACTLY
+    // DATA ENTRY PARSER
     // ================================================================
     let parsedPreview = null;
 
@@ -828,76 +827,54 @@
         const map = {};
         const lower = headerCells.map(c => c.trim().toLowerCase());
         
-        // EXACT MATCHING for your headers
-        // Using index-based matching for reliability
-        const expectedHeaders = [
-            'date', 'region', 'division', 'sub division', 
-            'name of sub divisional head', 'mobile number', 
-            'station id', 'machine id', 'address of camp with pin code', 
-            'name of operator', 'operator contact no', 
-            'no. of new aadhar enrolment', 'mbu updation', 
-            'no. of other updation (chargeble)', 'total transactions'
-        ];
-        
-        // Try to find each expected header
-        expectedHeaders.forEach((expected, idx) => {
-            // First try exact match
-            let found = false;
+        const fieldMap = {
+            'date': ['date'],
+            'region': ['region'],
+            'division': ['division'],
+            'subDivision': ['sub division'],
+            'headName': ['head', 'name of sub divisional head'],
+            'headMobile': ['mobile', 'mbbile', 'mobile number'],
+            'stationId': ['station'],
+            'machineId': ['machine'],
+            'address': ['address'],
+            'operatorName': ['operator name'],
+            'operatorContact': ['operator contact', 'operator no'],
+            'newEnrolment': ['enrol', 'new aadhar'],
+            'mbu': ['mbu', 'mbu updation', 'mbu deputation'],
+            'otherUpdation': ['other updation'],
+            'totalTransactions': ['total transaction']
+        };
+
+        // Try to find each column using keywords
+        const keys = Object.keys(fieldMap);
+        keys.forEach(key => {
+            const patterns = fieldMap[key];
             for(let i = 0; i < lower.length; i++) {
                 const clean = lower[i].replace(/[^a-z0-9]/g, '').toLowerCase();
-                const cleanExpected = expected.replace(/[^a-z0-9]/g, '').toLowerCase();
-                if(clean === cleanExpected || clean.includes(cleanExpected) || cleanExpected.includes(clean)) {
-                    map[Object.keys(fieldMap)[idx]] = i;
-                    found = true;
-                    break;
-                }
-            }
-            // If not found, try fuzzy matching
-            if(!found) {
-                for(let i = 0; i < lower.length; i++) {
-                    const clean = lower[i].replace(/[^a-z0-9]/g, '').toLowerCase();
-                    const cleanExpected = expected.replace(/[^a-z0-9]/g, '').toLowerCase();
-                    if(clean.includes(cleanExpected) || cleanExpected.includes(clean)) {
-                        map[Object.keys(fieldMap)[idx]] = i;
-                        found = true;
-                        break;
+                for(const pattern of patterns) {
+                    const cleanPattern = pattern.replace(/[^a-z0-9]/g, '').toLowerCase();
+                    if(clean.includes(cleanPattern) || cleanPattern.includes(clean)) {
+                        map[key] = i;
+                        return;
                     }
                 }
             }
         });
-        
+
         // Check if we found the critical columns
         if(('region' in map) && ('subDivision' in map) && ('mbu' in map) && ('totalTransactions' in map)) {
             return map;
         }
-        
+
         // Fallback: Use position-based if we have 15 columns
         if(headerCells.length >= 15) {
-            const keys = ['date','region','division','subDivision','headName','headMobile','stationId','machineId','address','operatorName','operatorContact','newEnrolment','mbu','otherUpdation','totalTransactions'];
-            keys.forEach((k, i) => map[k] = i);
+            const fallbackKeys = ['date','region','division','subDivision','headName','headMobile','stationId','machineId','address','operatorName','operatorContact','newEnrolment','mbu','otherUpdation','totalTransactions'];
+            fallbackKeys.forEach((k, i) => map[k] = i);
             return map;
         }
-        
+
         return null;
     }
-
-    const fieldMap = {
-        'date': ['date'],
-        'region': ['region'],
-        'division': ['division'],
-        'subDivision': ['sub division'],
-        'headName': ['head', 'name of sub divisional head'],
-        'headMobile': ['mobile', 'mbbile', 'mobile number'],
-        'stationId': ['station'],
-        'machineId': ['machine'],
-        'address': ['address'],
-        'operatorName': ['operator name'],
-        'operatorContact': ['operator contact', 'operator no'],
-        'newEnrolment': ['enrol', 'new aadhar'],
-        'mbu': ['mbu', 'mbu updation'],
-        'otherUpdation': ['other updation'],
-        'totalTransactions': ['total transaction']
-    };
 
     function parseSheet(text) {
         const lines = text.split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
@@ -906,7 +883,6 @@
         let colMap = detectColumnMap(rows2d[0]);
         let startIdx = 0;
         if(!colMap) {
-            // Fallback: use position-based
             colMap = {};
             ['date','region','division','subDivision','headName','headMobile','stationId','machineId','address','operatorName','operatorContact','newEnrolment','mbu','otherUpdation','totalTransactions'].forEach((k,i) => colMap[k]=i);
         } else {
@@ -1048,7 +1024,7 @@
     });
 
     // ================================================================
-    // GOOGLE SHEETS INTEGRATION
+    // GOOGLE SHEETS INTEGRATION (FIXED)
     // ================================================================
     document.getElementById('testSheetBtn').addEventListener('click', testGoogleSheet);
     document.getElementById('saveSheetBtn').addEventListener('click', saveSheetSettings);
@@ -1096,22 +1072,48 @@
     async function syncGoogleSheet() {
         const url = document.getElementById('sheetUrl').value.trim();
         const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
-        if(!url) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a Google Sheet URL.</div>'; return; }
+        if (!url) {
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a Google Sheet URL.</div>';
+            return;
+        }
         const sheetId = extractSheetId(url);
-        if(!sheetId) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid Google Sheet URL.</div>'; return; }
-        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔄 Syncing from Google Sheet...</div>';
+        if (!sheetId) {
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid Google Sheet URL.</div>';
+            return;
+        }
+        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔄 Syncing from Google Sheet (JSON)…</div>';
+
         try {
-            const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`);
-            const csvText = await response.text();
-            if(csvText) {
-                const lines = csvText.split('\n').filter(l => l.trim());
-                if(lines.length < 2) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">No data found in sheet.</div>'; return; }
-                const tabText = lines.map(l => l.split(',').map(c => c.trim().replace(/^"|"$/g,'')).join('\t')).join('\n');
-                document.getElementById('pasteArea').value = tabText;
-                document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Data loaded! Click "Parse Data" to preview.</div>';
-                document.getElementById('parseBtn').click();
+            // Fetch as JSON – this preserves column structure perfectly
+            const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`);
+            const text = await response.text();
+            // The response is wrapped in a callback: google.visualization.Query.setResponse({...})
+            const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+            const data = JSON.parse(jsonText);
+            const table = data.table;
+            if (!table || !table.rows || table.rows.length === 0) {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">No data found in sheet.</div>';
+                return;
             }
-        } catch(e) {
+
+            // Extract headers (column labels)
+            const cols = table.cols.map(col => col.label || col.id || '');
+            // Extract rows
+            const rows = table.rows.map(row => row.c.map(cell => (cell && cell.v !== undefined && cell.v !== null) ? String(cell.v) : ''));
+
+            // Build tab-separated text
+            let tabText = cols.join('\t') + '\n';
+            rows.forEach(row => {
+                // Ensure row length matches columns; pad with empty strings
+                while (row.length < cols.length) row.push('');
+                tabText += row.join('\t') + '\n';
+            });
+
+            document.getElementById('pasteArea').value = tabText;
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Data loaded (' + rows.length + ' rows)! Click "Parse Data" to preview.</div>';
+            document.getElementById('parseBtn').click();
+
+        } catch (e) {
             document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Sync error: ' + e.message + '</div>';
         }
     }
