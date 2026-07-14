@@ -470,12 +470,15 @@
                     allRows = allRows.concat(data.rows);
                 }
             });
-            setText('connectionStatus', '🟢 Connected');
-            setText('lastSyncTime', '📅 Last sync: ' + new Date().toLocaleString());
+            const connEl = document.getElementById('connectionStatus');
+            if (connEl) connEl.textContent = '🟢 Connected';
+            const syncEl = document.getElementById('lastSyncTime');
+            if (syncEl) syncEl.textContent = '📅 Last sync: ' + new Date().toLocaleString();
             return allRows;
         } catch(e) {
             console.error('Firebase load error:', e);
-            setText('connectionStatus', '🔴 Error');
+            const connEl = document.getElementById('connectionStatus');
+            if (connEl) connEl.textContent = '🔴 Error';
             return [];
         }
     }
@@ -691,13 +694,6 @@
         if(dates.length > 0) sel.value = dates[0];
     }
 
-    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
-    document.getElementById('exportReportBtn').addEventListener('click', exportReport);
-    document.getElementById('printReportBtn').addEventListener('click', printReport);
-    document.getElementById('reportDateSelect').addEventListener('change', generateReport);
-
-    // ... (rest of report functions unchanged) ...
-
     // ================================================================
     // DATA ENTRY PARSER – HARDCODED COLUMN MAPPING
     // ================================================================
@@ -875,7 +871,7 @@
     });
 
     // ================================================================
-    // UPDATED GOOGLE SHEETS SYNC
+    // GOOGLE SHEETS SYNC
     // ================================================================
     document.getElementById('testSheetBtn').addEventListener('click', testGoogleSheet);
     document.getElementById('saveSheetBtn').addEventListener('click', saveSheetSettings);
@@ -1036,6 +1032,140 @@
     }
 
     // ================================================================
+    // GENERATE REPORT
+    // ================================================================
+    function generateReport() {
+        const iso = document.getElementById('reportDateSelect').value;
+        const type = document.getElementById('reportTypeSelect').value;
+        const msgEl = document.getElementById('reportMsg');
+        if(!iso) { msgEl.innerHTML = '<div class="msg err">No date selected.</div>'; document.getElementById('reportContent').style.display = 'none'; return; }
+
+        let filteredRows;
+        if(type === 'daily') {
+            filteredRows = allRows.filter(r => r.date === iso);
+        } else if(type === 'weekly') {
+            const weekStart = new Date(iso); weekStart.setDate(weekStart.getDate() - 6);
+            const weekEnd = new Date(iso);
+            filteredRows = allRows.filter(r => r.date >= weekStart.toISOString().slice(0,10) && r.date <= weekEnd.toISOString().slice(0,10));
+        } else {
+            const monthStart = iso.slice(0,7) + '-01';
+            const monthEnd = iso.slice(0,7) + '-31';
+            filteredRows = allRows.filter(r => r.date >= monthStart && r.date <= monthEnd);
+        }
+
+        if(filteredRows.length === 0) {
+            msgEl.innerHTML = '<div class="msg err">No data found for ' + formatDateWithDay(iso) + '.</div>';
+            document.getElementById('reportContent').style.display = 'none';
+            return;
+        }
+
+        const agg = aggregateRows(filteredRows);
+        const regionData = {};
+        agg.forEach(s => {
+            if(!regionData[s.region]) {
+                regionData[s.region] = { divisions: {}, totalSD: 0, activeSD: 0, camps: 0, mbu: 0, txns: 0 };
+            }
+            const r = regionData[s.region];
+            r.totalSD++;
+            if(s.organized) r.activeSD++;
+            r.camps += s.camps || 0;
+            r.mbu += s.mbu || 0;
+            r.txns += s.transactions || 0;
+            if(!r.divisions[s.division]) {
+                r.divisions[s.division] = { totalSD: 0, activeSD: 0, camps: 0, mbu: 0, txns: 0 };
+            }
+            const d = r.divisions[s.division];
+            d.totalSD++;
+            if(s.organized) d.activeSD++;
+            d.camps += s.camps || 0;
+            d.mbu += s.mbu || 0;
+            d.txns += s.transactions || 0;
+        });
+
+        let title = type.charAt(0).toUpperCase() + type.slice(1) + ' Report';
+        let dateRange = type === 'daily' ? formatDateWithDay(iso) : (type === 'weekly' ? 'Week ending ' + formatDateWithDay(iso) : 'Month of ' + iso.slice(0,7));
+
+        let html = `<div class="report-header"><h2>📋 Review of MBU Camp – ${title}</h2><p>${dateRange} · Total Rows: ${filteredRows.length}</p></div>`;
+        html += `<table><thead><tr><th>Region / Division</th><th>No of SD</th><th>Active SD</th><th>No of Camps</th><th>MBU</th><th>Total Txns</th><th>Productivity</th></tr></thead><tbody>`;
+        let grandTotal = {sd:0, active:0, camps:0, mbu:0, txns:0};
+        Object.entries(regionData).sort((a,b) => b[1].txns - a[1].txns).forEach(([region, rData]) => {
+            Object.entries(rData.divisions).sort((a,b) => b[1].txns - a[1].txns).forEach(([div, dData]) => {
+                const prod = dData.camps > 0 ? (dData.txns / dData.camps).toFixed(1) : '0';
+                html += `<tr><td style="text-align:left;padding-left:20px;">${div}</td><td>${dData.totalSD}</td><td>${dData.activeSD}</td><td>${fmtNum(dData.camps)}</td><td>${fmtNum(dData.mbu)}</td><td>${fmtNum(dData.txns)}</td><td>${prod}</td></tr>`;
+            });
+            const rProd = rData.camps > 0 ? (rData.txns / rData.camps).toFixed(1) : '0';
+            html += `<tr class="sub-total"><td style="font-weight:700;">${region}</td><td>${rData.totalSD}</td><td>${rData.activeSD}</td><td>${fmtNum(rData.camps)}</td><td>${fmtNum(rData.mbu)}</td><td>${fmtNum(rData.txns)}</td><td>${rProd}</td></tr>`;
+            grandTotal.sd += rData.totalSD;
+            grandTotal.active += rData.activeSD;
+            grandTotal.camps += rData.camps;
+            grandTotal.mbu += rData.mbu;
+            grandTotal.txns += rData.txns;
+        });
+        const gProd = grandTotal.camps > 0 ? (grandTotal.txns / grandTotal.camps).toFixed(2) : '0';
+        html += `<tr class="total-row"><td style="font-weight:700;">Total</td><td>${grandTotal.sd}</td><td>${grandTotal.active}</td><td>${fmtNum(grandTotal.camps)}</td><td>${fmtNum(grandTotal.mbu)}</td><td>${fmtNum(grandTotal.txns)}</td><td>${gProd}</td></tr></tbody></table>`;
+        html += `<div style="margin-top:12px;font-size:12px;color:#697180;text-align:center;">Generated on ${new Date().toLocaleString()} · MBU Revenue: ${fmtRevenue(grandTotal.mbu * 125)} · Camp Productivity: ${gProd} txns/camp</div>`;
+
+        document.getElementById('reportPreview').innerHTML = html;
+        document.getElementById('reportContent').style.display = 'block';
+        msgEl.innerHTML = '<div class="msg ok">✅ Report generated.</div>';
+    }
+
+    function exportReport() {
+        const content = document.getElementById('reportPreview');
+        if(!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
+        const rows = content.querySelectorAll('tr');
+        let csv = '';
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('th, td');
+            const values = [];
+            cells.forEach(cell => values.push(cell.textContent.trim()));
+            csv += values.join(',') + '\n';
+        });
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'Report_' + document.getElementById('reportDateSelect').value + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report exported.</div>';
+    }
+
+    function printReport() {
+        const content = document.getElementById('reportPreview');
+        if(!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
+        const win = window.open('', '_blank', 'width=900,height=600');
+        win.document.write('<html><head><title>GCAMIS Report</title><style>body{font-family:Arial,sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px 8px;text-align:center;}th{background:#0F2138;color:#fff;}.sub-total td{background:#EEF1F5;font-weight:600;}.total-row td{background:#0F2138;color:#fff;font-weight:700;}</style></head><body>');
+        win.document.write(content.innerHTML);
+        win.document.write('</body></html>');
+        win.document.close();
+        win.print();
+    }
+
+    // ================================================================
+    // DRILL-DOWN
+    // ================================================================
+    function drillToRegion(name) {
+        renderDivisions(name);
+        document.getElementById('divisionBadge').textContent = 'Drilling: ' + name;
+        document.getElementById('divisionDesc').textContent = 'Showing divisions for: ' + name;
+        switchTab('divisions');
+    }
+    function drillToDivision(name) {
+        renderSubDivisions(name);
+        document.getElementById('subBadge').textContent = 'Drilling: ' + name;
+        document.getElementById('subDesc').textContent = 'Showing sub-divisions for: ' + name;
+        switchTab('subdivisions');
+    }
+    function switchTab(tabId) {
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+    }
+    window.drillToRegion = drillToRegion;
+    window.drillToDivision = drillToDivision;
+
+    // ================================================================
     // INIT
     // ================================================================
     async function init() {
@@ -1043,12 +1173,13 @@
         await loadFirebaseData();
         refreshAll();
         setTimeout(() => {
-            if(document.getElementById('reportDateSelect').value !== '') {
+            if(document.getElementById('reportDateSelect') && document.getElementById('reportDateSelect').value !== '') {
                 generateReport();
             }
         }, 500);
         setInterval(checkScheduledSync, 60000);
-        setText('connectionStatus', '🟢 Ready');
+        const connEl = document.getElementById('connectionStatus');
+        if (connEl) connEl.textContent = '🟢 Ready';
     }
 
     init();
