@@ -288,7 +288,7 @@
 
 <script>
     // ================================================================
-    // 🔥 FIREBASE CONFIG
+    // 🔥 FIREBASE CONFIG (YOUR PROJECT)
     // ================================================================
     const firebaseConfig = {
         apiKey: "AIzaSyB2mzMFZECGKy20wLyWiwal6JDx1322Zm8",
@@ -303,7 +303,7 @@
     const db = firebase.firestore();
 
     // ================================================================
-    // MASTER DATA
+    // MASTER DATA – 104 SUB-DIVISIONS
     // ================================================================
     const MASTER = [
         {r:"Ahmedabad Region",d:"Ahmedabad City Division",s:"North Sub Division",h:"Shri V S Chauhan",m:"9662513288"},
@@ -436,6 +436,7 @@
         return MASTER.map(m => {
             const key = subKey(m.r,m.d,m.s);
             const matched = bySub.get(key) || [];
+            // Successful camp = address + totalTransactions > 0
             const successful = matched.filter(r => r.address && r.address.trim() !== '' && (r.totalTransactions || 0) > 0);
             const camps = successful.length;
             const organized = camps > 0;
@@ -505,7 +506,7 @@
     }
 
     // ================================================================
-    // RENDER FUNCTIONS
+    // RENDER FUNCTIONS (Dashboard, Regions, Divisions, etc.)
     // ================================================================
     function refreshAll() {
         if(!allRows) return;
@@ -817,7 +818,7 @@
     window.drillToDivision = drillToDivision;
 
     // ================================================================
-    // DATA ENTRY PARSER
+    // DATA ENTRY PARSER – WITH IMPROVED COLUMN DETECTION
     // ================================================================
     let parsedPreview = null;
 
@@ -826,50 +827,53 @@
     function detectColumnMap(headerCells) {
         const map = {};
         const lower = headerCells.map(c => c.trim().toLowerCase());
-        
-        const fieldMap = {
+
+        // Map your exact headers to the expected keys
+        const headerMap = {
             'date': ['date'],
             'region': ['region'],
             'division': ['division'],
-            'subDivision': ['sub division'],
-            'headName': ['head', 'name of sub divisional head'],
-            'headMobile': ['mobile', 'mbbile', 'mobile number'],
-            'stationId': ['station'],
-            'machineId': ['machine'],
-            'address': ['address'],
-            'operatorName': ['operator name'],
-            'operatorContact': ['operator contact', 'operator no'],
-            'newEnrolment': ['enrol', 'new aadhar'],
-            'mbu': ['mbu', 'mbu updation', 'mbu deputation'],
-            'otherUpdation': ['other updation'],
-            'totalTransactions': ['total transaction']
+            'subdivision': ['sub division'],
+            'headname': ['name of sub divisional head', 'head'],
+            'headmobile': ['mobile number', 'mobile'],
+            'stationid': ['station id', 'station'],
+            'machineid': ['machine id', 'machine'],
+            'address': ['address of camp with pin code', 'address'],
+            'operatorname': ['name of operator', 'operator'],
+            'operatorcontact': ['operator contact no', 'operator contact'],
+            'newenrolment': ['no. of new aadhar enrolment', 'new aadhar'],
+            'mbu': ['mbu update', 'mbu updation', 'mbu', 'no.of mbu updation'],
+            'otherupdation': ['no. of other update', 'other updation'],
+            'totaltransactions': ['total transactions', 'total transaction']
         };
 
-        // Try to find each column using keywords
-        const keys = Object.keys(fieldMap);
-        keys.forEach(key => {
-            const patterns = fieldMap[key];
-            for(let i = 0; i < lower.length; i++) {
-                const clean = lower[i].replace(/[^a-z0-9]/g, '').toLowerCase();
-                for(const pattern of patterns) {
-                    const cleanPattern = pattern.replace(/[^a-z0-9]/g, '').toLowerCase();
-                    if(clean.includes(cleanPattern) || cleanPattern.includes(clean)) {
-                        map[key] = i;
-                        return;
+        // Try to match each header
+        for (let i = 0; i < lower.length; i++) {
+            const header = lower[i];
+            for (const [key, patterns] of Object.entries(headerMap)) {
+                if (!(key in map)) {
+                    for (const pattern of patterns) {
+                        // Clean both strings for comparison
+                        const cleanHeader = header.replace(/[^a-z0-9]/g, '');
+                        const cleanPattern = pattern.replace(/[^a-z0-9]/g, '');
+                        if (cleanHeader.includes(cleanPattern) || cleanPattern.includes(cleanHeader)) {
+                            map[key] = i;
+                            break;
+                        }
                     }
                 }
             }
-        });
+        }
 
         // Check if we found the critical columns
-        if(('region' in map) && ('subDivision' in map) && ('mbu' in map) && ('totalTransactions' in map)) {
+        if (('region' in map) && ('subdivision' in map) && ('mbu' in map) && ('totaltransactions' in map)) {
             return map;
         }
 
-        // Fallback: Use position-based if we have 15 columns
-        if(headerCells.length >= 15) {
-            const fallbackKeys = ['date','region','division','subDivision','headName','headMobile','stationId','machineId','address','operatorName','operatorContact','newEnrolment','mbu','otherUpdation','totalTransactions'];
-            fallbackKeys.forEach((k, i) => map[k] = i);
+        // Fallback: Use position-based mapping if we have 15 columns
+        if (headerCells.length >= 15) {
+            const keys = ['date', 'region', 'division', 'subdivision', 'headname', 'headmobile', 'stationid', 'machineid', 'address', 'operatorname', 'operatorcontact', 'newenrolment', 'mbu', 'otherupdation', 'totaltransactions'];
+            keys.forEach((k, i) => map[k] = i);
             return map;
         }
 
@@ -883,8 +887,9 @@
         let colMap = detectColumnMap(rows2d[0]);
         let startIdx = 0;
         if(!colMap) {
+            // Fallback: use position-based
             colMap = {};
-            ['date','region','division','subDivision','headName','headMobile','stationId','machineId','address','operatorName','operatorContact','newEnrolment','mbu','otherUpdation','totalTransactions'].forEach((k,i) => colMap[k]=i);
+            ['date','region','division','subdivision','headname','headmobile','stationid','machineid','address','operatorname','operatorcontact','newenrolment','mbu','otherupdation','totaltransactions'].forEach((k,i) => colMap[k]=i);
         } else {
             startIdx = 1;
         }
@@ -897,22 +902,29 @@
             const get = (k) => (colMap[k] !== undefined && cells[colMap[k]] !== undefined) ? cells[colMap[k]].trim() : '';
             const rawDate = get('date');
             const iso = parseDateFlexible(rawDate);
-            const region = get('region'), division = get('division'), subDivision = get('subDivision');
+            const region = get('region'), division = get('division'), subDivision = get('subdivision');
             if(!region || !subDivision) continue;
             if(!iso) { warnings.push('Row '+(i+1)+': date "'+rawDate+'" skipped.'); continue; }
-            const stationId = get('stationId'), machineId = get('machineId'), address = get('address');
-            const total = numOrNull(get('totalTransactions'));
+            const stationId = get('stationid'), machineId = get('machineid'), address = get('address');
+            const total = numOrNull(get('totaltransactions'));
             const organized = !!(stationId || machineId || address || (total && total > 0));
             const row = {
-                date: iso, region, division, subDivision,
-                headName: get('headName'), headMobile: get('headMobile'),
-                stationId, machineId, address,
-                operatorName: get('operatorName'), operatorContact: get('operatorContact'),
-                newEnrolment: numOrNull(get('newEnrolment')) || 0,
+                date: iso,
+                region: region,
+                division: division,
+                subDivision: subDivision,
+                headName: get('headname'),
+                headMobile: get('headmobile'),
+                stationId: stationId,
+                machineId: machineId,
+                address: address,
+                operatorName: get('operatorname'),
+                operatorContact: get('operatorcontact'),
+                newEnrolment: numOrNull(get('newenrolment')) || 0,
                 mbu: numOrNull(get('mbu')) || 0,
-                otherUpdation: numOrNull(get('otherUpdation')) || 0,
+                otherUpdation: numOrNull(get('otherupdation')) || 0,
                 totalTransactions: total || 0,
-                organized
+                organized: organized
             };
             if(!byDate[iso]) byDate[iso] = [];
             byDate[iso].push(row);
@@ -1024,7 +1036,7 @@
     });
 
     // ================================================================
-    // GOOGLE SHEETS INTEGRATION (FIXED)
+    // GOOGLE SHEETS INTEGRATION – UPDATED TO USE JSON ENDPOINT
     // ================================================================
     document.getElementById('testSheetBtn').addEventListener('click', testGoogleSheet);
     document.getElementById('saveSheetBtn').addEventListener('click', saveSheetSettings);
@@ -1058,6 +1070,7 @@
         if(!sheetId) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid Google Sheet URL.</div>'; return; }
         document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔍 Testing connection...</div>';
         try {
+            // Use JSON endpoint to test
             const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`);
             if(response.ok) {
                 document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Connected! Sheet found.</div>';
@@ -1069,6 +1082,7 @@
         }
     }
 
+    // UPDATED: uses JSON endpoint to avoid CSV splitting issues
     async function syncGoogleSheet() {
         const url = document.getElementById('sheetUrl').value.trim();
         const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
@@ -1084,7 +1098,6 @@
         document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔄 Syncing from Google Sheet (JSON)…</div>';
 
         try {
-            // Fetch as JSON – this preserves column structure perfectly
             const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`);
             const text = await response.text();
             // The response is wrapped in a callback: google.visualization.Query.setResponse({...})
