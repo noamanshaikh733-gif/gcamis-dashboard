@@ -84,7 +84,10 @@
         .report-preview table th { background: #0f2138; color: #fff; font-weight: 700; }
         .report-preview table .sub-total td { background: #eef1f5; font-weight: 600; }
         .report-preview table .total-row td { background: #0f2138; color: #fff; font-weight: 700; }
-        @media print { .no-print { display: none !important; } }
+        .report-header { text-align: center; margin-bottom: 15px; }
+        .report-header h2 { color: #0f2138; font-size: 18px; }
+        .report-header p { color: #697180; font-size: 13px; margin-top: 4px; }
+        @media print { .no-print { display: none !important; } .report-preview { border: none !important; } }
         @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } .header { flex-direction: column; align-items: stretch; } .tabs button { font-size: 12px; padding: 8px 12px; } }
     </style>
 </head>
@@ -193,18 +196,31 @@
         </div>
     </section>
 
-    <!-- ================= REPORTS ================= -->
+    <!-- ================= REPORTS (Enhanced) ================= -->
     <section class="section" id="tab-report">
         <div class="card">
-            <h2>📋 Reports</h2>
-            <div class="desc">Generate reports by date.</div>
+            <h2>📋 Reports <span class="badge">Custom Date Range</span></h2>
+            <div class="desc">Generate reports for any date range. All reports are downloadable and printable.</div>
             <div class="toolbar">
-                <select id="reportDateSelect"></select>
+                <label>📅 From:</label>
+                <input type="date" id="reportStartDate">
+                <label>To:</label>
+                <input type="date" id="reportEndDate">
                 <button class="gold" id="generateReportBtn">📊 Generate</button>
+                <button class="success" id="exportReportBtn">📤 Download CSV</button>
                 <button class="secondary" id="printReportBtn">🖨️ Print</button>
+                <button class="secondary" id="viewSavedReportsBtn">📂 View Saved</button>
             </div>
             <div id="reportMsg"></div>
-            <div id="reportContent" style="display:none;"><div class="report-preview" id="reportPreview"></div></div>
+            <div id="reportContent" style="display:none;">
+                <div class="report-preview" id="reportPreview"></div>
+            </div>
+        </div>
+        <!-- Saved Reports List -->
+        <div class="card" id="savedReportsCard" style="display:none;">
+            <h2>📂 Saved Reports <span class="badge">Previously Generated</span></h2>
+            <div class="desc">Access all previously generated reports. Click to view, download, or print.</div>
+            <div id="savedReportsList"></div>
         </div>
     </section>
 
@@ -213,10 +229,9 @@
         <div class="card">
             <h2>🌍 Region Summary <span class="badge" id="regionBadge">--</span></h2>
             <div class="toolbar">
-                <select id="regionDateSelect">
-                    <option value="latest">Latest</option>
-                </select>
+                <select id="regionDateSelect"><option value="latest">Latest</option></select>
                 <button class="gold" id="regionApplyBtn">Apply</button>
+                <button class="secondary" id="regionPrintBtn">🖨️ Print</button>
             </div>
             <div class="table-wrap"><table class="data" id="regionTable"></table></div>
         </div>
@@ -227,10 +242,9 @@
         <div class="card">
             <h2>🏢 Division Summary <span class="badge" id="divisionBadge">--</span></h2>
             <div class="toolbar">
-                <select id="divisionDateSelect">
-                    <option value="latest">Latest</option>
-                </select>
+                <select id="divisionDateSelect"><option value="latest">Latest</option></select>
                 <button class="gold" id="divisionApplyBtn">Apply</button>
+                <button class="secondary" id="divisionPrintBtn">🖨️ Print</button>
             </div>
             <div class="table-wrap"><table class="data" id="divisionTable"></table></div>
         </div>
@@ -241,10 +255,9 @@
         <div class="card">
             <h2>📍 Sub-Division Summary <span class="badge" id="subBadge">--</span></h2>
             <div class="toolbar">
-                <select id="subDateSelect">
-                    <option value="latest">Latest</option>
-                </select>
+                <select id="subDateSelect"><option value="latest">Latest</option></select>
                 <button class="gold" id="subApplyBtn">Apply</button>
+                <button class="secondary" id="subPrintBtn">🖨️ Print</button>
             </div>
             <div class="table-wrap"><table class="data" id="subTable"></table></div>
         </div>
@@ -256,9 +269,7 @@
             <h2>⚠️ Non-Organized Tracker <span class="badge" id="offenderBadge">--</span></h2>
             <div class="desc">Sub-divisions with ZERO successful camps.</div>
             <div class="toolbar">
-                <select id="offenderDateSelect">
-                    <option value="latest">Latest</option>
-                </select>
+                <select id="offenderDateSelect"><option value="latest">Latest</option></select>
                 <button class="gold" id="offenderApplyBtn">Apply</button>
                 <button class="secondary" id="offenderPrintBtn">🖨️ Print</button>
             </div>
@@ -433,6 +444,10 @@
     function isoToDisplay(iso) { if(!iso) return ''; const [y,m,d]=iso.split('-'); return d+'.'+m+'.'+y; }
     function getDayName(iso) { if(!iso) return ''; const date = new Date(iso+'T00:00:00'); return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()]; }
     function formatDateWithDay(iso) { return getDayName(iso) + ', ' + isoToDisplay(iso); }
+    function formatDateRange(start, end) {
+        if (start === end) return formatDateWithDay(start);
+        return formatDateWithDay(start) + ' to ' + formatDateWithDay(end);
+    }
     function fmtNum(n) { return (n||0).toLocaleString('en-IN'); }
     function fmtRevenue(n) { return '₹' + fmtNum(Math.round(n||0)); }
     function setText(id, value) {
@@ -472,7 +487,9 @@
 
     let allRows = [];
     let currentDate = null;
+    let savedReports = []; // Store generated reports
     const COLLECTION = 'camp_data';
+    const REPORTS_COLLECTION = 'saved_reports';
 
     // ================================================================
     // FIREBASE OPERATIONS
@@ -495,6 +512,32 @@
         }
     }
 
+    async function loadSavedReports() {
+        try {
+            const snapshot = await db.collection(REPORTS_COLLECTION).get();
+            savedReports = [];
+            snapshot.forEach(doc => {
+                savedReports.push({ id: doc.id, ...doc.data() });
+            });
+            savedReports.sort((a,b) => b.generatedAt - a.generatedAt);
+            return savedReports;
+        } catch(e) {
+            return [];
+        }
+    }
+
+    async function saveReport(report) {
+        try {
+            const docRef = await db.collection(REPORTS_COLLECTION).add({
+                ...report,
+                generatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            return docRef.id;
+        } catch(e) {
+            return null;
+        }
+    }
+
     function getAvailableDates() {
         const dates = new Set();
         allRows.forEach(r => { if(r.date) dates.add(r.date); });
@@ -503,6 +546,10 @@
 
     function getRowsForDate(iso) {
         return allRows.filter(r => r.date === iso);
+    }
+
+    function getRowsForDateRange(start, end) {
+        return allRows.filter(r => r.date >= start && r.date <= end);
     }
 
     function getLatestDate() {
@@ -524,7 +571,6 @@
             acc.active += s.organized ? 1 : 0;
             return acc;
         }, {camps:0, mbu:0, txns:0, revenue:0, active:0});
-        const prod = t.camps > 0 ? (t.txns / t.camps) : 0;
         setText('kpiCamps', fmtNum(t.camps));
         setText('kpiTxns', fmtNum(t.txns));
         setText('kpiMBU', fmtNum(t.mbu));
@@ -645,6 +691,228 @@
     }
 
     // ================================================================
+    // ENHANCED REPORT FUNCTIONS
+    // ================================================================
+    function generateReportHTML(startDate, endDate) {
+        const filteredRows = getRowsForDateRange(startDate, endDate);
+        if (filteredRows.length === 0) return null;
+
+        const agg = aggregateRows(filteredRows);
+        const regionData = {};
+        agg.forEach(s => {
+            if(!regionData[s.region]) {
+                regionData[s.region] = { divisions: {}, totalSD: 0, activeSD: 0, camps: 0, mbu: 0, txns: 0 };
+            }
+            const r = regionData[s.region];
+            r.totalSD++;
+            if(s.organized) r.activeSD++;
+            r.camps += s.camps || 0;
+            r.mbu += s.mbu || 0;
+            r.txns += s.transactions || 0;
+            if(!r.divisions[s.division]) {
+                r.divisions[s.division] = { totalSD: 0, activeSD: 0, camps: 0, mbu: 0, txns: 0 };
+            }
+            const d = r.divisions[s.division];
+            d.totalSD++;
+            if(s.organized) d.activeSD++;
+            d.camps += s.camps || 0;
+            d.mbu += s.mbu || 0;
+            d.txns += s.transactions || 0;
+        });
+
+        let dateLabel = startDate === endDate ? formatDateWithDay(startDate) : formatDateRange(startDate, endDate);
+        let html = `<div class="report-header"><h2>📋 Review of MBU Camps</h2><p>${dateLabel} · Total Rows: ${filteredRows.length}</p></div>`;
+        html += `<table><thead><tr><th>Region / Division</th><th>SD</th><th>Active</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Productivity</th></tr></thead><tbody>`;
+        let grandTotal = {sd:0, active:0, camps:0, mbu:0, txns:0};
+        Object.entries(regionData).sort((a,b) => b[1].txns - a[1].txns).forEach(([region, rData]) => {
+            Object.entries(rData.divisions).sort((a,b) => b[1].txns - a[1].txns).forEach(([div, dData]) => {
+                const prod = dData.camps > 0 ? (dData.txns / dData.camps).toFixed(1) : '0';
+                html += `<tr><td style="padding-left:20px;">${div}</td><td>${dData.totalSD}</td><td>${dData.activeSD}</td><td>${fmtNum(dData.camps)}</td><td>${fmtNum(dData.mbu)}</td><td>${fmtNum(dData.txns)}</td><td>${prod}</td></tr>`;
+            });
+            const rProd = rData.camps > 0 ? (rData.txns / rData.camps).toFixed(1) : '0';
+            html += `<tr class="sub-total"><td style="font-weight:700;">${region}</td><td>${rData.totalSD}</td><td>${rData.activeSD}</td><td>${fmtNum(rData.camps)}</td><td>${fmtNum(rData.mbu)}</td><td>${fmtNum(rData.txns)}</td><td>${rProd}</td></tr>`;
+            grandTotal.sd += rData.totalSD;
+            grandTotal.active += rData.activeSD;
+            grandTotal.camps += rData.camps;
+            grandTotal.mbu += rData.mbu;
+            grandTotal.txns += rData.txns;
+        });
+        const gProd = grandTotal.camps > 0 ? (grandTotal.txns / grandTotal.camps).toFixed(2) : '0';
+        html += `<tr class="total-row"><td style="font-weight:700;">Total</td><td>${grandTotal.sd}</td><td>${grandTotal.active}</td><td>${fmtNum(grandTotal.camps)}</td><td>${fmtNum(grandTotal.mbu)}</td><td>${fmtNum(grandTotal.txns)}</td><td>${gProd}</td></tr></tbody></table>`;
+        html += `<div style="margin-top:12px;font-size:12px;color:#697180;text-align:center;">Revenue: ${fmtRevenue(grandTotal.mbu * 125)} · Generated: ${new Date().toLocaleString()}</div>`;
+
+        return {
+            html: html,
+            dateLabel: dateLabel,
+            startDate: startDate,
+            endDate: endDate,
+            rowCount: filteredRows.length,
+            totalSD: grandTotal.sd,
+            activeSD: grandTotal.active,
+            totalCamps: grandTotal.camps,
+            totalMBU: grandTotal.mbu,
+            totalTxns: grandTotal.txns,
+            revenue: grandTotal.mbu * 125
+        };
+    }
+
+    function displayReport(reportData) {
+        if (!reportData) {
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data in selected date range.</div>';
+            document.getElementById('reportContent').style.display = 'none';
+            return;
+        }
+        document.getElementById('reportPreview').innerHTML = reportData.html;
+        document.getElementById('reportContent').style.display = 'block';
+        document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report generated for ' + reportData.dateLabel + '.</div>';
+    }
+
+    function exportReportCSV(reportData) {
+        if (!reportData) { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
+        const rows = document.getElementById('reportPreview').querySelectorAll('tr');
+        let csv = '';
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('th, td');
+            const values = [];
+            cells.forEach(cell => values.push(cell.textContent.trim()));
+            csv += values.join(',') + '\n';
+        });
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `GCAMIS_Report_${reportData.startDate}_to_${reportData.endDate}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report exported as CSV.</div>';
+    }
+
+    function printReportContent() {
+        const content = document.getElementById('reportPreview');
+        if (!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
+        const win = window.open('', '_blank', 'width=900,height=600');
+        win.document.write('<html><head><title>GCAMIS Report</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:center;}th{background:#0f2138;color:#fff;}.sub-total td{background:#eef1f5;font-weight:600;}.total-row td{background:#0f2138;color:#fff;font-weight:700;}</style></head><body>');
+        win.document.write(content.innerHTML);
+        win.document.write('</body></html>');
+        win.document.close();
+        win.print();
+    }
+
+    // ================================================================
+    // REPORT EVENT HANDLERS
+    // ================================================================
+    let lastReportData = null;
+
+    document.getElementById('generateReportBtn').addEventListener('click', function() {
+        const startDate = document.getElementById('reportStartDate').value;
+        const endDate = document.getElementById('reportEndDate').value;
+        if (!startDate || !endDate) {
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">Please select both start and end dates.</div>';
+            return;
+        }
+        if (startDate > endDate) {
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">Start date cannot be after end date.</div>';
+            return;
+        }
+        const reportData = generateReportHTML(startDate, endDate);
+        if (reportData) {
+            lastReportData = reportData;
+            displayReport(reportData);
+            // Save report to Firebase for later access
+            saveReport({
+                startDate: startDate,
+                endDate: endDate,
+                dateLabel: reportData.dateLabel,
+                rowCount: reportData.rowCount,
+                totalSD: reportData.totalSD,
+                activeSD: reportData.activeSD,
+                totalCamps: reportData.totalCamps,
+                totalMBU: reportData.totalMBU,
+                totalTxns: reportData.totalTxns,
+                revenue: reportData.revenue,
+                html: reportData.html
+            }).then(id => {
+                if (id) loadSavedReports();
+            });
+        } else {
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data in selected date range.</div>';
+            document.getElementById('reportContent').style.display = 'none';
+        }
+    });
+
+    document.getElementById('exportReportBtn').addEventListener('click', function() {
+        if (!lastReportData) {
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>';
+            return;
+        }
+        exportReportCSV(lastReportData);
+    });
+
+    document.getElementById('printReportBtn').addEventListener('click', printReportContent);
+
+    document.getElementById('viewSavedReportsBtn').addEventListener('click', function() {
+        const card = document.getElementById('savedReportsCard');
+        if (card.style.display === 'none') {
+            card.style.display = 'block';
+            loadSavedReports().then(() => renderSavedReports());
+            this.textContent = '📂 Hide Saved';
+        } else {
+            card.style.display = 'none';
+            this.textContent = '📂 View Saved';
+        }
+    });
+
+    function renderSavedReports() {
+        const list = document.getElementById('savedReportsList');
+        if (savedReports.length === 0) {
+            list.innerHTML = '<div class="empty">No saved reports found.</div>';
+            return;
+        }
+        let html = '<div class="table-wrap"><table class="data"><tr><th>Date Range</th><th>Rows</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Revenue</th><th>Actions</th></tr>';
+        savedReports.forEach(r => {
+            html += `<tr>
+                <td>${r.dateLabel || r.startDate + ' to ' + r.endDate}</td>
+                <td class="num">${r.rowCount || 0}</td>
+                <td class="num">${r.totalCamps || 0}</td>
+                <td class="num">${r.totalMBU || 0}</td>
+                <td class="num">${r.totalTxns || 0}</td>
+                <td class="num">${fmtRevenue(r.revenue || 0)}</td>
+                <td>
+                    <button class="secondary" onclick="viewSavedReport('${r.id}')">👁️ View</button>
+                    <button class="gold" onclick="downloadSavedReport('${r.id}')">📥</button>
+                </td>
+            </tr>`;
+        });
+        html += '</table></div>';
+        list.innerHTML = html;
+    }
+
+    window.viewSavedReport = function(id) {
+        const report = savedReports.find(r => r.id === id);
+        if (report && report.html) {
+            document.getElementById('reportPreview').innerHTML = report.html;
+            document.getElementById('reportContent').style.display = 'block';
+            document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Loaded saved report: ' + report.dateLabel + '</div>';
+            // Set lastReportData for export
+            lastReportData = report;
+        }
+    };
+
+    window.downloadSavedReport = function(id) {
+        const report = savedReports.find(r => r.id === id);
+        if (report) {
+            const csvContent = report.html.replace(/<[^>]*>/g, '').trim();
+            const blob = new Blob([csvContent], {type: 'text/csv'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Report_${report.startDate}_to_${report.endDate}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    };
+
+    // ================================================================
     // GOOGLE SHEETS SYNC
     // ================================================================
     function extractSheetId(url) {
@@ -727,7 +995,6 @@
         if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found.</div>'; return; }
         msgEl.innerHTML = '<div class="msg ok">✅ Parsed ' + rows.length + ' rows across ' + dateArray.length + ' date(s).</div>';
         document.getElementById('previewCard').style.display = 'block';
-        // Build preview
         let previewRows = '<tr><th>Date</th><th>Rows</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Revenue</th></tr>';
         let totalCamps=0,totalMBU=0,totalTxns=0,totalRevenue=0;
         dateArray.forEach(iso => {
@@ -788,72 +1055,8 @@
     });
 
     // ================================================================
-    // REPORTS
+    // PRINT FUNCTIONS FOR TABLES
     // ================================================================
-    function generateReport() {
-        const iso = document.getElementById('reportDateSelect').value;
-        if (!iso) { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Select a date.</div>'; return; }
-        const rows = getRowsForDate(iso);
-        if (rows.length === 0) {
-            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data for ' + formatDateWithDay(iso) + '.</div>';
-            document.getElementById('reportContent').style.display = 'none';
-            return;
-        }
-        const agg = aggregateRows(rows);
-        const byRegion = {};
-        agg.forEach(s => {
-            if(!byRegion[s.region]) byRegion[s.region] = { divisions: {}, totalSD: 0, activeSD: 0, camps: 0, mbu: 0, txns: 0 };
-            const r = byRegion[s.region];
-            r.totalSD++;
-            if(s.organized) r.activeSD++;
-            r.camps += s.camps || 0;
-            r.mbu += s.mbu || 0;
-            r.txns += s.transactions || 0;
-            if(!r.divisions[s.division]) {
-                r.divisions[s.division] = { totalSD: 0, activeSD: 0, camps: 0, mbu: 0, txns: 0 };
-            }
-            const d = r.divisions[s.division];
-            d.totalSD++;
-            if(s.organized) d.activeSD++;
-            d.camps += s.camps || 0;
-            d.mbu += s.mbu || 0;
-            d.txns += s.transactions || 0;
-        });
-        let html = `<h3 style="text-align:center;">📋 MBU Camp Report - ${formatDateWithDay(iso)}</h3>`;
-        html += `<table><thead><tr><th>Region / Division</th><th>SD</th><th>Active</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Productivity</th></tr></thead><tbody>`;
-        let grandTotal = {sd:0, active:0, camps:0, mbu:0, txns:0};
-        Object.entries(byRegion).sort((a,b) => b[1].txns - a[1].txns).forEach(([region, rData]) => {
-            Object.entries(rData.divisions).sort((a,b) => b[1].txns - a[1].txns).forEach(([div, dData]) => {
-                const prod = dData.camps > 0 ? (dData.txns / dData.camps).toFixed(1) : '0';
-                html += `<tr><td style="padding-left:20px;">${div}</td><td>${dData.totalSD}</td><td>${dData.activeSD}</td><td>${fmtNum(dData.camps)}</td><td>${fmtNum(dData.mbu)}</td><td>${fmtNum(dData.txns)}</td><td>${prod}</td></tr>`;
-            });
-            const rProd = rData.camps > 0 ? (rData.txns / rData.camps).toFixed(1) : '0';
-            html += `<tr class="sub-total"><td style="font-weight:700;">${region}</td><td>${rData.totalSD}</td><td>${rData.activeSD}</td><td>${fmtNum(rData.camps)}</td><td>${fmtNum(rData.mbu)}</td><td>${fmtNum(rData.txns)}</td><td>${rProd}</td></tr>`;
-            grandTotal.sd += rData.totalSD;
-            grandTotal.active += rData.activeSD;
-            grandTotal.camps += rData.camps;
-            grandTotal.mbu += rData.mbu;
-            grandTotal.txns += rData.txns;
-        });
-        const gProd = grandTotal.camps > 0 ? (grandTotal.txns / grandTotal.camps).toFixed(2) : '0';
-        html += `<tr class="total-row"><td style="font-weight:700;">Total</td><td>${grandTotal.sd}</td><td>${grandTotal.active}</td><td>${fmtNum(grandTotal.camps)}</td><td>${fmtNum(grandTotal.mbu)}</td><td>${fmtNum(grandTotal.txns)}</td><td>${gProd}</td></tr></tbody></table>`;
-        html += `<div style="margin-top:12px;font-size:12px;color:#697180;text-align:center;">Revenue: ${fmtRevenue(grandTotal.mbu * 125)}</div>`;
-        document.getElementById('reportPreview').innerHTML = html;
-        document.getElementById('reportContent').style.display = 'block';
-        document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report generated.</div>';
-    }
-
-    function printReport() {
-        const content = document.getElementById('reportPreview');
-        if (!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
-        const win = window.open('', '_blank', 'width=900,height=600');
-        win.document.write('<html><head><title>GCAMIS Report</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:center;}th{background:#0f2138;color:#fff;}.sub-total td{background:#eef1f5;font-weight:600;}.total-row td{background:#0f2138;color:#fff;font-weight:700;}</style></head><body>');
-        win.document.write(content.innerHTML);
-        win.document.write('</body></html>');
-        win.document.close();
-        win.print();
-    }
-
     function printTable(tableId, title) {
         const table = document.getElementById(tableId);
         if (!table || table.rows.length === 0) { alert('No data.'); return; }
@@ -864,6 +1067,11 @@
         win.document.close();
         win.print();
     }
+
+    document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
+    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
+    document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
+    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
 
     // ================================================================
     // EXPORT
@@ -935,10 +1143,6 @@
     document.getElementById('subApplyBtn').addEventListener('click', function() { applyDateFilter('sub'); });
     document.getElementById('offenderApplyBtn').addEventListener('click', function() { applyDateFilter('offender'); });
 
-    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
-    document.getElementById('printReportBtn').addEventListener('click', printReport);
-    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
-
     // ================================================================
     // TAB SWITCHING
     // ================================================================
@@ -948,6 +1152,9 @@
             this.classList.add('active');
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            if (this.dataset.tab === 'report') {
+                loadSavedReports();
+            }
         });
     });
 
@@ -956,11 +1163,12 @@
     // ================================================================
     async function init() {
         await loadFirebaseData();
+        await loadSavedReports();
         const dates = getAvailableDates();
         const latest = getLatestDate();
         
         // Populate all date selects
-        const selectors = ['reportDateSelect', 'regionDateSelect', 'divisionDateSelect', 'subDateSelect', 'offenderDateSelect'];
+        const selectors = ['regionDateSelect', 'divisionDateSelect', 'subDateSelect', 'offenderDateSelect'];
         selectors.forEach(id => {
             const sel = document.getElementById(id);
             if (sel) {
@@ -974,6 +1182,12 @@
                 if (latest) sel.value = 'latest';
             }
         });
+
+        // Set default report dates to latest available
+        if (latest) {
+            document.getElementById('reportStartDate').value = latest;
+            document.getElementById('reportEndDate').value = latest;
+        }
 
         if (latest) {
             renderDashboard(latest);
