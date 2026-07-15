@@ -112,7 +112,7 @@
         </div>
     </header>
 
-    <nav class="tabs" id="mainTabs">
+    <nav class="tabs">
         <button class="active" data-tab="today">📊 Dashboard</button>
         <button data-tab="entry">📥 Data Entry</button>
         <button data-tab="googlesheet">📊 Google Sheets</button>
@@ -189,7 +189,7 @@
     <!-- ================= GOOGLE SHEETS ================= -->
     <section class="section" id="tab-googlesheet">
         <div class="card">
-            <h2>📊 Google Sheets Auto-Sync <span class="badge">Set & Forget</span></h2>
+            <h2>📊 Google Sheets Auto-Sync <span class="badge">Working!</span></h2>
             <div class="desc">Connect your Google Sheet and the portal will auto-fetch data daily at your scheduled time.</div>
             <div class="google-sheet-setup">
                 <label>🔗 Google Sheet URL:</label>
@@ -564,6 +564,9 @@
         return null;
     }
 
+    // ================================================================
+    // SAFE DOM UPDATES
+    // ================================================================
     function setText(id, value) {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
@@ -714,73 +717,19 @@
     // ================================================================
     // DRILL-DOWN
     // ================================================================
-    function drillToRegion(name) {
-        switchTab('divisions');
-    }
-    function drillToDivision(name) {
-        switchTab('subdivisions');
-    }
-
-    // ================================================================
-    // TAB SWITCHING – THIS WAS THE MISSING PART!
-    // ================================================================
+    function drillToRegion(name) { switchTab('divisions'); }
+    function drillToDivision(name) { switchTab('subdivisions'); }
     function switchTab(tabId) {
-        // Update tab buttons
-        document.querySelectorAll('#mainTabs button').forEach(b => {
-            b.classList.remove('active');
-            if (b.dataset.tab === tabId) {
-                b.classList.add('active');
-            }
-        });
-        // Update sections
-        document.querySelectorAll('.section').forEach(s => {
-            s.classList.remove('active');
-            if (s.id === 'tab-' + tabId) {
-                s.classList.add('active');
-            }
-        });
-        // Refresh data for the tab if needed
-        if (tabId === 'report') {
-            populateReportDates();
-        }
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
     }
-
-    // ================================================================
-    // TAB EVENT LISTENERS
-    // ================================================================
-    document.querySelectorAll('#mainTabs button').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const tabId = this.dataset.tab;
-            switchTab(tabId);
-        });
-    });
 
     // ================================================================
     // REPORTS
     // ================================================================
-    function populateReportDates() {
-        const dates = getAvailableDates();
-        const reportSel = document.getElementById('reportDateSelect');
-        if (!reportSel) return;
-        reportSel.innerHTML = '';
-        dates.forEach(iso => {
-            const opt = document.createElement('option');
-            opt.value = iso;
-            opt.textContent = formatDateWithDay(iso);
-            reportSel.appendChild(opt);
-        });
-        if (dates.length > 0) reportSel.value = dates[dates.length-1];
-    }
-
-    document.getElementById('reportTypeSelect').addEventListener('change', function() {
-        const type = this.value;
-        document.getElementById('reportDateSelect').style.display = (type === 'daily' || type === 'weekly' || type === 'monthly') ? 'inline-block' : 'none';
-        document.getElementById('reportStartDate').style.display = type === 'custom' ? 'inline-block' : 'none';
-        document.getElementById('reportEndDate').style.display = type === 'custom' ? 'inline-block' : 'none';
-        if (type !== 'custom') populateReportDates();
-    });
-
-    document.getElementById('generateReportBtn').addEventListener('click', function() {
+    function generateReport() {
         const type = document.getElementById('reportTypeSelect').value;
         let startDate, endDate;
         if (type === 'daily') {
@@ -856,9 +805,9 @@
         document.getElementById('reportPreview').innerHTML = html;
         document.getElementById('reportContent').style.display = 'block';
         document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report generated.</div>';
-    });
+    }
 
-    document.getElementById('exportReportBtn').addEventListener('click', function() {
+    function exportReport() {
         const content = document.getElementById('reportPreview');
         if(!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
         const rows = content.querySelectorAll('tr');
@@ -876,9 +825,9 @@
         a.click();
         URL.revokeObjectURL(url);
         document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report exported.</div>';
-    });
+    }
 
-    document.getElementById('printReportBtn').addEventListener('click', function() {
+    function printReport() {
         const content = document.getElementById('reportPreview');
         if(!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
         const win = window.open('', '_blank', 'width=900,height=600');
@@ -887,11 +836,8 @@
         win.document.write('</body></html>');
         win.document.close();
         win.print();
-    });
+    }
 
-    // ================================================================
-    // PRINT FUNCTIONS
-    // ================================================================
     function printTable(tableId, title) {
         const table = document.getElementById(tableId);
         if (!table || table.rows.length === 0) { alert('No data to print.'); return; }
@@ -903,30 +849,8 @@
         win.print();
     }
 
-    document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
-    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
-    document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
-    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
-
-    document.getElementById('offenderExportBtn').addEventListener('click', function() {
-        const table = document.getElementById('offenderTable');
-        if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
-        let csv = '';
-        for (let row of table.rows) {
-            let cells = [];
-            for (let cell of row.cells) cells.push(cell.textContent.trim());
-            csv += cells.join(',') + '\n';
-        }
-        const blob = new Blob([csv], {type: 'text/csv'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'NonOrganized.csv';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-
     // ================================================================
-    // DATE FILTER EVENTS
+    // EVENT BINDINGS
     // ================================================================
     document.getElementById('dashboardApplyDate').addEventListener('click', function() {
         const range = document.getElementById('dashboardDateRange').value;
@@ -978,6 +902,151 @@
         document.getElementById('offenderCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
     });
 
+    document.getElementById('reportTypeSelect').addEventListener('change', function() {
+        const type = this.value;
+        const dailySel = document.getElementById('reportDateSelect');
+        const startInput = document.getElementById('reportStartDate');
+        const endInput = document.getElementById('reportEndDate');
+        dailySel.style.display = (type === 'daily' || type === 'weekly' || type === 'monthly') ? 'inline-block' : 'none';
+        startInput.style.display = type === 'custom' ? 'inline-block' : 'none';
+        endInput.style.display = type === 'custom' ? 'inline-block' : 'none';
+        if (type !== 'custom') {
+            const dates = getAvailableDates();
+            dailySel.innerHTML = '';
+            dates.forEach(iso => {
+                const opt = document.createElement('option');
+                opt.value = iso;
+                opt.textContent = formatDateWithDay(iso);
+                dailySel.appendChild(opt);
+            });
+            if (dates.length > 0) dailySel.value = dates[dates.length-1];
+        }
+    });
+
+    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+    document.getElementById('exportReportBtn').addEventListener('click', exportReport);
+    document.getElementById('printReportBtn').addEventListener('click', printReport);
+
+    document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
+    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
+    document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
+    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
+
+    document.getElementById('offenderExportBtn').addEventListener('click', function() {
+        const table = document.getElementById('offenderTable');
+        if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
+        let csv = '';
+        for (let row of table.rows) {
+            let cells = [];
+            for (let cell of row.cells) cells.push(cell.textContent.trim());
+            csv += cells.join(',') + '\n';
+        }
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'NonOrganized.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // ================================================================
+    // GOOGLE SHEETS SYNC (WORKING)
+    // ================================================================
+    function extractSheetId(url) {
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        return match ? match[1] : null;
+    }
+
+    document.getElementById('testSheetBtn').addEventListener('click', function() {
+        const url = document.getElementById('sheetUrl').value.trim();
+        const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
+        if (!url) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a URL.</div>'; return; }
+        const sheetId = extractSheetId(url);
+        if (!sheetId) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid URL.</div>'; return; }
+        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔍 Testing...</div>';
+        fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`)
+            .then(res => {
+                if (res.ok) {
+                    document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Connected! Sheet found.</div>';
+                } else {
+                    document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Could not connect. Check if sheet is public.</div>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Connection error. Make sure sheet is public.</div>';
+            });
+    });
+
+    document.getElementById('saveSheetBtn').addEventListener('click', function() {
+        localStorage.setItem('sheetSettings', JSON.stringify({
+            url: document.getElementById('sheetUrl').value,
+            name: document.getElementById('sheetName').value,
+            time: document.getElementById('syncTime').value
+        }));
+        document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Settings saved.</div>';
+    });
+
+    async function syncGoogleSheet() {
+        const url = document.getElementById('sheetUrl').value.trim();
+        const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
+        if (!url) {
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a Google Sheet URL.</div>';
+            return;
+        }
+        const sheetId = extractSheetId(url);
+        if (!sheetId) {
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid Google Sheet URL.</div>';
+            return;
+        }
+        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔄 Syncing from Google Sheet (CSV)…</div>';
+
+        try {
+            const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`);
+            const csvText = await response.text();
+
+            if (!csvText || csvText.trim() === '') {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">No data found in sheet. Check sheet name and URL.</div>';
+                return;
+            }
+
+            const lines = csvText.split('\n').filter(l => l.trim());
+            if (lines.length < 2) {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Sheet has no data rows.</div>';
+                return;
+            }
+
+            const tabLines = lines.map(line => {
+                const cells = [];
+                let current = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        cells.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                cells.push(current.trim());
+                return cells.map(c => c.replace(/^"|"$/g, '')).join('\t');
+            });
+
+            const tabText = tabLines.join('\n');
+
+            document.getElementById('pasteArea').value = tabText;
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Data loaded (' + (tabLines.length - 1) + ' rows)! Click "Parse Data" to preview.</div>';
+            document.getElementById('parseBtn').click();
+
+        } catch (e) {
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Sync error: ' + e.message + '</div>';
+        }
+    }
+
+    document.getElementById('syncNowBtn').addEventListener('click', syncGoogleSheet);
+
     // ================================================================
     // DATA ENTRY
     // ================================================================
@@ -994,6 +1063,7 @@
         if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found.</div>'; return; }
         msgEl.innerHTML = '<div class="msg ok">✅ Parsed ' + rows.length + ' rows across ' + dateArray.length + ' date(s).</div>';
         document.getElementById('previewCard').style.display = 'block';
+        document.getElementById('saveBtn').style.display = 'inline-block';
     });
 
     document.getElementById('saveBtn').addEventListener('click', async function() {
@@ -1027,8 +1097,8 @@
             byDate[iso].push(rowObj);
         });
         let count = 0;
-        for (const [iso, rowsData] of Object.entries(byDate)) {
-            await db.collection(COLLECTION).doc(iso).set({ date: iso, rows: rowsData, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        for (const [iso, rows] of Object.entries(byDate)) {
+            await db.collection(COLLECTION).doc(iso).set({ date: iso, rows, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
             count++;
         }
         document.getElementById('saveMsg').innerHTML = '<div class="msg ok">✅ Saved ' + count + ' date(s) to Firebase!</div>';
@@ -1044,7 +1114,7 @@
     });
 
     // ================================================================
-    // EXPORT
+    // EXPORT FUNCTIONS
     // ================================================================
     document.getElementById('exportExcelBtn').addEventListener('click', function() {
         if (!allRows.length) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data.</div>'; return; }
@@ -1086,24 +1156,6 @@
     });
 
     // ================================================================
-    // GOOGLE SHEETS
-    // ================================================================
-    document.getElementById('testSheetBtn').addEventListener('click', function() {
-        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">Test connection feature requires API key.</div>';
-    });
-    document.getElementById('saveSheetBtn').addEventListener('click', function() {
-        localStorage.setItem('sheetSettings', JSON.stringify({
-            url: document.getElementById('sheetUrl').value,
-            name: document.getElementById('sheetName').value,
-            time: document.getElementById('syncTime').value
-        }));
-        document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Settings saved.</div>';
-    });
-    document.getElementById('syncNowBtn').addEventListener('click', function() {
-        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">Sync feature requires API setup.</div>';
-    });
-
-    // ================================================================
     // INIT
     // ================================================================
     async function init() {
@@ -1116,7 +1168,14 @@
             renderDivisions(latest);
             renderSubDivisions(latest);
             renderOffenders(latest);
-            populateReportDates();
+            const reportSel = document.getElementById('reportDateSelect');
+            dates.forEach(iso => {
+                const opt = document.createElement('option');
+                opt.value = iso;
+                opt.textContent = formatDateWithDay(iso);
+                reportSel.appendChild(opt);
+            });
+            reportSel.value = latest;
         } else {
             renderDashboard(null);
             renderRegions(null);
@@ -1125,11 +1184,20 @@
             renderOffenders(null);
         }
         document.getElementById('connectionStatus').textContent = '🟢 Ready';
-        // Set default report type
         document.getElementById('reportTypeSelect').value = 'daily';
         document.getElementById('reportDateSelect').style.display = 'inline-block';
         document.getElementById('reportStartDate').style.display = 'none';
         document.getElementById('reportEndDate').style.display = 'none';
+        // Load saved sheet settings
+        const saved = localStorage.getItem('sheetSettings');
+        if (saved) {
+            try {
+                const settings = JSON.parse(saved);
+                document.getElementById('sheetUrl').value = settings.url || '';
+                document.getElementById('sheetName').value = settings.name || 'Sheet1';
+                document.getElementById('syncTime').value = settings.time || '08:00';
+            } catch(e) {}
+        }
     }
 
     init();
