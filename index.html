@@ -87,8 +87,10 @@
         .report-header { text-align: center; margin-bottom: 15px; }
         .report-header h2 { color: #0f2138; font-size: 18px; }
         .report-header p { color: #697180; font-size: 13px; margin-top: 4px; }
+        .filter-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .filter-group select { padding: 6px 10px; border-radius: 6px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; min-width: 160px; }
         @media print { .no-print { display: none !important; } .report-preview { border: none !important; } }
-        @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } .header { flex-direction: column; align-items: stretch; } .tabs button { font-size: 12px; padding: 8px 12px; } }
+        @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } .header { flex-direction: column; align-items: stretch; } .tabs button { font-size: 12px; padding: 8px 12px; } .filter-group { flex-direction: column; align-items: stretch; } .filter-group select { min-width: auto; } }
     </style>
 </head>
 <body>
@@ -196,16 +198,35 @@
         </div>
     </section>
 
-    <!-- ================= REPORTS (Enhanced) ================= -->
+    <!-- ================= REPORTS (Enhanced with Filters) ================= -->
     <section class="section" id="tab-report">
         <div class="card">
-            <h2>📋 Reports <span class="badge">Custom Date Range</span></h2>
-            <div class="desc">Generate reports for any date range. All reports are downloadable and printable.</div>
-            <div class="toolbar">
+            <h2>📋 Reports <span class="badge">Custom Date Range &amp; Filters</span></h2>
+            <div class="desc">Generate reports for any date range with region/division/sub-division filters. All reports are downloadable and printable.</div>
+            
+            <div class="filter-group" style="margin-bottom:14px;">
                 <label>📅 From:</label>
                 <input type="date" id="reportStartDate">
                 <label>To:</label>
                 <input type="date" id="reportEndDate">
+                
+                <label>🌍 Region:</label>
+                <select id="reportRegionFilter">
+                    <option value="all">All Regions</option>
+                </select>
+                
+                <label>🏢 Division:</label>
+                <select id="reportDivisionFilter">
+                    <option value="all">All Divisions</option>
+                </select>
+                
+                <label>📍 Sub-Division:</label>
+                <select id="reportSubFilter">
+                    <option value="all">All Sub-Divisions</option>
+                </select>
+            </div>
+            
+            <div class="toolbar">
                 <button class="gold" id="generateReportBtn">📊 Generate</button>
                 <button class="success" id="exportReportBtn">📤 Download CSV</button>
                 <button class="secondary" id="printReportBtn">🖨️ Print</button>
@@ -486,8 +507,7 @@
     }
 
     let allRows = [];
-    let currentDate = null;
-    let savedReports = []; // Store generated reports
+    let savedReports = [];
     const COLLECTION = 'camp_data';
     const REPORTS_COLLECTION = 'saved_reports';
 
@@ -505,11 +525,60 @@
                 }
             });
             setText('connectionStatus', '🟢 Connected');
+            // Populate region/division/sub filters
+            populateFilters();
             return allRows;
         } catch(e) {
             setText('connectionStatus', '🔴 Error');
             return [];
         }
+    }
+
+    function populateFilters() {
+        const regions = [...new Set(MASTER.map(m => m.r))].sort();
+        const regionSel = document.getElementById('reportRegionFilter');
+        regionSel.innerHTML = '<option value="all">All Regions</option>';
+        regions.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = r;
+            regionSel.appendChild(opt);
+        });
+
+        const divisions = [...new Set(MASTER.map(m => m.d))].sort();
+        const divSel = document.getElementById('reportDivisionFilter');
+        divSel.innerHTML = '<option value="all">All Divisions</option>';
+        divisions.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            divSel.appendChild(opt);
+        });
+
+        const subs = [...new Set(MASTER.map(m => m.s))].sort();
+        const subSel = document.getElementById('reportSubFilter');
+        subSel.innerHTML = '<option value="all">All Sub-Divisions</option>';
+        subs.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            subSel.appendChild(opt);
+        });
+
+        // Also populate region date selects
+        ['regionDateSelect', 'divisionDateSelect', 'subDateSelect', 'offenderDateSelect'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (sel) {
+                sel.innerHTML = '<option value="latest">Latest Available</option>';
+                const dates = getAvailableDates();
+                dates.forEach(iso => {
+                    const opt = document.createElement('option');
+                    opt.value = iso;
+                    opt.textContent = formatDateWithDay(iso);
+                    sel.appendChild(opt);
+                });
+            }
+        });
     }
 
     async function loadSavedReports() {
@@ -519,7 +588,7 @@
             snapshot.forEach(doc => {
                 savedReports.push({ id: doc.id, ...doc.data() });
             });
-            savedReports.sort((a,b) => b.generatedAt - a.generatedAt);
+            savedReports.sort((a,b) => (b.generatedAt || 0) - (a.generatedAt || 0));
             return savedReports;
         } catch(e) {
             return [];
@@ -691,13 +760,35 @@
     }
 
     // ================================================================
-    // ENHANCED REPORT FUNCTIONS
+    // ENHANCED REPORT FUNCTIONS WITH FILTERS
     // ================================================================
-    function generateReportHTML(startDate, endDate) {
-        const filteredRows = getRowsForDateRange(startDate, endDate);
+    function generateReportHTML(startDate, endDate, regionFilter, divisionFilter, subFilter) {
+        let filteredRows = getRowsForDateRange(startDate, endDate);
+        
+        // Apply region filter
+        if (regionFilter && regionFilter !== 'all') {
+            filteredRows = filteredRows.filter(r => r.region === regionFilter);
+        }
+        // Apply division filter
+        if (divisionFilter && divisionFilter !== 'all') {
+            filteredRows = filteredRows.filter(r => r.division === divisionFilter);
+        }
+        // Apply sub-division filter
+        if (subFilter && subFilter !== 'all') {
+            filteredRows = filteredRows.filter(r => r.subDivision === subFilter);
+        }
+        
         if (filteredRows.length === 0) return null;
 
         const agg = aggregateRows(filteredRows);
+        
+        // Build filter description
+        let filterDesc = '';
+        if (regionFilter && regionFilter !== 'all') filterDesc += ' Region: ' + regionFilter;
+        if (divisionFilter && divisionFilter !== 'all') filterDesc += ' | Division: ' + divisionFilter;
+        if (subFilter && subFilter !== 'all') filterDesc += ' | Sub-Division: ' + subFilter;
+        if (filterDesc) filterDesc = ' (' + filterDesc + ')';
+        
         const regionData = {};
         agg.forEach(s => {
             if(!regionData[s.region]) {
@@ -721,22 +812,37 @@
         });
 
         let dateLabel = startDate === endDate ? formatDateWithDay(startDate) : formatDateRange(startDate, endDate);
-        let html = `<div class="report-header"><h2>📋 Review of MBU Camps</h2><p>${dateLabel} · Total Rows: ${filteredRows.length}</p></div>`;
+        let html = `<div class="report-header"><h2>📋 Review of MBU Camps${filterDesc}</h2><p>${dateLabel} · Total Rows: ${filteredRows.length}</p></div>`;
         html += `<table><thead><tr><th>Region / Division</th><th>SD</th><th>Active</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Productivity</th></tr></thead><tbody>`;
         let grandTotal = {sd:0, active:0, camps:0, mbu:0, txns:0};
-        Object.entries(regionData).sort((a,b) => b[1].txns - a[1].txns).forEach(([region, rData]) => {
-            Object.entries(rData.divisions).sort((a,b) => b[1].txns - a[1].txns).forEach(([div, dData]) => {
-                const prod = dData.camps > 0 ? (dData.txns / dData.camps).toFixed(1) : '0';
-                html += `<tr><td style="padding-left:20px;">${div}</td><td>${dData.totalSD}</td><td>${dData.activeSD}</td><td>${fmtNum(dData.camps)}</td><td>${fmtNum(dData.mbu)}</td><td>${fmtNum(dData.txns)}</td><td>${prod}</td></tr>`;
+        
+        // If a specific sub-division is selected, show only that sub-division
+        if (subFilter && subFilter !== 'all') {
+            const subData = agg.find(s => s.subDivision === subFilter);
+            if (subData) {
+                const prod = subData.camps > 0 ? (subData.transactions / subData.camps).toFixed(1) : '0';
+                html += `<tr><td style="font-weight:700;">${subData.subDivision}</td><td>1</td><td>${subData.organized ? 1 : 0}</td><td>${fmtNum(subData.camps)}</td><td>${fmtNum(subData.mbu)}</td><td>${fmtNum(subData.transactions)}</td><td>${prod}</td></tr>`;
+                grandTotal.sd = 1;
+                grandTotal.active = subData.organized ? 1 : 0;
+                grandTotal.camps = subData.camps;
+                grandTotal.mbu = subData.mbu;
+                grandTotal.txns = subData.transactions;
+            }
+        } else {
+            Object.entries(regionData).sort((a,b) => b[1].txns - a[1].txns).forEach(([region, rData]) => {
+                Object.entries(rData.divisions).sort((a,b) => b[1].txns - a[1].txns).forEach(([div, dData]) => {
+                    const prod = dData.camps > 0 ? (dData.txns / dData.camps).toFixed(1) : '0';
+                    html += `<tr><td style="padding-left:20px;">${div}</td><td>${dData.totalSD}</td><td>${dData.activeSD}</td><td>${fmtNum(dData.camps)}</td><td>${fmtNum(dData.mbu)}</td><td>${fmtNum(dData.txns)}</td><td>${prod}</td></tr>`;
+                });
+                const rProd = rData.camps > 0 ? (rData.txns / rData.camps).toFixed(1) : '0';
+                html += `<tr class="sub-total"><td style="font-weight:700;">${region}</td><td>${rData.totalSD}</td><td>${rData.activeSD}</td><td>${fmtNum(rData.camps)}</td><td>${fmtNum(rData.mbu)}</td><td>${fmtNum(rData.txns)}</td><td>${rProd}</td></tr>`;
+                grandTotal.sd += rData.totalSD;
+                grandTotal.active += rData.activeSD;
+                grandTotal.camps += rData.camps;
+                grandTotal.mbu += rData.mbu;
+                grandTotal.txns += rData.txns;
             });
-            const rProd = rData.camps > 0 ? (rData.txns / rData.camps).toFixed(1) : '0';
-            html += `<tr class="sub-total"><td style="font-weight:700;">${region}</td><td>${rData.totalSD}</td><td>${rData.activeSD}</td><td>${fmtNum(rData.camps)}</td><td>${fmtNum(rData.mbu)}</td><td>${fmtNum(rData.txns)}</td><td>${rProd}</td></tr>`;
-            grandTotal.sd += rData.totalSD;
-            grandTotal.active += rData.activeSD;
-            grandTotal.camps += rData.camps;
-            grandTotal.mbu += rData.mbu;
-            grandTotal.txns += rData.txns;
-        });
+        }
         const gProd = grandTotal.camps > 0 ? (grandTotal.txns / grandTotal.camps).toFixed(2) : '0';
         html += `<tr class="total-row"><td style="font-weight:700;">Total</td><td>${grandTotal.sd}</td><td>${grandTotal.active}</td><td>${fmtNum(grandTotal.camps)}</td><td>${fmtNum(grandTotal.mbu)}</td><td>${fmtNum(grandTotal.txns)}</td><td>${gProd}</td></tr></tbody></table>`;
         html += `<div style="margin-top:12px;font-size:12px;color:#697180;text-align:center;">Revenue: ${fmtRevenue(grandTotal.mbu * 125)} · Generated: ${new Date().toLocaleString()}</div>`;
@@ -746,19 +852,23 @@
             dateLabel: dateLabel,
             startDate: startDate,
             endDate: endDate,
+            regionFilter: regionFilter,
+            divisionFilter: divisionFilter,
+            subFilter: subFilter,
             rowCount: filteredRows.length,
             totalSD: grandTotal.sd,
             activeSD: grandTotal.active,
             totalCamps: grandTotal.camps,
             totalMBU: grandTotal.mbu,
             totalTxns: grandTotal.txns,
-            revenue: grandTotal.mbu * 125
+            revenue: grandTotal.mbu * 125,
+            filterDesc: filterDesc
         };
     }
 
     function displayReport(reportData) {
         if (!reportData) {
-            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data in selected date range.</div>';
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data in selected date range with current filters.</div>';
             document.getElementById('reportContent').style.display = 'none';
             return;
         }
@@ -777,11 +887,16 @@
             cells.forEach(cell => values.push(cell.textContent.trim()));
             csv += values.join(',') + '\n';
         });
+        let filename = `GCAMIS_Report_${reportData.startDate}_to_${reportData.endDate}`;
+        if (reportData.regionFilter && reportData.regionFilter !== 'all') filename += '_' + reportData.regionFilter.replace(/\s/g, '_');
+        if (reportData.divisionFilter && reportData.divisionFilter !== 'all') filename += '_' + reportData.divisionFilter.replace(/\s/g, '_');
+        if (reportData.subFilter && reportData.subFilter !== 'all') filename += '_' + reportData.subFilter.replace(/\s/g, '_');
+        filename += '.csv';
         const blob = new Blob([csv], {type: 'text/csv'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `GCAMIS_Report_${reportData.startDate}_to_${reportData.endDate}.csv`;
+        a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
         document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report exported as CSV.</div>';
@@ -806,6 +921,10 @@
     document.getElementById('generateReportBtn').addEventListener('click', function() {
         const startDate = document.getElementById('reportStartDate').value;
         const endDate = document.getElementById('reportEndDate').value;
+        const regionFilter = document.getElementById('reportRegionFilter').value;
+        const divisionFilter = document.getElementById('reportDivisionFilter').value;
+        const subFilter = document.getElementById('reportSubFilter').value;
+        
         if (!startDate || !endDate) {
             document.getElementById('reportMsg').innerHTML = '<div class="msg err">Please select both start and end dates.</div>';
             return;
@@ -814,15 +933,18 @@
             document.getElementById('reportMsg').innerHTML = '<div class="msg err">Start date cannot be after end date.</div>';
             return;
         }
-        const reportData = generateReportHTML(startDate, endDate);
+        const reportData = generateReportHTML(startDate, endDate, regionFilter, divisionFilter, subFilter);
         if (reportData) {
             lastReportData = reportData;
             displayReport(reportData);
-            // Save report to Firebase for later access
             saveReport({
                 startDate: startDate,
                 endDate: endDate,
+                regionFilter: regionFilter,
+                divisionFilter: divisionFilter,
+                subFilter: subFilter,
                 dateLabel: reportData.dateLabel,
+                filterDesc: reportData.filterDesc,
                 rowCount: reportData.rowCount,
                 totalSD: reportData.totalSD,
                 activeSD: reportData.activeSD,
@@ -835,7 +957,7 @@
                 if (id) loadSavedReports();
             });
         } else {
-            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data in selected date range.</div>';
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data in selected date range with current filters.</div>';
             document.getElementById('reportContent').style.display = 'none';
         }
     });
@@ -868,10 +990,16 @@
             list.innerHTML = '<div class="empty">No saved reports found.</div>';
             return;
         }
-        let html = '<div class="table-wrap"><table class="data"><tr><th>Date Range</th><th>Rows</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Revenue</th><th>Actions</th></tr>';
+        let html = '<div class="table-wrap"><table class="data"><tr><th>Date Range</th><th>Filters</th><th>Rows</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Revenue</th><th>Actions</th></tr>';
         savedReports.forEach(r => {
+            let filterText = '';
+            if (r.regionFilter && r.regionFilter !== 'all') filterText += 'R:' + r.regionFilter.replace(/Region/g,'').trim() + ' ';
+            if (r.divisionFilter && r.divisionFilter !== 'all') filterText += 'D:' + r.divisionFilter.replace(/Division/g,'').trim() + ' ';
+            if (r.subFilter && r.subFilter !== 'all') filterText += 'S:' + r.subFilter.replace(/Sub Division/g,'').trim();
+            if (!filterText) filterText = 'All';
             html += `<tr>
                 <td>${r.dateLabel || r.startDate + ' to ' + r.endDate}</td>
+                <td style="font-size:11px;">${filterText}</td>
                 <td class="num">${r.rowCount || 0}</td>
                 <td class="num">${r.totalCamps || 0}</td>
                 <td class="num">${r.totalMBU || 0}</td>
@@ -892,8 +1020,7 @@
         if (report && report.html) {
             document.getElementById('reportPreview').innerHTML = report.html;
             document.getElementById('reportContent').style.display = 'block';
-            document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Loaded saved report: ' + report.dateLabel + '</div>';
-            // Set lastReportData for export
+            document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Loaded saved report: ' + report.dateLabel + (report.filterDesc || '') + '</div>';
             lastReportData = report;
         }
     };
@@ -906,7 +1033,12 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Report_${report.startDate}_to_${report.endDate}.csv`;
+            let filename = `Report_${report.startDate}_to_${report.endDate}`;
+            if (report.regionFilter && report.regionFilter !== 'all') filename += '_' + report.regionFilter.replace(/\s/g, '_');
+            if (report.divisionFilter && report.divisionFilter !== 'all') filename += '_' + report.divisionFilter.replace(/\s/g, '_');
+            if (report.subFilter && report.subFilter !== 'all') filename += '_' + report.subFilter.replace(/\s/g, '_');
+            filename += '.csv';
+            a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
         }
