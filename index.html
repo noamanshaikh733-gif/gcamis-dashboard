@@ -459,7 +459,8 @@
     ];
 
     const TOTAL_SD = MASTER.length;
-    document.getElementById('kpiTotalSD').textContent = TOTAL_SD;
+    const kpiTotalSD = document.getElementById('kpiTotalSD');
+    if (kpiTotalSD) kpiTotalSD.textContent = TOTAL_SD;
 
     // ================================================================
     // HELPERS
@@ -728,9 +729,11 @@
     }
     function switchTab(tabId) {
         document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        const btn = document.querySelector(`.tabs button[data-tab="${tabId}"]`);
+        if (btn) btn.classList.add('active');
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('tab-' + tabId).classList.add('active');
+        const section = document.getElementById('tab-' + tabId);
+        if (section) section.classList.add('active');
     }
 
     // ================================================================
@@ -864,304 +867,380 @@
         return match ? match[1] : null;
     }
 
-    document.getElementById('testSheetBtn').addEventListener('click', function() {
-        const url = document.getElementById('sheetUrl').value.trim();
-        const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
-        if (!url) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a URL.</div>'; return; }
-        const sheetId = extractSheetId(url);
-        if (!sheetId) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid URL.</div>'; return; }
-        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔍 Testing...</div>';
-        fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`)
-            .then(res => {
-                if (res.ok) {
-                    document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Connected! Sheet found.</div>';
-                } else {
-                    document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Could not connect. Check if sheet is public.</div>';
-                }
-            })
-            .catch(() => {
-                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Connection error. Make sure sheet is public.</div>';
-            });
-    });
-
-    document.getElementById('saveSheetBtn').addEventListener('click', function() {
-        localStorage.setItem('sheetSettings', JSON.stringify({
-            url: document.getElementById('sheetUrl').value,
-            name: document.getElementById('sheetName').value,
-            time: document.getElementById('syncTime').value
-        }));
-        document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Settings saved.</div>';
-    });
-
-    document.getElementById('syncNowBtn').addEventListener('click', async function() {
-        const url = document.getElementById('sheetUrl').value.trim();
-        const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
-        if (!url) {
-            document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a Google Sheet URL.</div>';
-            return;
-        }
-        const sheetId = extractSheetId(url);
-        if (!sheetId) {
-            document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid Google Sheet URL.</div>';
-            return;
-        }
-        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔄 Syncing from Google Sheet (CSV)…</div>';
-
-        try {
-            const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`);
-            const csvText = await response.text();
-
-            if (!csvText || csvText.trim() === '') {
-                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">No data found in sheet. Check sheet name and URL.</div>';
-                return;
-            }
-
-            const lines = csvText.split('\n').filter(l => l.trim());
-            if (lines.length < 2) {
-                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Sheet has no data rows.</div>';
-                return;
-            }
-
-            const tabLines = lines.map(line => {
-                const cells = [];
-                let current = '';
-                let inQuotes = false;
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        cells.push(current.trim());
-                        current = '';
+    const testSheetBtn = document.getElementById('testSheetBtn');
+    if (testSheetBtn) {
+        testSheetBtn.addEventListener('click', function() {
+            const url = document.getElementById('sheetUrl').value.trim();
+            const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
+            if (!url) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a URL.</div>'; return; }
+            const sheetId = extractSheetId(url);
+            if (!sheetId) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid URL.</div>'; return; }
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔍 Testing...</div>';
+            fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`)
+                .then(res => {
+                    if (res.ok) {
+                        document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Connected! Sheet found.</div>';
                     } else {
-                        current += char;
+                        document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Could not connect. Check if sheet is public.</div>';
                     }
+                })
+                .catch(() => {
+                    document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Connection error. Make sure sheet is public.</div>';
+                });
+        });
+    }
+
+    const saveSheetBtn = document.getElementById('saveSheetBtn');
+    if (saveSheetBtn) {
+        saveSheetBtn.addEventListener('click', function() {
+            localStorage.setItem('sheetSettings', JSON.stringify({
+                url: document.getElementById('sheetUrl').value,
+                name: document.getElementById('sheetName').value,
+                time: document.getElementById('syncTime').value
+            }));
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Settings saved.</div>';
+        });
+    }
+
+    const syncNowBtn = document.getElementById('syncNowBtn');
+    if (syncNowBtn) {
+        syncNowBtn.addEventListener('click', async function() {
+            const url = document.getElementById('sheetUrl').value.trim();
+            const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
+            if (!url) {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a Google Sheet URL.</div>';
+                return;
+            }
+            const sheetId = extractSheetId(url);
+            if (!sheetId) {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid Google Sheet URL.</div>';
+                return;
+            }
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔄 Syncing from Google Sheet (CSV)…</div>';
+
+            try {
+                const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`);
+                const csvText = await response.text();
+
+                if (!csvText || csvText.trim() === '') {
+                    document.getElementById('sheetMsg').innerHTML = '<div class="msg err">No data found in sheet. Check sheet name and URL.</div>';
+                    return;
                 }
-                cells.push(current.trim());
-                return cells.map(c => c.replace(/^"|"$/g, '')).join('\t');
-            });
 
-            const tabText = tabLines.join('\n');
+                const lines = csvText.split('\n').filter(l => l.trim());
+                if (lines.length < 2) {
+                    document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Sheet has no data rows.</div>';
+                    return;
+                }
 
-            const pasteArea = document.getElementById('pasteArea');
-            if (pasteArea) pasteArea.value = tabText;
-            document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Data loaded (' + (tabLines.length - 1) + ' rows)! Click "Parse Data" to preview.</div>';
-            const parseBtn = document.getElementById('parseBtn');
-            if (parseBtn) parseBtn.click();
+                const tabLines = lines.map(line => {
+                    const cells = [];
+                    let current = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            cells.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    cells.push(current.trim());
+                    return cells.map(c => c.replace(/^"|"$/g, '')).join('\t');
+                });
 
-        } catch (e) {
-            document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Sync error: ' + e.message + '</div>';
-        }
-    });
+                const tabText = tabLines.join('\n');
+
+                const pasteArea = document.getElementById('pasteArea');
+                if (pasteArea) pasteArea.value = tabText;
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Data loaded (' + (tabLines.length - 1) + ' rows)! Click "Parse Data" to preview.</div>';
+                const parseBtn = document.getElementById('parseBtn');
+                if (parseBtn) parseBtn.click();
+
+            } catch (e) {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Sync error: ' + e.message + '</div>';
+            }
+        });
+    }
 
     // ================================================================
     // DATA ENTRY
     // ================================================================
-    document.getElementById('parseBtn').addEventListener('click', function() {
-        const text = document.getElementById('pasteArea').value;
-        const msgEl = document.getElementById('parseMsg');
-        if (!text.trim()) { msgEl.innerHTML = '<div class="msg err">Paste data first.</div>'; return; }
-        const lines = text.split('\n').filter(l => l.trim());
-        if (lines.length < 2) { msgEl.innerHTML = '<div class="msg err">Not enough rows.</div>'; return; }
-        const rows = lines.slice(1).map(l => l.split('\t'));
-        const dates = new Set();
-        rows.forEach(r => { if (r[0]) dates.add(parseDateFlexible(r[0])); });
-        const dateArray = Array.from(dates).filter(d => d);
-        if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found.</div>'; return; }
-        msgEl.innerHTML = '<div class="msg ok">✅ Parsed ' + rows.length + ' rows across ' + dateArray.length + ' date(s).</div>';
-        document.getElementById('previewCard').style.display = 'block';
-        document.getElementById('saveBtn').style.display = 'inline-block';
-    });
-
-    document.getElementById('saveBtn').addEventListener('click', async function() {
-        const text = document.getElementById('pasteArea').value;
-        if (!text.trim()) return;
-        const lines = text.split('\n').filter(l => l.trim());
-        const rows = lines.slice(1).map(l => l.split('\t'));
-        const byDate = {};
-        rows.forEach(r => {
-            const iso = parseDateFlexible(r[0]);
-            if (!iso) return;
-            if (!byDate[iso]) byDate[iso] = [];
-            const rowObj = {
-                date: iso,
-                region: r[1] || '',
-                division: r[2] || '',
-                subDivision: r[3] || '',
-                headName: r[4] || '',
-                headMobile: r[5] || '',
-                stationId: r[6] || '',
-                machineId: r[7] || '',
-                address: r[8] || '',
-                operatorName: r[9] || '',
-                operatorContact: r[10] || '',
-                newEnrolment: parseFloat(r[11]) || 0,
-                mbu: parseFloat(r[12]) || 0,
-                otherUpdation: parseFloat(r[13]) || 0,
-                totalTransactions: parseFloat(r[14]) || 0,
-                organized: !!(r[8] && parseFloat(r[14]) > 0)
-            };
-            byDate[iso].push(rowObj);
+    const parseBtn = document.getElementById('parseBtn');
+    if (parseBtn) {
+        parseBtn.addEventListener('click', function() {
+            const text = document.getElementById('pasteArea').value;
+            const msgEl = document.getElementById('parseMsg');
+            if (!text.trim()) { msgEl.innerHTML = '<div class="msg err">Paste data first.</div>'; return; }
+            const lines = text.split('\n').filter(l => l.trim());
+            if (lines.length < 2) { msgEl.innerHTML = '<div class="msg err">Not enough rows.</div>'; return; }
+            const rows = lines.slice(1).map(l => l.split('\t'));
+            const dates = new Set();
+            rows.forEach(r => { if (r[0]) dates.add(parseDateFlexible(r[0])); });
+            const dateArray = Array.from(dates).filter(d => d);
+            if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found.</div>'; return; }
+            msgEl.innerHTML = '<div class="msg ok">✅ Parsed ' + rows.length + ' rows across ' + dateArray.length + ' date(s).</div>';
+            document.getElementById('previewCard').style.display = 'block';
+            document.getElementById('saveBtn').style.display = 'inline-block';
         });
-        let count = 0;
-        for (const [iso, rows] of Object.entries(byDate)) {
-            await db.collection(COLLECTION).doc(iso).set({ date: iso, rows, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-            count++;
-        }
-        document.getElementById('saveMsg').innerHTML = '<div class="msg ok">✅ Saved ' + count + ' date(s) to Firebase!</div>';
-        await loadFirebaseData();
-        const dates = getAvailableDates();
-        if (dates.length > 0) renderDashboard(dates[dates.length-1]);
-    });
+    }
 
-    document.getElementById('clearBtn').addEventListener('click', function() {
-        document.getElementById('pasteArea').value = '';
-        document.getElementById('parseMsg').innerHTML = '';
-        document.getElementById('previewCard').style.display = 'none';
-    });
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async function() {
+            const text = document.getElementById('pasteArea').value;
+            if (!text.trim()) return;
+            const lines = text.split('\n').filter(l => l.trim());
+            const rows = lines.slice(1).map(l => l.split('\t'));
+            const byDate = {};
+            rows.forEach(r => {
+                const iso = parseDateFlexible(r[0]);
+                if (!iso) return;
+                if (!byDate[iso]) byDate[iso] = [];
+                const rowObj = {
+                    date: iso,
+                    region: r[1] || '',
+                    division: r[2] || '',
+                    subDivision: r[3] || '',
+                    headName: r[4] || '',
+                    headMobile: r[5] || '',
+                    stationId: r[6] || '',
+                    machineId: r[7] || '',
+                    address: r[8] || '',
+                    operatorName: r[9] || '',
+                    operatorContact: r[10] || '',
+                    newEnrolment: parseFloat(r[11]) || 0,
+                    mbu: parseFloat(r[12]) || 0,
+                    otherUpdation: parseFloat(r[13]) || 0,
+                    totalTransactions: parseFloat(r[14]) || 0,
+                    organized: !!(r[8] && parseFloat(r[14]) > 0)
+                };
+                byDate[iso].push(rowObj);
+            });
+            let count = 0;
+            for (const [iso, rows] of Object.entries(byDate)) {
+                await db.collection(COLLECTION).doc(iso).set({ date: iso, rows, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                count++;
+            }
+            document.getElementById('saveMsg').innerHTML = '<div class="msg ok">✅ Saved ' + count + ' date(s) to Firebase!</div>';
+            await loadFirebaseData();
+            const dates = getAvailableDates();
+            if (dates.length > 0) renderDashboard(dates[dates.length-1]);
+        });
+    }
+
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            document.getElementById('pasteArea').value = '';
+            document.getElementById('parseMsg').innerHTML = '';
+            document.getElementById('previewCard').style.display = 'none';
+        });
+    }
 
     // ================================================================
     // EXPORT FUNCTIONS
     // ================================================================
-    document.getElementById('exportExcelBtn').addEventListener('click', function() {
-        if (!allRows.length) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data.</div>'; return; }
-        let csv = 'Date,Region,Division,SubDivision,Head,Mobile,StationId,MachineId,Address,Operator,OperatorContact,NewEnrolment,MBU,OtherUpdation,TotalTransactions,Organized\n';
-        allRows.forEach(r => {
-            csv += [r.date,r.region,r.division,r.subDivision,r.headName||'',r.headMobile||'',r.stationId||'',r.machineId||'',r.address||'',r.operatorName||'',r.operatorContact||'',r.newEnrolment||0,r.mbu||0,r.otherUpdation||0,r.totalTransactions||0,r.organized].join(',') + '\n';
+    const exportExcelBtn = document.getElementById('exportExcelBtn');
+    if (exportExcelBtn) {
+        exportExcelBtn.addEventListener('click', function() {
+            if (!allRows.length) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data.</div>'; return; }
+            let csv = 'Date,Region,Division,SubDivision,Head,Mobile,StationId,MachineId,Address,Operator,OperatorContact,NewEnrolment,MBU,OtherUpdation,TotalTransactions,Organized\n';
+            allRows.forEach(r => {
+                csv += [r.date,r.region,r.division,r.subDivision,r.headName||'',r.headMobile||'',r.stationId||'',r.machineId||'',r.address||'',r.operatorName||'',r.operatorContact||'',r.newEnrolment||0,r.mbu||0,r.otherUpdation||0,r.totalTransactions||0,r.organized].join(',') + '\n';
+            });
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'GCAMIS_export.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported.</div>';
         });
-        const blob = new Blob([csv], {type: 'text/csv'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'GCAMIS_export.csv';
-        a.click();
-        URL.revokeObjectURL(url);
-        document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported.</div>';
-    });
+    }
 
-    document.getElementById('exportJSONBtn').addEventListener('click', async function() {
-        const allData = {};
-        const snapshot = await db.collection(COLLECTION).get();
-        snapshot.forEach(doc => allData[doc.id] = doc.data());
-        const json = JSON.stringify(allData, null, 2);
-        const blob = new Blob([json], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'GCAMIS_backup.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported.</div>';
-    });
+    const exportJSONBtn = document.getElementById('exportJSONBtn');
+    if (exportJSONBtn) {
+        exportJSONBtn.addEventListener('click', async function() {
+            const allData = {};
+            const snapshot = await db.collection(COLLECTION).get();
+            snapshot.forEach(doc => allData[doc.id] = doc.data());
+            const json = JSON.stringify(allData, null, 2);
+            const blob = new Blob([json], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'GCAMIS_backup.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported.</div>';
+        });
+    }
 
-    document.getElementById('clearDataBtn').addEventListener('click', async function() {
-        if (!confirm('Delete ALL data?')) return;
-        const snapshot = await db.collection(COLLECTION).get();
-        snapshot.forEach(doc => doc.ref.delete());
-        allRows = [];
-        const dates = getAvailableDates();
-        if (dates.length > 0) renderDashboard(dates[dates.length-1]);
-        document.getElementById('exportMsg').innerHTML = '<div class="msg err">🗑️ All data deleted.</div>';
-    });
+    const clearDataBtn = document.getElementById('clearDataBtn');
+    if (clearDataBtn) {
+        clearDataBtn.addEventListener('click', async function() {
+            if (!confirm('Delete ALL data?')) return;
+            const snapshot = await db.collection(COLLECTION).get();
+            snapshot.forEach(doc => doc.ref.delete());
+            allRows = [];
+            const dates = getAvailableDates();
+            if (dates.length > 0) renderDashboard(dates[dates.length-1]);
+            document.getElementById('exportMsg').innerHTML = '<div class="msg err">🗑️ All data deleted.</div>';
+        });
+    }
 
     // ================================================================
     // EVENT BINDINGS FOR DATE FILTERS
     // ================================================================
-    document.getElementById('dashboardApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('dashboardDateRange').value;
-        const custom = document.getElementById('dashboardCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderDashboard(iso);
-    });
-    document.getElementById('dashboardDateRange').addEventListener('change', function() {
-        document.getElementById('dashboardCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
+    const dashboardApplyDate = document.getElementById('dashboardApplyDate');
+    if (dashboardApplyDate) {
+        dashboardApplyDate.addEventListener('click', function() {
+            const range = document.getElementById('dashboardDateRange').value;
+            const custom = document.getElementById('dashboardCustomDate').value;
+            const iso = getDateFromRange(range, custom);
+            renderDashboard(iso);
+        });
+    }
 
-    document.getElementById('regionApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('regionDateRange').value;
-        const custom = document.getElementById('regionCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderRegions(iso);
-    });
-    document.getElementById('regionDateRange').addEventListener('change', function() {
-        document.getElementById('regionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
+    const dashboardDateRange = document.getElementById('dashboardDateRange');
+    if (dashboardDateRange) {
+        dashboardDateRange.addEventListener('change', function() {
+            document.getElementById('dashboardCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+        });
+    }
 
-    document.getElementById('divisionApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('divisionDateRange').value;
-        const custom = document.getElementById('divisionCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderDivisions(iso);
-    });
-    document.getElementById('divisionDateRange').addEventListener('change', function() {
-        document.getElementById('divisionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
+    const regionApplyDate = document.getElementById('regionApplyDate');
+    if (regionApplyDate) {
+        regionApplyDate.addEventListener('click', function() {
+            const range = document.getElementById('regionDateRange').value;
+            const custom = document.getElementById('regionCustomDate').value;
+            const iso = getDateFromRange(range, custom);
+            renderRegions(iso);
+        });
+    }
 
-    document.getElementById('subApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('subDateRange').value;
-        const custom = document.getElementById('subCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderSubDivisions(iso);
-    });
-    document.getElementById('subDateRange').addEventListener('change', function() {
-        document.getElementById('subCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
+    const regionDateRange = document.getElementById('regionDateRange');
+    if (regionDateRange) {
+        regionDateRange.addEventListener('change', function() {
+            document.getElementById('regionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+        });
+    }
 
-    document.getElementById('offenderApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('offenderDateRange').value;
-        const custom = document.getElementById('offenderCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderOffenders(iso);
-    });
-    document.getElementById('offenderDateRange').addEventListener('change', function() {
-        document.getElementById('offenderCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
+    const divisionApplyDate = document.getElementById('divisionApplyDate');
+    if (divisionApplyDate) {
+        divisionApplyDate.addEventListener('click', function() {
+            const range = document.getElementById('divisionDateRange').value;
+            const custom = document.getElementById('divisionCustomDate').value;
+            const iso = getDateFromRange(range, custom);
+            renderDivisions(iso);
+        });
+    }
 
-    document.getElementById('reportTypeSelect').addEventListener('change', function() {
-        const type = this.value;
-        const dailySel = document.getElementById('reportDateSelect');
-        const startInput = document.getElementById('reportStartDate');
-        const endInput = document.getElementById('reportEndDate');
-        dailySel.style.display = (type === 'daily' || type === 'weekly' || type === 'monthly') ? 'inline-block' : 'none';
-        startInput.style.display = type === 'custom' ? 'inline-block' : 'none';
-        endInput.style.display = type === 'custom' ? 'inline-block' : 'none';
-        if (type !== 'custom') {
-            const dates = getAvailableDates();
-            dailySel.innerHTML = '';
-            dates.forEach(iso => {
-                const opt = document.createElement('option');
-                opt.value = iso;
-                opt.textContent = formatDateWithDay(iso);
-                dailySel.appendChild(opt);
-            });
-            if (dates.length > 0) dailySel.value = dates[dates.length-1];
-        }
-    });
+    const divisionDateRange = document.getElementById('divisionDateRange');
+    if (divisionDateRange) {
+        divisionDateRange.addEventListener('change', function() {
+            document.getElementById('divisionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+        });
+    }
 
-    // Generate report on load
-    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
-    document.getElementById('exportReportBtn').addEventListener('click', exportReport);
-    document.getElementById('printReportBtn').addEventListener('click', printReport);
+    const subApplyDate = document.getElementById('subApplyDate');
+    if (subApplyDate) {
+        subApplyDate.addEventListener('click', function() {
+            const range = document.getElementById('subDateRange').value;
+            const custom = document.getElementById('subCustomDate').value;
+            const iso = getDateFromRange(range, custom);
+            renderSubDivisions(iso);
+        });
+    }
 
-    document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
-    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
-    document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
-    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
+    const subDateRange = document.getElementById('subDateRange');
+    if (subDateRange) {
+        subDateRange.addEventListener('change', function() {
+            document.getElementById('subCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+        });
+    }
 
-    document.getElementById('offenderExportBtn').addEventListener('click', function() {
-        const table = document.getElementById('offenderTable');
-        if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
-        let csv = '';
-        for (let row of table.rows) {
-            let cells = [];
-            for (let cell of row.cells) cells.push(cell.textContent.trim());
-            csv += cells.join(',') + '\n';
-        }
-        const blob = new Blob([csv], {type: 'text/csv'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'NonOrganized.csv';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
+    const offenderApplyDate = document.getElementById('offenderApplyDate');
+    if (offenderApplyDate) {
+        offenderApplyDate.addEventListener('click', function() {
+            const range = document.getElementById('offenderDateRange').value;
+            const custom = document.getElementById('offenderCustomDate').value;
+            const iso = getDateFromRange(range, custom);
+            renderOffenders(iso);
+        });
+    }
+
+    const offenderDateRange = document.getElementById('offenderDateRange');
+    if (offenderDateRange) {
+        offenderDateRange.addEventListener('change', function() {
+            document.getElementById('offenderCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+        });
+    }
+
+    const reportTypeSelect = document.getElementById('reportTypeSelect');
+    if (reportTypeSelect) {
+        reportTypeSelect.addEventListener('change', function() {
+            const type = this.value;
+            const dailySel = document.getElementById('reportDateSelect');
+            const startInput = document.getElementById('reportStartDate');
+            const endInput = document.getElementById('reportEndDate');
+            if (dailySel) dailySel.style.display = (type === 'daily' || type === 'weekly' || type === 'monthly') ? 'inline-block' : 'none';
+            if (startInput) startInput.style.display = type === 'custom' ? 'inline-block' : 'none';
+            if (endInput) endInput.style.display = type === 'custom' ? 'inline-block' : 'none';
+            if (type !== 'custom') {
+                const dates = getAvailableDates();
+                if (dailySel) {
+                    dailySel.innerHTML = '';
+                    dates.forEach(iso => {
+                        const opt = document.createElement('option');
+                        opt.value = iso;
+                        opt.textContent = formatDateWithDay(iso);
+                        dailySel.appendChild(opt);
+                    });
+                    if (dates.length > 0) dailySel.value = dates[dates.length-1];
+                }
+            }
+        });
+    }
+
+    const generateReportBtn = document.getElementById('generateReportBtn');
+    if (generateReportBtn) generateReportBtn.addEventListener('click', generateReport);
+    const exportReportBtn = document.getElementById('exportReportBtn');
+    if (exportReportBtn) exportReportBtn.addEventListener('click', exportReport);
+    const printReportBtn = document.getElementById('printReportBtn');
+    if (printReportBtn) printReportBtn.addEventListener('click', printReport);
+
+    const regionPrintBtn = document.getElementById('regionPrintBtn');
+    if (regionPrintBtn) regionPrintBtn.addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
+    const divisionPrintBtn = document.getElementById('divisionPrintBtn');
+    if (divisionPrintBtn) divisionPrintBtn.addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
+    const subPrintBtn = document.getElementById('subPrintBtn');
+    if (subPrintBtn) subPrintBtn.addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
+    const offenderPrintBtn = document.getElementById('offenderPrintBtn');
+    if (offenderPrintBtn) offenderPrintBtn.addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
+
+    const offenderExportBtn = document.getElementById('offenderExportBtn');
+    if (offenderExportBtn) {
+        offenderExportBtn.addEventListener('click', function() {
+            const table = document.getElementById('offenderTable');
+            if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
+            let csv = '';
+            for (let row of table.rows) {
+                let cells = [];
+                for (let cell of row.cells) cells.push(cell.textContent.trim());
+                csv += cells.join(',') + '\n';
+            }
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'NonOrganized.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
 
     // ================================================================
     // INIT
@@ -1203,7 +1282,6 @@
         const endDate = document.getElementById('reportEndDate');
         if (endDate) endDate.style.display = 'none';
 
-        // Load saved sheet settings
         const saved = localStorage.getItem('sheetSettings');
         if (saved) {
             try {
@@ -1218,7 +1296,6 @@
         }
     }
 
-    // Make drill functions globally accessible
     window.drillToRegion = drillToRegion;
     window.drillToDivision = drillToDivision;
 
