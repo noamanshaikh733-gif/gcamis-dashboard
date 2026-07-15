@@ -112,7 +112,7 @@
         </div>
     </header>
 
-    <nav class="tabs">
+    <nav class="tabs" id="mainTabs">
         <button class="active" data-tab="today">📊 Dashboard</button>
         <button data-tab="entry">📥 Data Entry</button>
         <button data-tab="googlesheet">📊 Google Sheets</button>
@@ -465,7 +465,23 @@
     // HELPERS
     // ================================================================
     function subKey(r,d,s){ return (r||'').trim().toLowerCase()+'||'+(d||'').trim().toLowerCase()+'||'+(s||'').trim().toLowerCase(); }
-    function parseDateFlexible(raw) { /* ... same as before ... */ }
+    function parseDateFlexible(raw) {
+        if(!raw) return null;
+        raw = raw.trim();
+        let m = raw.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
+        if(m) { const dd=m[1].padStart(2,'0'), mm=m[2].padStart(2,'0'), yyyy=m[3]; return yyyy+'-'+mm+'-'+dd; }
+        m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if(m) { return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'); }
+        if(/^\d+(\.\d+)?$/.test(raw)) {
+            const serial = parseFloat(raw);
+            if(serial > 20000 && serial < 60000) {
+                const epoch = new Date(Date.UTC(1899,11,30));
+                const d = new Date(epoch.getTime() + serial*86400000);
+                return d.toISOString().slice(0,10);
+            }
+        }
+        return null;
+    }
     function isoToDisplay(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); return d+'.'+m+'.'+y; }
     function getDayName(iso){ if(!iso) return ''; const date = new Date(iso+'T00:00:00'); return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()]; }
     function formatDateWithDay(iso){ return getDayName(iso) + ', ' + isoToDisplay(iso); }
@@ -548,9 +564,6 @@
         return null;
     }
 
-    // ================================================================
-    // SAFE DOM UPDATES
-    // ================================================================
     function setText(id, value) {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
@@ -701,19 +714,73 @@
     // ================================================================
     // DRILL-DOWN
     // ================================================================
-    function drillToRegion(name) { switchTab('divisions'); }
-    function drillToDivision(name) { switchTab('subdivisions'); }
-    function switchTab(tabId) {
-        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('tab-' + tabId).classList.add('active');
+    function drillToRegion(name) {
+        switchTab('divisions');
     }
+    function drillToDivision(name) {
+        switchTab('subdivisions');
+    }
+
+    // ================================================================
+    // TAB SWITCHING – THIS WAS THE MISSING PART!
+    // ================================================================
+    function switchTab(tabId) {
+        // Update tab buttons
+        document.querySelectorAll('#mainTabs button').forEach(b => {
+            b.classList.remove('active');
+            if (b.dataset.tab === tabId) {
+                b.classList.add('active');
+            }
+        });
+        // Update sections
+        document.querySelectorAll('.section').forEach(s => {
+            s.classList.remove('active');
+            if (s.id === 'tab-' + tabId) {
+                s.classList.add('active');
+            }
+        });
+        // Refresh data for the tab if needed
+        if (tabId === 'report') {
+            populateReportDates();
+        }
+    }
+
+    // ================================================================
+    // TAB EVENT LISTENERS
+    // ================================================================
+    document.querySelectorAll('#mainTabs button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabId = this.dataset.tab;
+            switchTab(tabId);
+        });
+    });
 
     // ================================================================
     // REPORTS
     // ================================================================
-    function generateReport() {
+    function populateReportDates() {
+        const dates = getAvailableDates();
+        const reportSel = document.getElementById('reportDateSelect');
+        if (!reportSel) return;
+        reportSel.innerHTML = '';
+        dates.forEach(iso => {
+            const opt = document.createElement('option');
+            opt.value = iso;
+            opt.textContent = formatDateWithDay(iso);
+            reportSel.appendChild(opt);
+        });
+        if (dates.length > 0) reportSel.value = dates[dates.length-1];
+    }
+
+    document.getElementById('reportTypeSelect').addEventListener('change', function() {
+        const type = this.value;
+        document.getElementById('reportDateSelect').style.display = (type === 'daily' || type === 'weekly' || type === 'monthly') ? 'inline-block' : 'none';
+        document.getElementById('reportStartDate').style.display = type === 'custom' ? 'inline-block' : 'none';
+        document.getElementById('reportEndDate').style.display = type === 'custom' ? 'inline-block' : 'none';
+        if (type !== 'custom') populateReportDates();
+    });
+
+    document.getElementById('generateReportBtn').addEventListener('click', function() {
         const type = document.getElementById('reportTypeSelect').value;
         let startDate, endDate;
         if (type === 'daily') {
@@ -789,9 +856,9 @@
         document.getElementById('reportPreview').innerHTML = html;
         document.getElementById('reportContent').style.display = 'block';
         document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report generated.</div>';
-    }
+    });
 
-    function exportReport() {
+    document.getElementById('exportReportBtn').addEventListener('click', function() {
         const content = document.getElementById('reportPreview');
         if(!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
         const rows = content.querySelectorAll('tr');
@@ -809,9 +876,9 @@
         a.click();
         URL.revokeObjectURL(url);
         document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report exported.</div>';
-    }
+    });
 
-    function printReport() {
+    document.getElementById('printReportBtn').addEventListener('click', function() {
         const content = document.getElementById('reportPreview');
         if(!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
         const win = window.open('', '_blank', 'width=900,height=600');
@@ -820,8 +887,11 @@
         win.document.write('</body></html>');
         win.document.close();
         win.print();
-    }
+    });
 
+    // ================================================================
+    // PRINT FUNCTIONS
+    // ================================================================
     function printTable(tableId, title) {
         const table = document.getElementById(tableId);
         if (!table || table.rows.length === 0) { alert('No data to print.'); return; }
@@ -833,8 +903,30 @@
         win.print();
     }
 
+    document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
+    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
+    document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
+    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
+
+    document.getElementById('offenderExportBtn').addEventListener('click', function() {
+        const table = document.getElementById('offenderTable');
+        if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
+        let csv = '';
+        for (let row of table.rows) {
+            let cells = [];
+            for (let cell of row.cells) cells.push(cell.textContent.trim());
+            csv += cells.join(',') + '\n';
+        }
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'NonOrganized.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
     // ================================================================
-    // EVENT BINDINGS
+    // DATE FILTER EVENTS
     // ================================================================
     document.getElementById('dashboardApplyDate').addEventListener('click', function() {
         const range = document.getElementById('dashboardDateRange').value;
@@ -886,64 +978,15 @@
         document.getElementById('offenderCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
     });
 
-    document.getElementById('reportTypeSelect').addEventListener('change', function() {
-        const type = this.value;
-        const dailySel = document.getElementById('reportDateSelect');
-        const startInput = document.getElementById('reportStartDate');
-        const endInput = document.getElementById('reportEndDate');
-        dailySel.style.display = (type === 'daily' || type === 'weekly' || type === 'monthly') ? 'inline-block' : 'none';
-        startInput.style.display = type === 'custom' ? 'inline-block' : 'none';
-        endInput.style.display = type === 'custom' ? 'inline-block' : 'none';
-        if (type !== 'custom') {
-            const dates = getAvailableDates();
-            dailySel.innerHTML = '';
-            dates.forEach(iso => {
-                const opt = document.createElement('option');
-                opt.value = iso;
-                opt.textContent = formatDateWithDay(iso);
-                dailySel.appendChild(opt);
-            });
-            if (dates.length > 0) dailySel.value = dates[dates.length-1];
-        }
-    });
-
-    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
-    document.getElementById('exportReportBtn').addEventListener('click', exportReport);
-    document.getElementById('printReportBtn').addEventListener('click', printReport);
-
-    document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
-    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
-    document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
-    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
-
-    document.getElementById('offenderExportBtn').addEventListener('click', function() {
-        const table = document.getElementById('offenderTable');
-        if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
-        let csv = '';
-        for (let row of table.rows) {
-            let cells = [];
-            for (let cell of row.cells) cells.push(cell.textContent.trim());
-            csv += cells.join(',') + '\n';
-        }
-        const blob = new Blob([csv], {type: 'text/csv'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'NonOrganized.csv';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-
     // ================================================================
-    // DATA ENTRY (simplified – placeholder)
+    // DATA ENTRY
     // ================================================================
     document.getElementById('parseBtn').addEventListener('click', function() {
         const text = document.getElementById('pasteArea').value;
         const msgEl = document.getElementById('parseMsg');
         if (!text.trim()) { msgEl.innerHTML = '<div class="msg err">Paste data first.</div>'; return; }
-        // Basic parser – you can extend
         const lines = text.split('\n').filter(l => l.trim());
         if (lines.length < 2) { msgEl.innerHTML = '<div class="msg err">Not enough rows.</div>'; return; }
-        const headers = lines[0].split('\t');
         const rows = lines.slice(1).map(l => l.split('\t'));
         const dates = new Set();
         rows.forEach(r => { if (r[0]) dates.add(parseDateFlexible(r[0])); });
@@ -951,21 +994,18 @@
         if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found.</div>'; return; }
         msgEl.innerHTML = '<div class="msg ok">✅ Parsed ' + rows.length + ' rows across ' + dateArray.length + ' date(s).</div>';
         document.getElementById('previewCard').style.display = 'block';
-        document.getElementById('saveBtn').style.display = 'inline-block';
     });
 
     document.getElementById('saveBtn').addEventListener('click', async function() {
         const text = document.getElementById('pasteArea').value;
         if (!text.trim()) return;
         const lines = text.split('\n').filter(l => l.trim());
-        const headers = lines[0].split('\t');
         const rows = lines.slice(1).map(l => l.split('\t'));
         const byDate = {};
         rows.forEach(r => {
             const iso = parseDateFlexible(r[0]);
             if (!iso) return;
             if (!byDate[iso]) byDate[iso] = [];
-            // Minimal mapping – you should map proper columns
             const rowObj = {
                 date: iso,
                 region: r[1] || '',
@@ -987,8 +1027,8 @@
             byDate[iso].push(rowObj);
         });
         let count = 0;
-        for (const [iso, rows] of Object.entries(byDate)) {
-            await db.collection(COLLECTION).doc(iso).set({ date: iso, rows, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        for (const [iso, rowsData] of Object.entries(byDate)) {
+            await db.collection(COLLECTION).doc(iso).set({ date: iso, rows: rowsData, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
             count++;
         }
         document.getElementById('saveMsg').innerHTML = '<div class="msg ok">✅ Saved ' + count + ' date(s) to Firebase!</div>';
@@ -1004,7 +1044,7 @@
     });
 
     // ================================================================
-    // EXPORT FUNCTIONS
+    // EXPORT
     // ================================================================
     document.getElementById('exportExcelBtn').addEventListener('click', function() {
         if (!allRows.length) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data.</div>'; return; }
@@ -1040,12 +1080,13 @@
         const snapshot = await db.collection(COLLECTION).get();
         snapshot.forEach(doc => doc.ref.delete());
         allRows = [];
-        refreshAll();
+        const dates = getAvailableDates();
+        if (dates.length > 0) renderDashboard(dates[dates.length-1]);
         document.getElementById('exportMsg').innerHTML = '<div class="msg err">🗑️ All data deleted.</div>';
     });
 
     // ================================================================
-    // GOOGLE SHEETS SYNC (simplified)
+    // GOOGLE SHEETS
     // ================================================================
     document.getElementById('testSheetBtn').addEventListener('click', function() {
         document.getElementById('sheetMsg').innerHTML = '<div class="msg info">Test connection feature requires API key.</div>';
@@ -1075,15 +1116,7 @@
             renderDivisions(latest);
             renderSubDivisions(latest);
             renderOffenders(latest);
-            // populate report dates
-            const reportSel = document.getElementById('reportDateSelect');
-            dates.forEach(iso => {
-                const opt = document.createElement('option');
-                opt.value = iso;
-                opt.textContent = formatDateWithDay(iso);
-                reportSel.appendChild(opt);
-            });
-            reportSel.value = latest;
+            populateReportDates();
         } else {
             renderDashboard(null);
             renderRegions(null);
@@ -1092,24 +1125,11 @@
             renderOffenders(null);
         }
         document.getElementById('connectionStatus').textContent = '🟢 Ready';
-        // set default report type
+        // Set default report type
         document.getElementById('reportTypeSelect').value = 'daily';
         document.getElementById('reportDateSelect').style.display = 'inline-block';
         document.getElementById('reportStartDate').style.display = 'none';
         document.getElementById('reportEndDate').style.display = 'none';
-    }
-
-    // Helper function to refresh all
-    function refreshAll() {
-        const dates = getAvailableDates();
-        if (dates.length > 0) {
-            const latest = dates[dates.length-1];
-            renderDashboard(latest);
-            renderRegions(latest);
-            renderDivisions(latest);
-            renderSubDivisions(latest);
-            renderOffenders(latest);
-        }
     }
 
     init();
