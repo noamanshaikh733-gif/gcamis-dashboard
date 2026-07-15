@@ -33,7 +33,6 @@
         .kpi-card.gold { border-left-color: #b9812c; } .kpi-card.gold .value { color: #b9812c; }
         .kpi-card.red { border-left-color: #b3392b; } .kpi-card.red .value { color: #b3392b; }
         .kpi-card.blue { border-left-color: #2a6b9e; } .kpi-card.blue .value { color: #2a6b9e; }
-        .kpi-card.orange { border-left-color: #FF9800; } .kpi-card.orange .value { color: #FF9800; }
         .alerts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 12px; margin-bottom: 20px; }
         .alert-card { border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .alert-card .icon { font-size: 24px; }
@@ -47,8 +46,6 @@
         .alert-card.success { background: #e5f4eb; border-left: 4px solid #1c7a45; }
         .alert-card.success .info .desc { color: #1c7a45; }
         .data-entry-area { width: 100%; min-height: 200px; font-family: 'Courier New', monospace; font-size: 13px; padding: 12px; border: 2px dashed #e1e4e9; border-radius: 8px; background: #fafbfc; resize: vertical; tab-size: 4; }
-        .data-entry-area:focus { border-color: #b9812c; outline: none; box-shadow: 0 0 0 3px rgba(185,129,44,0.2); }
-        .upload-hint { background: #e3edf7; padding: 12px 16px; border-radius: 6px; font-size: 13px; margin: 10px 0; }
         .table-wrap { overflow-x: auto; max-height: 500px; overflow-y: auto; }
         table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
         table.data th { text-align: left; font-size: 10.5px; text-transform: uppercase; color: #697180; padding: 8px 10px; border-bottom: 2px solid #e1e4e9; position: sticky; top: 0; background: #fff; }
@@ -58,16 +55,6 @@
         table.data .clickable:hover { text-decoration: underline; }
         table.data .total-row td { background: #0f2138; color: #fff; font-weight: 700; }
         table.data .sub-total td { background: #eef1f5; font-weight: 600; }
-        table.data .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-        table.data .status-pill.green { background: #e5f4eb; color: #1c7a45; }
-        table.data .status-pill.red { background: #fbeae7; color: #b3392b; }
-        table.data .status-pill.orange { background: #fdf0e6; color: #FF9800; }
-        .report-preview { background: #fafbfc; padding: 16px; border-radius: 6px; border: 1px solid #e1e4e9; margin: 10px 0; overflow-x: auto; }
-        .report-preview table { width: 100%; font-size: 12px; border-collapse: collapse; }
-        .report-preview table th, .report-preview table td { padding: 6px 8px; border: 1px solid #ddd; text-align: center; }
-        .report-preview table th { background: #0f2138; color: #fff; font-weight: 700; }
-        .report-preview table .sub-total td { background: #eef1f5; font-weight: 600; }
-        .report-preview table .total-row td { background: #0f2138; color: #fff; font-weight: 700; }
         .section { display: none; } .section.active { display: block; }
         .empty { text-align: center; padding: 40px 20px; color: #697180; }
         .empty .icon { font-size: 40px; display: block; margin-bottom: 10px; }
@@ -75,7 +62,6 @@
         .msg.ok { background: #e5f4eb; color: #1c7a45; }
         .msg.err { background: #fbeae7; color: #b3392b; }
         .msg.info { background: #fdf0e6; color: #FF9800; }
-        .msg.blue { background: #e3edf7; color: #2a6b9e; }
         .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; padding: 6px 10px; background: #f8f9fa; border-radius: 6px; }
         .toolbar button { font-family: inherit; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 6px; border: none; background: #0f2138; color: #fff; cursor: pointer; }
         .toolbar button:hover { opacity: 0.85; }
@@ -83,7 +69,6 @@
         .toolbar button.gold { background: #b9812c; }
         .toolbar button.danger { background: #b3392b; }
         .toolbar button.secondary { background: #e9ecef; color: #1b2430; }
-        .toolbar button.orange { background: #FF9800; color: #fff; }
         .preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 10px; margin: 12px 0; }
         .preview-item { background: #f8f9fa; padding: 10px; border-radius: 6px; text-align: center; }
         .preview-item .num { font-size: 24px; font-weight: 700; color: #b9812c; }
@@ -93,7 +78,13 @@
         .date-filter-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .date-filter-group select, .date-filter-group input { padding: 6px 10px; border-radius: 6px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; }
         .date-filter-group label { font-weight: 600; font-size: 13px; color: #697180; }
-        @media print { .no-print { display: none !important; } .report-preview { border: none !important; } }
+        .report-preview { background: #fafbfc; padding: 16px; border-radius: 6px; border: 1px solid #e1e4e9; margin: 10px 0; overflow-x: auto; }
+        .report-preview table { width: 100%; font-size: 12px; border-collapse: collapse; }
+        .report-preview table th, .report-preview table td { padding: 6px 8px; border: 1px solid #ddd; text-align: center; }
+        .report-preview table th { background: #0f2138; color: #fff; font-weight: 700; }
+        .report-preview table .sub-total td { background: #eef1f5; font-weight: 600; }
+        .report-preview table .total-row td { background: #0f2138; color: #fff; font-weight: 700; }
+        @media print { .no-print { display: none !important; } }
         @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } .header { flex-direction: column; align-items: stretch; } .tabs button { font-size: 12px; padding: 8px 12px; } }
     </style>
 </head>
@@ -131,8 +122,6 @@
                 <label>📅 View Data For:</label>
                 <select id="dashboardDateRange">
                     <option value="latest">Latest Available</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
                     <option value="custom">Custom</option>
                 </select>
                 <input type="date" id="dashboardCustomDate" style="display:none;">
@@ -140,23 +129,22 @@
                 <span id="dashboardDateLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
             </div>
         </div>
-        <div class="kpi-grid" id="todayKPIs">
-            <div class="kpi-card green"><div class="label">🏕️ Total Camps</div><div class="value" id="kpiCamps">0</div><div class="sub" id="kpiCampsSub">--</div></div>
+        <div class="kpi-grid">
+            <div class="kpi-card green"><div class="label">🏕️ Camps</div><div class="value" id="kpiCamps">0</div><div class="sub" id="kpiCampsSub">--</div></div>
             <div class="kpi-card gold"><div class="label">📊 Transactions</div><div class="value" id="kpiTxns">0</div><div class="sub">Total</div></div>
             <div class="kpi-card blue"><div class="label">📱 MBU</div><div class="value" id="kpiMBU">0</div><div class="sub">Updates</div></div>
             <div class="kpi-card gold"><div class="label">💰 Revenue</div><div class="value" id="kpiRevenue">₹0</div><div class="sub">@ ₹125/MBU</div></div>
             <div class="kpi-card green"><div class="label">✅ Active SD</div><div class="value" id="kpiActive">0</div><div class="sub">/ <span id="kpiTotalSD">104</span></div></div>
-            <div class="kpi-card red"><div class="label">⏳ Non-Organized SD</div><div class="value" id="kpiPending">0</div><div class="sub">Zero successful camps</div></div>
-            <div class="kpi-card blue"><div class="label">⚡ Camp Productivity</div><div class="value" id="kpiProductivity">0</div><div class="sub">Txns per camp</div></div>
+            <div class="kpi-card red"><div class="label">⏳ Non-Organized</div><div class="value" id="kpiPending">0</div><div class="sub">Zero camps</div></div>
         </div>
-        <div class="alerts-grid" id="alertGrid">
-            <div class="alert-card danger"><div class="icon">🔴</div><div class="info"><div class="title">No Data Upload</div><div class="desc" id="alertNoDataCount">0 Sub-Divisions</div></div></div>
-            <div class="alert-card warning"><div class="icon">🟠</div><div class="info"><div class="title">Non-Organized SD</div><div class="desc" id="alertNoCampsCount">0 Sub-Divisions</div></div></div>
-            <div class="alert-card warning"><div class="icon">🟠</div><div class="info"><div class="title">Low Transactions (&lt;20)</div><div class="desc" id="alertLowTxnsCount">0 Sub-Divisions</div></div></div>
+        <div class="alerts-grid">
+            <div class="alert-card danger"><div class="icon">🔴</div><div class="info"><div class="title">No Data</div><div class="desc" id="alertNoDataCount">0</div></div></div>
+            <div class="alert-card warning"><div class="icon">🟠</div><div class="info"><div class="title">Non-Organized</div><div class="desc" id="alertNoCampsCount">0</div></div></div>
+            <div class="alert-card warning"><div class="icon">🟠</div><div class="info"><div class="title">Low Txns</div><div class="desc" id="alertLowTxnsCount">0</div></div></div>
         </div>
         <div class="card">
             <h2>🏆 Top Performers <span class="badge" id="performerBadge">--</span></h2>
-            <div id="topPerformers" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
                 <div style="background:#f8f9fa;padding:12px;border-radius:8px;"><div style="font-size:11px;color:#697180;">🏆 Best Region</div><div id="bestRegion" style="font-weight:700;font-size:18px;color:#b9812c;">—</div></div>
                 <div style="background:#f8f9fa;padding:12px;border-radius:8px;"><div style="font-size:11px;color:#697180;">🏆 Best Division</div><div id="bestDivision" style="font-weight:700;font-size:18px;color:#b9812c;">—</div></div>
                 <div style="background:#f8f9fa;padding:12px;border-radius:8px;"><div style="font-size:11px;color:#697180;">🏆 Best Sub-Division</div><div id="bestSubDivision" style="font-weight:700;font-size:18px;color:#b9812c;">—</div></div>
@@ -167,10 +155,10 @@
     <!-- ================= DATA ENTRY ================= -->
     <section class="section" id="tab-entry">
         <div class="card">
-            <h2>📥 Manual Data Entry <span class="badge">Paste Excel</span></h2>
-            <div class="upload-hint"><strong>📋 Instructions:</strong><br>1. Open your Excel/CSV file and select <strong>all rows including the header</strong>.<br>2. Press <strong>Ctrl+C</strong> (or Cmd+C) to copy.<br>3. Paste below and click <strong>"Parse Data"</strong>.<br>4. Review preview, then click <strong>"Save to Firebase"</strong>.</div>
-            <textarea class="data-entry-area" id="pasteArea" placeholder="Paste tab-separated data here (Ctrl+V from Excel)…"></textarea>
-            <div class="toolbar" style="margin-top:12px;">
+            <h2>📥 Data Entry</h2>
+            <div class="desc">Paste your Excel data below (tab-separated, including header).</div>
+            <textarea class="data-entry-area" id="pasteArea" placeholder="Paste tab-separated data here…"></textarea>
+            <div class="toolbar">
                 <button class="success" id="parseBtn">▶ Parse Data</button>
                 <button class="secondary" id="clearBtn">✕ Clear</button>
             </div>
@@ -180,8 +168,8 @@
             <h2>👁️ Preview</h2>
             <div id="previewSummary"></div>
             <div class="preview-grid" id="previewStats"></div>
-            <div style="overflow-x:auto;max-height:300px;overflow-y:auto;"><table class="data" id="previewTable"></table></div>
-            <div class="toolbar"><button class="success" id="saveBtn">💾 Save to Firebase</button></div>
+            <div class="table-wrap"><table class="data" id="previewTable"></table></div>
+            <div class="toolbar"><button class="success" id="saveBtn">💾 Save</button></div>
             <div id="saveMsg"></div>
         </div>
     </section>
@@ -189,18 +177,15 @@
     <!-- ================= GOOGLE SHEETS ================= -->
     <section class="section" id="tab-googlesheet">
         <div class="card">
-            <h2>📊 Google Sheets Auto-Sync <span class="badge">Working!</span></h2>
-            <div class="desc">Connect your Google Sheet and the portal will auto-fetch data daily at your scheduled time.</div>
+            <h2>📊 Google Sheets Sync</h2>
+            <div class="desc">Connect your public Google Sheet.</div>
             <div class="google-sheet-setup">
-                <label>🔗 Google Sheet URL:</label>
-                <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit" style="width:100%;max-width:600px;">
+                <label>🔗 Sheet URL:</label>
+                <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." style="width:100%;max-width:600px;">
                 <label>📄 Sheet Name:</label>
                 <input type="text" id="sheetName" value="Sheet1" style="width:100%;max-width:200px;">
-                <label>⏰ Sync Time (24hr):</label>
-                <input type="time" id="syncTime" value="08:00" style="width:100%;max-width:150px;">
                 <div class="toolbar" style="margin-top:10px;">
-                    <button class="gold" id="testSheetBtn">🔍 Test Connection</button>
-                    <button class="success" id="saveSheetBtn">💾 Save Settings</button>
+                    <button class="gold" id="testSheetBtn">🔍 Test</button>
                     <button class="orange" id="syncNowBtn">🔄 Sync Now</button>
                 </div>
                 <div id="sheetMsg"></div>
@@ -211,21 +196,11 @@
     <!-- ================= REPORTS ================= -->
     <section class="section" id="tab-report">
         <div class="card">
-            <h2>📋 Reports <span class="badge">Daily · Weekly · Monthly · Custom</span></h2>
-            <div class="desc">Generate reports for selected date range.</div>
+            <h2>📋 Reports</h2>
+            <div class="desc">Generate reports by date.</div>
             <div class="toolbar">
-                <label>📅 Report Type:</label>
-                <select id="reportTypeSelect">
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="custom">Custom</option>
-                </select>
-                <input type="date" id="reportStartDate" style="display:none;">
-                <input type="date" id="reportEndDate" style="display:none;">
                 <select id="reportDateSelect"></select>
                 <button class="gold" id="generateReportBtn">📊 Generate</button>
-                <button class="success" id="exportReportBtn">📤 CSV</button>
                 <button class="secondary" id="printReportBtn">🖨️ Print</button>
             </div>
             <div id="reportMsg"></div>
@@ -237,18 +212,11 @@
     <section class="section" id="tab-regions">
         <div class="card">
             <h2>🌍 Region Summary <span class="badge" id="regionBadge">--</span></h2>
-            <div class="date-filter-group" style="margin-bottom:10px;">
-                <label>📅 View Data For:</label>
-                <select id="regionDateRange">
-                    <option value="latest">Latest Available</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="custom">Custom</option>
+            <div class="toolbar">
+                <select id="regionDateSelect">
+                    <option value="latest">Latest</option>
                 </select>
-                <input type="date" id="regionCustomDate" style="display:none;">
-                <button class="gold" id="regionApplyDate">Apply</button>
-                <span id="regionDateLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
-                <button class="secondary" id="regionPrintBtn">🖨️ Print</button>
+                <button class="gold" id="regionApplyBtn">Apply</button>
             </div>
             <div class="table-wrap"><table class="data" id="regionTable"></table></div>
         </div>
@@ -258,18 +226,11 @@
     <section class="section" id="tab-divisions">
         <div class="card">
             <h2>🏢 Division Summary <span class="badge" id="divisionBadge">--</span></h2>
-            <div class="date-filter-group" style="margin-bottom:10px;">
-                <label>📅 View Data For:</label>
-                <select id="divisionDateRange">
-                    <option value="latest">Latest Available</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="custom">Custom</option>
+            <div class="toolbar">
+                <select id="divisionDateSelect">
+                    <option value="latest">Latest</option>
                 </select>
-                <input type="date" id="divisionCustomDate" style="display:none;">
-                <button class="gold" id="divisionApplyDate">Apply</button>
-                <span id="divisionDateLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
-                <button class="secondary" id="divisionPrintBtn">🖨️ Print</button>
+                <button class="gold" id="divisionApplyBtn">Apply</button>
             </div>
             <div class="table-wrap"><table class="data" id="divisionTable"></table></div>
         </div>
@@ -279,18 +240,11 @@
     <section class="section" id="tab-subdivisions">
         <div class="card">
             <h2>📍 Sub-Division Summary <span class="badge" id="subBadge">--</span></h2>
-            <div class="date-filter-group" style="margin-bottom:10px;">
-                <label>📅 View Data For:</label>
-                <select id="subDateRange">
-                    <option value="latest">Latest Available</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="custom">Custom</option>
+            <div class="toolbar">
+                <select id="subDateSelect">
+                    <option value="latest">Latest</option>
                 </select>
-                <input type="date" id="subCustomDate" style="display:none;">
-                <button class="gold" id="subApplyDate">Apply</button>
-                <span id="subDateLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
-                <button class="secondary" id="subPrintBtn">🖨️ Print</button>
+                <button class="gold" id="subApplyBtn">Apply</button>
             </div>
             <div class="table-wrap"><table class="data" id="subTable"></table></div>
         </div>
@@ -300,20 +254,13 @@
     <section class="section" id="tab-offenders">
         <div class="card">
             <h2>⚠️ Non-Organized Tracker <span class="badge" id="offenderBadge">--</span></h2>
-            <div class="desc">Sub-divisions with <strong>ZERO</strong> successful camps for selected date. (Successful camp = address + transactions &gt; 0)</div>
-            <div class="date-filter-group" style="margin-bottom:10px;">
-                <label>📅 View Data For:</label>
-                <select id="offenderDateRange">
-                    <option value="latest">Latest Available</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="custom">Custom</option>
+            <div class="desc">Sub-divisions with ZERO successful camps.</div>
+            <div class="toolbar">
+                <select id="offenderDateSelect">
+                    <option value="latest">Latest</option>
                 </select>
-                <input type="date" id="offenderCustomDate" style="display:none;">
-                <button class="gold" id="offenderApplyDate">Apply</button>
-                <span id="offenderDateLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
+                <button class="gold" id="offenderApplyBtn">Apply</button>
                 <button class="secondary" id="offenderPrintBtn">🖨️ Print</button>
-                <button class="success" id="offenderExportBtn">📤 CSV</button>
             </div>
             <div class="table-wrap"><table class="data" id="offenderTable"></table></div>
         </div>
@@ -321,7 +268,8 @@
 
     <!-- ================= EXPORT ================= -->
     <section class="section" id="tab-export">
-        <div class="card"><h2>📤 Export Data</h2>
+        <div class="card">
+            <h2>📤 Export</h2>
             <div class="toolbar">
                 <button class="success" id="exportExcelBtn">📊 CSV</button>
                 <button class="gold" id="exportJSONBtn">📄 JSON</button>
@@ -459,13 +407,12 @@
     ];
 
     const TOTAL_SD = MASTER.length;
-    const kpiTotalSD = document.getElementById('kpiTotalSD');
-    if (kpiTotalSD) kpiTotalSD.textContent = TOTAL_SD;
+    document.getElementById('kpiTotalSD').textContent = TOTAL_SD;
 
     // ================================================================
     // HELPERS
     // ================================================================
-    function subKey(r,d,s){ return (r||'').trim().toLowerCase()+'||'+(d||'').trim().toLowerCase()+'||'+(s||'').trim().toLowerCase(); }
+    function subKey(r,d,s) { return (r||'').trim().toLowerCase()+'||'+(d||'').trim().toLowerCase()+'||'+(s||'').trim().toLowerCase(); }
     function parseDateFlexible(raw) {
         if(!raw) return null;
         raw = raw.trim();
@@ -483,11 +430,11 @@
         }
         return null;
     }
-    function isoToDisplay(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); return d+'.'+m+'.'+y; }
-    function getDayName(iso){ if(!iso) return ''; const date = new Date(iso+'T00:00:00'); return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()]; }
-    function formatDateWithDay(iso){ return getDayName(iso) + ', ' + isoToDisplay(iso); }
-    function fmtNum(n){ return (n||0).toLocaleString('en-IN'); }
-    function fmtRevenue(n){ return '₹' + fmtNum(Math.round(n||0)); }
+    function isoToDisplay(iso) { if(!iso) return ''; const [y,m,d]=iso.split('-'); return d+'.'+m+'.'+y; }
+    function getDayName(iso) { if(!iso) return ''; const date = new Date(iso+'T00:00:00'); return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()]; }
+    function formatDateWithDay(iso) { return getDayName(iso) + ', ' + isoToDisplay(iso); }
+    function fmtNum(n) { return (n||0).toLocaleString('en-IN'); }
+    function fmtRevenue(n) { return '₹' + fmtNum(Math.round(n||0)); }
     function setText(id, value) {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
@@ -524,6 +471,7 @@
     }
 
     let allRows = [];
+    let currentDate = null;
     const COLLECTION = 'camp_data';
 
     // ================================================================
@@ -540,7 +488,6 @@
                 }
             });
             setText('connectionStatus', '🟢 Connected');
-            setText('lastSyncTime', '📅 Last sync: ' + new Date().toLocaleString());
             return allRows;
         } catch(e) {
             setText('connectionStatus', '🔴 Error');
@@ -558,19 +505,9 @@
         return allRows.filter(r => r.date === iso);
     }
 
-    function getDateFromRange(range, customDate) {
-        if (range === 'latest') {
-            const dates = getAvailableDates();
-            return dates.length > 0 ? dates[dates.length-1] : null;
-        } else if (range === 'today') {
-            return new Date().toISOString().slice(0,10);
-        } else if (range === 'yesterday') {
-            const d = new Date(); d.setDate(d.getDate()-1);
-            return d.toISOString().slice(0,10);
-        } else if (range === 'custom' && customDate) {
-            return customDate;
-        }
-        return null;
+    function getLatestDate() {
+        const dates = getAvailableDates();
+        return dates.length > 0 ? dates[dates.length-1] : null;
     }
 
     // ================================================================
@@ -587,21 +524,20 @@
             acc.active += s.organized ? 1 : 0;
             return acc;
         }, {camps:0, mbu:0, txns:0, revenue:0, active:0});
-        const productivity = t.camps > 0 ? (t.txns / t.camps) : 0;
+        const prod = t.camps > 0 ? (t.txns / t.camps) : 0;
         setText('kpiCamps', fmtNum(t.camps));
         setText('kpiTxns', fmtNum(t.txns));
         setText('kpiMBU', fmtNum(t.mbu));
         setText('kpiRevenue', fmtRevenue(t.revenue));
         setText('kpiActive', t.active);
         setText('kpiPending', TOTAL_SD - t.active);
-        setText('kpiProductivity', productivity.toFixed(1));
 
         const noData = agg.filter(s => !s.hasRows);
         const noCamps = agg.filter(s => s.hasRows && !s.organized);
         const lowTxns = agg.filter(s => s.organized && s.transactions < 20);
-        setText('alertNoDataCount', noData.length + ' Sub-Divisions');
-        setText('alertNoCampsCount', noCamps.length + ' Sub-Divisions');
-        setText('alertLowTxnsCount', lowTxns.length + ' Sub-Divisions');
+        setText('alertNoDataCount', noData.length);
+        setText('alertNoCampsCount', noCamps.length);
+        setText('alertLowTxnsCount', lowTxns.length);
 
         const byRegion = {};
         const byDivision = {};
@@ -646,13 +582,11 @@
         });
         let html = `<tr><th>Region</th><th class="num">SD</th><th class="num">Active</th><th class="num">Missing</th><th class="num">Camps</th><th class="num">MBU</th><th class="num">Txns</th><th class="num">Revenue</th></tr>`;
         Object.entries(byRegion).sort((a,b) => b[1].txns - a[1].txns).forEach(([name, data]) => {
-            html += `<tr><td class="clickable" onclick="drillToRegion('${name}')">${name}</td><td class="num">${data.total}</td><td class="num">${data.active}</td><td class="num">${data.missing}</td><td class="num">${fmtNum(data.camps)}</td><td class="num">${fmtNum(data.mbu)}</td><td class="num">${fmtNum(data.txns)}</td><td class="num">${fmtRevenue(data.revenue)}</td></tr>`;
+            html += `<tr><td>${name}</td><td class="num">${data.total}</td><td class="num">${data.active}</td><td class="num">${data.missing}</td><td class="num">${fmtNum(data.camps)}</td><td class="num">${fmtNum(data.mbu)}</td><td class="num">${fmtNum(data.txns)}</td><td class="num">${fmtRevenue(data.revenue)}</td></tr>`;
         });
         setHTML('regionTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
         setText('regionBadge', label);
-        const labelEl = document.getElementById('regionDateLabel');
-        if (labelEl) labelEl.textContent = label;
     }
 
     function renderDivisions(iso) {
@@ -672,13 +606,11 @@
         });
         let html = `<tr><th>Division</th><th>Region</th><th class="num">SD</th><th class="num">Active</th><th class="num">Missing</th><th class="num">Camps</th><th class="num">MBU</th><th class="num">Txns</th><th class="num">Revenue</th></tr>`;
         Object.entries(byDivision).sort((a,b) => b[1].txns - a[1].txns).forEach(([name, data]) => {
-            html += `<tr><td class="clickable" onclick="drillToDivision('${name}')">${name}</td><td>${data.region}</td><td class="num">${data.total}</td><td class="num">${data.active}</td><td class="num">${data.missing}</td><td class="num">${fmtNum(data.camps)}</td><td class="num">${fmtNum(data.mbu)}</td><td class="num">${fmtNum(data.txns)}</td><td class="num">${fmtRevenue(data.revenue)}</td></tr>`;
+            html += `<tr><td>${name}</td><td>${data.region}</td><td class="num">${data.total}</td><td class="num">${data.active}</td><td class="num">${data.missing}</td><td class="num">${fmtNum(data.camps)}</td><td class="num">${fmtNum(data.mbu)}</td><td class="num">${fmtNum(data.txns)}</td><td class="num">${fmtRevenue(data.revenue)}</td></tr>`;
         });
         setHTML('divisionTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
         setText('divisionBadge', label);
-        const labelEl = document.getElementById('divisionDateLabel');
-        if (labelEl) labelEl.textContent = label;
     }
 
     function renderSubDivisions(iso) {
@@ -687,16 +619,14 @@
         if(!agg) { setHTML('subTable', '<tr><td colspan="9" class="empty">No data</td></tr>'); return; }
         let html = `<tr><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Status</th><th class="num">Camps</th><th class="num">MBU</th><th class="num">Txns</th><th class="num">Revenue</th></tr>`;
         agg.sort((a,b) => b.transactions - a.transactions).forEach(s => {
-            let status = '🔴 No Camp'; let cls = 'red';
+            let status = '🔴 No Camp', cls = 'red';
             if(s.organized) { status = '✅ Active'; cls = 'green'; }
             else if(s.hasRows) { status = '🟠 Partial'; cls = 'orange'; }
-            html += `<tr><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td><span class="status-pill ${cls}"><i></i>${status}</span></td><td class="num">${s.camps}</td><td class="num">${fmtNum(s.mbu)}</td><td class="num">${fmtNum(s.transactions)}</td><td class="num">${fmtRevenue(s.revenue)}</td></tr>`;
+            html += `<tr><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td><span style="color:${cls === 'green' ? '#1c7a45' : cls === 'orange' ? '#d4772a' : '#b3392b'}">${status}</span></td><td class="num">${s.camps}</td><td class="num">${fmtNum(s.mbu)}</td><td class="num">${fmtNum(s.transactions)}</td><td class="num">${fmtRevenue(s.revenue)}</td></tr>`;
         });
         setHTML('subTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
         setText('subBadge', label);
-        const labelEl = document.getElementById('subDateLabel');
-        if (labelEl) labelEl.textContent = label;
     }
 
     function renderOffenders(iso) {
@@ -705,77 +635,175 @@
         if(!agg) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">No data</td></tr>'); return; }
         const list = agg.filter(s => s.hasRows && !s.organized);
         if(list.length === 0) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">🎉 All sub-divisions organized at least one camp!</td></tr>'); return; }
-        let html = `<tr><th>#</th><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Rows</th><th class="num">Status</th></tr>`;
+        let html = `<tr><th>#</th><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Rows</th></tr>`;
         list.forEach((s, i) => {
-            html += `<tr><td>${i+1}</td><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td class="num">${s.hasRows}</td><td class="num">🟠 Partial (no successful camp)</td></tr>`;
+            html += `<tr><td>${i+1}</td><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td class="num">${s.hasRows}</td></tr>`;
         });
         setHTML('offenderTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
         setText('offenderBadge', label);
-        const labelEl = document.getElementById('offenderDateLabel');
-        if (labelEl) labelEl.textContent = label;
     }
 
     // ================================================================
-    // DRILL-DOWN
+    // GOOGLE SHEETS SYNC
     // ================================================================
-    function drillToRegion(name) {
-        renderDivisions(null);
-        switchTab('divisions');
+    function extractSheetId(url) {
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        return match ? match[1] : null;
     }
-    function drillToDivision(name) {
-        renderSubDivisions(null);
-        switchTab('subdivisions');
-    }
-    function switchTab(tabId) {
-        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-        const btn = document.querySelector(`.tabs button[data-tab="${tabId}"]`);
-        if (btn) btn.classList.add('active');
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        const section = document.getElementById('tab-' + tabId);
-        if (section) section.classList.add('active');
-    }
+
+    document.getElementById('testSheetBtn').addEventListener('click', function() {
+        const url = document.getElementById('sheetUrl').value.trim();
+        const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
+        if (!url) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Enter URL.</div>'; return; }
+        const sheetId = extractSheetId(url);
+        if (!sheetId) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid URL.</div>'; return; }
+        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">Testing...</div>';
+        fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`)
+            .then(res => {
+                if (res.ok) {
+                    document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Connected!</div>';
+                } else {
+                    document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Not found. Make sheet public.</div>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Error. Make sheet public.</div>';
+            });
+    });
+
+    document.getElementById('syncNowBtn').addEventListener('click', async function() {
+        const url = document.getElementById('sheetUrl').value.trim();
+        const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
+        if (!url) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Enter URL.</div>'; return; }
+        const sheetId = extractSheetId(url);
+        if (!sheetId) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid URL.</div>'; return; }
+        document.getElementById('sheetMsg').innerHTML = '<div class="msg info">Syncing...</div>';
+
+        try {
+            const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`);
+            const csvText = await response.text();
+            if (!csvText || csvText.trim() === '') {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">No data.</div>';
+                return;
+            }
+            const lines = csvText.split('\n').filter(l => l.trim());
+            if (lines.length < 2) {
+                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">No data rows.</div>';
+                return;
+            }
+            const tabLines = lines.map(line => {
+                const cells = [];
+                let current = '', inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') { inQuotes = !inQuotes; }
+                    else if (char === ',' && !inQuotes) { cells.push(current.trim()); current = ''; }
+                    else { current += char; }
+                }
+                cells.push(current.trim());
+                return cells.map(c => c.replace(/^"|"$/g, '')).join('\t');
+            });
+            document.getElementById('pasteArea').value = tabLines.join('\n');
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Loaded ' + (tabLines.length - 1) + ' rows! Go to Data Entry and click Parse.</div>';
+        } catch(e) {
+            document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Error: ' + e.message + '</div>';
+        }
+    });
+
+    // ================================================================
+    // DATA ENTRY
+    // ================================================================
+    document.getElementById('parseBtn').addEventListener('click', function() {
+        const text = document.getElementById('pasteArea').value;
+        const msgEl = document.getElementById('parseMsg');
+        if (!text.trim()) { msgEl.innerHTML = '<div class="msg err">Paste data first.</div>'; return; }
+        const lines = text.split('\n').filter(l => l.trim());
+        if (lines.length < 2) { msgEl.innerHTML = '<div class="msg err">Not enough rows.</div>'; return; }
+        const rows = lines.slice(1).map(l => l.split('\t'));
+        const dates = new Set();
+        rows.forEach(r => { if (r[0]) dates.add(parseDateFlexible(r[0])); });
+        const dateArray = Array.from(dates).filter(d => d);
+        if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found.</div>'; return; }
+        msgEl.innerHTML = '<div class="msg ok">✅ Parsed ' + rows.length + ' rows across ' + dateArray.length + ' date(s).</div>';
+        document.getElementById('previewCard').style.display = 'block';
+        // Build preview
+        let previewRows = '<tr><th>Date</th><th>Rows</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Revenue</th></tr>';
+        let totalCamps=0,totalMBU=0,totalTxns=0,totalRevenue=0;
+        dateArray.forEach(iso => {
+            const r = rows.filter(row => parseDateFlexible(row[0]) === iso);
+            const agg = aggregateRows(r.map(row => ({
+                date: iso, region: row[1]||'', division: row[2]||'', subDivision: row[3]||'',
+                address: row[8]||'', totalTransactions: parseFloat(row[14])||0, mbu: parseFloat(row[12])||0
+            })));
+            const t = agg.reduce((a,s) => { a.camps += s.camps||0; a.mbu += s.mbu||0; a.txns += s.transactions||0; a.revenue += s.revenue||0; return a; }, {camps:0,mbu:0,txns:0,revenue:0});
+            totalCamps += t.camps; totalMBU += t.mbu; totalTxns += t.txns; totalRevenue += t.revenue;
+            previewRows += `<tr><td>${formatDateWithDay(iso)}</td><td>${r.length}</td><td class="num">${fmtNum(t.camps)}</td><td class="num">${fmtNum(t.mbu)}</td><td class="num">${fmtNum(t.txns)}</td><td class="num">${fmtRevenue(t.revenue)}</td></tr>`;
+        });
+        document.getElementById('previewTable').innerHTML = previewRows;
+        document.getElementById('previewStats').innerHTML = `
+            <div class="preview-item"><div class="num">${fmtNum(totalCamps)}</div><div class="label">Camps</div></div>
+            <div class="preview-item"><div class="num">${fmtNum(totalMBU)}</div><div class="label">MBU</div></div>
+            <div class="preview-item"><div class="num">${fmtNum(totalTxns)}</div><div class="label">Txns</div></div>
+            <div class="preview-item"><div class="num">${fmtRevenue(totalRevenue)}</div><div class="label">Revenue</div></div>
+        `;
+        document.getElementById('previewSummary').textContent = dateArray.length + ' date(s) · ' + rows.length + ' rows · ' + totalCamps + ' camps';
+        document.getElementById('saveBtn').style.display = 'inline-block';
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', async function() {
+        const text = document.getElementById('pasteArea').value;
+        if (!text.trim()) return;
+        const lines = text.split('\n').filter(l => l.trim());
+        const rows = lines.slice(1).map(l => l.split('\t'));
+        const byDate = {};
+        rows.forEach(r => {
+            const iso = parseDateFlexible(r[0]);
+            if (!iso) return;
+            if (!byDate[iso]) byDate[iso] = [];
+            byDate[iso].push({
+                date: iso, region: r[1]||'', division: r[2]||'', subDivision: r[3]||'',
+                headName: r[4]||'', headMobile: r[5]||'', stationId: r[6]||'', machineId: r[7]||'',
+                address: r[8]||'', operatorName: r[9]||'', operatorContact: r[10]||'',
+                newEnrolment: parseFloat(r[11])||0, mbu: parseFloat(r[12])||0,
+                otherUpdation: parseFloat(r[13])||0, totalTransactions: parseFloat(r[14])||0,
+                organized: !!(r[8] && parseFloat(r[14]) > 0)
+            });
+        });
+        let count = 0;
+        for (const [iso, rows] of Object.entries(byDate)) {
+            await db.collection(COLLECTION).doc(iso).set({ date: iso, rows, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+            count++;
+        }
+        document.getElementById('saveMsg').innerHTML = '<div class="msg ok">✅ Saved ' + count + ' date(s) to Firebase!</div>';
+        await loadFirebaseData();
+        const latest = getLatestDate();
+        if (latest) renderDashboard(latest);
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', function() {
+        document.getElementById('pasteArea').value = '';
+        document.getElementById('parseMsg').innerHTML = '';
+        document.getElementById('previewCard').style.display = 'none';
+    });
 
     // ================================================================
     // REPORTS
     // ================================================================
     function generateReport() {
-        const type = document.getElementById('reportTypeSelect').value;
-        let startDate, endDate;
-        if (type === 'daily') {
-            const iso = document.getElementById('reportDateSelect').value;
-            if (!iso) { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Select a date.</div>'; return; }
-            startDate = endDate = iso;
-        } else if (type === 'weekly' || type === 'monthly') {
-            const iso = document.getElementById('reportDateSelect').value;
-            if (!iso) { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Select a date.</div>'; return; }
-            const d = new Date(iso);
-            if (type === 'weekly') {
-                const start = new Date(d); start.setDate(d.getDate() - 6);
-                startDate = start.toISOString().slice(0,10);
-                endDate = iso;
-            } else {
-                startDate = iso.slice(0,7) + '-01';
-                endDate = iso.slice(0,7) + '-31';
-            }
-        } else if (type === 'custom') {
-            startDate = document.getElementById('reportStartDate').value;
-            endDate = document.getElementById('reportEndDate').value;
-            if (!startDate || !endDate) { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Select start and end date.</div>'; return; }
-        }
-        const filteredRows = allRows.filter(r => r.date >= startDate && r.date <= endDate);
-        if (filteredRows.length === 0) {
-            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data in selected range.</div>';
+        const iso = document.getElementById('reportDateSelect').value;
+        if (!iso) { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Select a date.</div>'; return; }
+        const rows = getRowsForDate(iso);
+        if (rows.length === 0) {
+            document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data for ' + formatDateWithDay(iso) + '.</div>';
             document.getElementById('reportContent').style.display = 'none';
             return;
         }
-        const agg = aggregateRows(filteredRows);
-        const regionData = {};
+        const agg = aggregateRows(rows);
+        const byRegion = {};
         agg.forEach(s => {
-            if(!regionData[s.region]) {
-                regionData[s.region] = { divisions: {}, totalSD: 0, activeSD: 0, camps: 0, mbu: 0, txns: 0 };
-            }
-            const r = regionData[s.region];
+            if(!byRegion[s.region]) byRegion[s.region] = { divisions: {}, totalSD: 0, activeSD: 0, camps: 0, mbu: 0, txns: 0 };
+            const r = byRegion[s.region];
             r.totalSD++;
             if(s.organized) r.activeSD++;
             r.camps += s.camps || 0;
@@ -791,15 +819,13 @@
             d.mbu += s.mbu || 0;
             d.txns += s.transactions || 0;
         });
-        let title = type.charAt(0).toUpperCase() + type.slice(1) + ' Report';
-        let dateRange = startDate === endDate ? formatDateWithDay(startDate) : `${isoToDisplay(startDate)} to ${isoToDisplay(endDate)}`;
-        let html = `<div class="report-header"><h2>📋 Review of MBU Camp – ${title}</h2><p>${dateRange} · Total Rows: ${filteredRows.length}</p></div>`;
-        html += `<table><thead><tr><th>Region / Division</th><th>No of SD</th><th>Active SD</th><th>No of Camps</th><th>MBU</th><th>Total Txns</th><th>Productivity</th></tr></thead><tbody>`;
+        let html = `<h3 style="text-align:center;">📋 MBU Camp Report - ${formatDateWithDay(iso)}</h3>`;
+        html += `<table><thead><tr><th>Region / Division</th><th>SD</th><th>Active</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Productivity</th></tr></thead><tbody>`;
         let grandTotal = {sd:0, active:0, camps:0, mbu:0, txns:0};
-        Object.entries(regionData).sort((a,b) => b[1].txns - a[1].txns).forEach(([region, rData]) => {
+        Object.entries(byRegion).sort((a,b) => b[1].txns - a[1].txns).forEach(([region, rData]) => {
             Object.entries(rData.divisions).sort((a,b) => b[1].txns - a[1].txns).forEach(([div, dData]) => {
                 const prod = dData.camps > 0 ? (dData.txns / dData.camps).toFixed(1) : '0';
-                html += `<tr><td style="text-align:left;padding-left:20px;">${div}</td><td>${dData.totalSD}</td><td>${dData.activeSD}</td><td>${fmtNum(dData.camps)}</td><td>${fmtNum(dData.mbu)}</td><td>${fmtNum(dData.txns)}</td><td>${prod}</td></tr>`;
+                html += `<tr><td style="padding-left:20px;">${div}</td><td>${dData.totalSD}</td><td>${dData.activeSD}</td><td>${fmtNum(dData.camps)}</td><td>${fmtNum(dData.mbu)}</td><td>${fmtNum(dData.txns)}</td><td>${prod}</td></tr>`;
             });
             const rProd = rData.camps > 0 ? (rData.txns / rData.camps).toFixed(1) : '0';
             html += `<tr class="sub-total"><td style="font-weight:700;">${region}</td><td>${rData.totalSD}</td><td>${rData.activeSD}</td><td>${fmtNum(rData.camps)}</td><td>${fmtNum(rData.mbu)}</td><td>${fmtNum(rData.txns)}</td><td>${rProd}</td></tr>`;
@@ -811,37 +837,17 @@
         });
         const gProd = grandTotal.camps > 0 ? (grandTotal.txns / grandTotal.camps).toFixed(2) : '0';
         html += `<tr class="total-row"><td style="font-weight:700;">Total</td><td>${grandTotal.sd}</td><td>${grandTotal.active}</td><td>${fmtNum(grandTotal.camps)}</td><td>${fmtNum(grandTotal.mbu)}</td><td>${fmtNum(grandTotal.txns)}</td><td>${gProd}</td></tr></tbody></table>`;
-        html += `<div style="margin-top:12px;font-size:12px;color:#697180;text-align:center;">Generated on ${new Date().toLocaleString()} · MBU Revenue: ${fmtRevenue(grandTotal.mbu * 125)} · Camp Productivity: ${gProd} txns/camp</div>`;
+        html += `<div style="margin-top:12px;font-size:12px;color:#697180;text-align:center;">Revenue: ${fmtRevenue(grandTotal.mbu * 125)}</div>`;
         document.getElementById('reportPreview').innerHTML = html;
         document.getElementById('reportContent').style.display = 'block';
         document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report generated.</div>';
     }
 
-    function exportReport() {
-        const content = document.getElementById('reportPreview');
-        if(!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
-        const rows = content.querySelectorAll('tr');
-        let csv = '';
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('th, td');
-            const values = [];
-            cells.forEach(cell => values.push(cell.textContent.trim()));
-            csv += values.join(',') + '\n';
-        });
-        const blob = new Blob([csv], {type: 'text/csv'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'Report_' + new Date().toISOString().slice(0,10) + '.csv';
-        a.click();
-        URL.revokeObjectURL(url);
-        document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report exported.</div>';
-    }
-
     function printReport() {
         const content = document.getElementById('reportPreview');
-        if(!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
+        if (!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
         const win = window.open('', '_blank', 'width=900,height=600');
-        win.document.write('<html><head><title>GCAMIS Report</title><style>body{font-family:Arial,sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px 8px;text-align:center;}th{background:#0F2138;color:#fff;}.sub-total td{background:#EEF1F5;font-weight:600;}.total-row td{background:#0F2138;color:#fff;font-weight:700;}</style></head><body>');
+        win.document.write('<html><head><title>GCAMIS Report</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:center;}th{background:#0f2138;color:#fff;}.sub-total td{background:#eef1f5;font-weight:600;}.total-row td{background:#0f2138;color:#fff;font-weight:700;}</style></head><body>');
         win.document.write(content.innerHTML);
         win.document.write('</body></html>');
         win.document.close();
@@ -850,9 +856,9 @@
 
     function printTable(tableId, title) {
         const table = document.getElementById(tableId);
-        if (!table || table.rows.length === 0) { alert('No data to print.'); return; }
+        if (!table || table.rows.length === 0) { alert('No data.'); return; }
         const win = window.open('', '_blank', 'width=900,height=600');
-        win.document.write('<html><head><title>'+title+'</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:left;}th{background:#0F2138;color:#fff;}</style></head><body><h2>'+title+'</h2>');
+        win.document.write('<html><head><title>'+title+'</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:left;}th{background:#0f2138;color:#fff;}</style></head><body><h2>'+title+'</h2>');
         win.document.write(table.outerHTML);
         win.document.write('</body></html>');
         win.document.close();
@@ -860,387 +866,90 @@
     }
 
     // ================================================================
-    // GOOGLE SHEETS SYNC
+    // EXPORT
     // ================================================================
-    function extractSheetId(url) {
-        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        return match ? match[1] : null;
-    }
-
-    const testSheetBtn = document.getElementById('testSheetBtn');
-    if (testSheetBtn) {
-        testSheetBtn.addEventListener('click', function() {
-            const url = document.getElementById('sheetUrl').value.trim();
-            const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
-            if (!url) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a URL.</div>'; return; }
-            const sheetId = extractSheetId(url);
-            if (!sheetId) { document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid URL.</div>'; return; }
-            document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔍 Testing...</div>';
-            fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`)
-                .then(res => {
-                    if (res.ok) {
-                        document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Connected! Sheet found.</div>';
-                    } else {
-                        document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Could not connect. Check if sheet is public.</div>';
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Connection error. Make sure sheet is public.</div>';
-                });
+    document.getElementById('exportExcelBtn').addEventListener('click', function() {
+        if (!allRows.length) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data.</div>'; return; }
+        let csv = 'Date,Region,Division,SubDivision,Head,Mobile,StationId,MachineId,Address,Operator,OperatorContact,NewEnrolment,MBU,OtherUpdation,TotalTransactions,Organized\n';
+        allRows.forEach(r => {
+            csv += [r.date,r.region,r.division,r.subDivision,r.headName||'',r.headMobile||'',r.stationId||'',r.machineId||'',r.address||'',r.operatorName||'',r.operatorContact||'',r.newEnrolment||0,r.mbu||0,r.otherUpdation||0,r.totalTransactions||0,r.organized].join(',') + '\n';
         });
-    }
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'GCAMIS_export.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported.</div>';
+    });
 
-    const saveSheetBtn = document.getElementById('saveSheetBtn');
-    if (saveSheetBtn) {
-        saveSheetBtn.addEventListener('click', function() {
-            localStorage.setItem('sheetSettings', JSON.stringify({
-                url: document.getElementById('sheetUrl').value,
-                name: document.getElementById('sheetName').value,
-                time: document.getElementById('syncTime').value
-            }));
-            document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Settings saved.</div>';
-        });
-    }
+    document.getElementById('exportJSONBtn').addEventListener('click', async function() {
+        const allData = {};
+        const snapshot = await db.collection(COLLECTION).get();
+        snapshot.forEach(doc => allData[doc.id] = doc.data());
+        const json = JSON.stringify(allData, null, 2);
+        const blob = new Blob([json], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'GCAMIS_backup.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported.</div>';
+    });
 
-    const syncNowBtn = document.getElementById('syncNowBtn');
-    if (syncNowBtn) {
-        syncNowBtn.addEventListener('click', async function() {
-            const url = document.getElementById('sheetUrl').value.trim();
-            const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
-            if (!url) {
-                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Please enter a Google Sheet URL.</div>';
-                return;
-            }
-            const sheetId = extractSheetId(url);
-            if (!sheetId) {
-                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Invalid Google Sheet URL.</div>';
-                return;
-            }
-            document.getElementById('sheetMsg').innerHTML = '<div class="msg info">🔄 Syncing from Google Sheet (CSV)…</div>';
-
-            try {
-                const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`);
-                const csvText = await response.text();
-
-                if (!csvText || csvText.trim() === '') {
-                    document.getElementById('sheetMsg').innerHTML = '<div class="msg err">No data found in sheet. Check sheet name and URL.</div>';
-                    return;
-                }
-
-                const lines = csvText.split('\n').filter(l => l.trim());
-                if (lines.length < 2) {
-                    document.getElementById('sheetMsg').innerHTML = '<div class="msg err">Sheet has no data rows.</div>';
-                    return;
-                }
-
-                const tabLines = lines.map(line => {
-                    const cells = [];
-                    let current = '';
-                    let inQuotes = false;
-                    for (let i = 0; i < line.length; i++) {
-                        const char = line[i];
-                        if (char === '"') {
-                            inQuotes = !inQuotes;
-                        } else if (char === ',' && !inQuotes) {
-                            cells.push(current.trim());
-                            current = '';
-                        } else {
-                            current += char;
-                        }
-                    }
-                    cells.push(current.trim());
-                    return cells.map(c => c.replace(/^"|"$/g, '')).join('\t');
-                });
-
-                const tabText = tabLines.join('\n');
-
-                const pasteArea = document.getElementById('pasteArea');
-                if (pasteArea) pasteArea.value = tabText;
-                document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Data loaded (' + (tabLines.length - 1) + ' rows)! Click "Parse Data" to preview.</div>';
-                const parseBtn = document.getElementById('parseBtn');
-                if (parseBtn) parseBtn.click();
-
-            } catch (e) {
-                document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Sync error: ' + e.message + '</div>';
-            }
-        });
-    }
+    document.getElementById('clearDataBtn').addEventListener('click', async function() {
+        if (!confirm('Delete ALL data?')) return;
+        const snapshot = await db.collection(COLLECTION).get();
+        snapshot.forEach(doc => doc.ref.delete());
+        allRows = [];
+        const latest = getLatestDate();
+        if (latest) renderDashboard(latest);
+        document.getElementById('exportMsg').innerHTML = '<div class="msg err">🗑️ All data deleted.</div>';
+    });
 
     // ================================================================
-    // DATA ENTRY
+    // DATE FILTER HANDLERS
     // ================================================================
-    const parseBtn = document.getElementById('parseBtn');
-    if (parseBtn) {
-        parseBtn.addEventListener('click', function() {
-            const text = document.getElementById('pasteArea').value;
-            const msgEl = document.getElementById('parseMsg');
-            if (!text.trim()) { msgEl.innerHTML = '<div class="msg err">Paste data first.</div>'; return; }
-            const lines = text.split('\n').filter(l => l.trim());
-            if (lines.length < 2) { msgEl.innerHTML = '<div class="msg err">Not enough rows.</div>'; return; }
-            const rows = lines.slice(1).map(l => l.split('\t'));
-            const dates = new Set();
-            rows.forEach(r => { if (r[0]) dates.add(parseDateFlexible(r[0])); });
-            const dateArray = Array.from(dates).filter(d => d);
-            if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found.</div>'; return; }
-            msgEl.innerHTML = '<div class="msg ok">✅ Parsed ' + rows.length + ' rows across ' + dateArray.length + ' date(s).</div>';
-            document.getElementById('previewCard').style.display = 'block';
-            document.getElementById('saveBtn').style.display = 'inline-block';
-        });
-    }
-
-    const saveBtn = document.getElementById('saveBtn');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', async function() {
-            const text = document.getElementById('pasteArea').value;
-            if (!text.trim()) return;
-            const lines = text.split('\n').filter(l => l.trim());
-            const rows = lines.slice(1).map(l => l.split('\t'));
-            const byDate = {};
-            rows.forEach(r => {
-                const iso = parseDateFlexible(r[0]);
-                if (!iso) return;
-                if (!byDate[iso]) byDate[iso] = [];
-                const rowObj = {
-                    date: iso,
-                    region: r[1] || '',
-                    division: r[2] || '',
-                    subDivision: r[3] || '',
-                    headName: r[4] || '',
-                    headMobile: r[5] || '',
-                    stationId: r[6] || '',
-                    machineId: r[7] || '',
-                    address: r[8] || '',
-                    operatorName: r[9] || '',
-                    operatorContact: r[10] || '',
-                    newEnrolment: parseFloat(r[11]) || 0,
-                    mbu: parseFloat(r[12]) || 0,
-                    otherUpdation: parseFloat(r[13]) || 0,
-                    totalTransactions: parseFloat(r[14]) || 0,
-                    organized: !!(r[8] && parseFloat(r[14]) > 0)
-                };
-                byDate[iso].push(rowObj);
-            });
-            let count = 0;
-            for (const [iso, rows] of Object.entries(byDate)) {
-                await db.collection(COLLECTION).doc(iso).set({ date: iso, rows, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-                count++;
-            }
-            document.getElementById('saveMsg').innerHTML = '<div class="msg ok">✅ Saved ' + count + ' date(s) to Firebase!</div>';
-            await loadFirebaseData();
-            const dates = getAvailableDates();
-            if (dates.length > 0) renderDashboard(dates[dates.length-1]);
-        });
-    }
-
-    const clearBtn = document.getElementById('clearBtn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            document.getElementById('pasteArea').value = '';
-            document.getElementById('parseMsg').innerHTML = '';
-            document.getElementById('previewCard').style.display = 'none';
-        });
-    }
-
-    // ================================================================
-    // EXPORT FUNCTIONS
-    // ================================================================
-    const exportExcelBtn = document.getElementById('exportExcelBtn');
-    if (exportExcelBtn) {
-        exportExcelBtn.addEventListener('click', function() {
-            if (!allRows.length) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data.</div>'; return; }
-            let csv = 'Date,Region,Division,SubDivision,Head,Mobile,StationId,MachineId,Address,Operator,OperatorContact,NewEnrolment,MBU,OtherUpdation,TotalTransactions,Organized\n';
-            allRows.forEach(r => {
-                csv += [r.date,r.region,r.division,r.subDivision,r.headName||'',r.headMobile||'',r.stationId||'',r.machineId||'',r.address||'',r.operatorName||'',r.operatorContact||'',r.newEnrolment||0,r.mbu||0,r.otherUpdation||0,r.totalTransactions||0,r.organized].join(',') + '\n';
-            });
-            const blob = new Blob([csv], {type: 'text/csv'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'GCAMIS_export.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-            document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported.</div>';
-        });
-    }
-
-    const exportJSONBtn = document.getElementById('exportJSONBtn');
-    if (exportJSONBtn) {
-        exportJSONBtn.addEventListener('click', async function() {
-            const allData = {};
-            const snapshot = await db.collection(COLLECTION).get();
-            snapshot.forEach(doc => allData[doc.id] = doc.data());
-            const json = JSON.stringify(allData, null, 2);
-            const blob = new Blob([json], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'GCAMIS_backup.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            document.getElementById('exportMsg').innerHTML = '<div class="msg ok">✅ Exported.</div>';
-        });
-    }
-
-    const clearDataBtn = document.getElementById('clearDataBtn');
-    if (clearDataBtn) {
-        clearDataBtn.addEventListener('click', async function() {
-            if (!confirm('Delete ALL data?')) return;
-            const snapshot = await db.collection(COLLECTION).get();
-            snapshot.forEach(doc => doc.ref.delete());
-            allRows = [];
-            const dates = getAvailableDates();
-            if (dates.length > 0) renderDashboard(dates[dates.length-1]);
-            document.getElementById('exportMsg').innerHTML = '<div class="msg err">🗑️ All data deleted.</div>';
-        });
-    }
-
-    // ================================================================
-    // EVENT BINDINGS FOR DATE FILTERS
-    // ================================================================
-    const dashboardApplyDate = document.getElementById('dashboardApplyDate');
-    if (dashboardApplyDate) {
-        dashboardApplyDate.addEventListener('click', function() {
+    function applyDateFilter(type) {
+        const sel = document.getElementById(type + 'DateSelect');
+        const val = sel ? sel.value : 'latest';
+        let iso = val === 'latest' ? getLatestDate() : val;
+        if (type === 'dashboard') {
+            const customDate = document.getElementById('dashboardCustomDate').value;
             const range = document.getElementById('dashboardDateRange').value;
-            const custom = document.getElementById('dashboardCustomDate').value;
-            const iso = getDateFromRange(range, custom);
+            if (range === 'custom' && customDate) iso = customDate;
             renderDashboard(iso);
-        });
+        } else if (type === 'region') { renderRegions(iso); }
+        else if (type === 'division') { renderDivisions(iso); }
+        else if (type === 'sub') { renderSubDivisions(iso); }
+        else if (type === 'offender') { renderOffenders(iso); }
     }
 
-    const dashboardDateRange = document.getElementById('dashboardDateRange');
-    if (dashboardDateRange) {
-        dashboardDateRange.addEventListener('change', function() {
-            document.getElementById('dashboardCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+    document.getElementById('dashboardApplyDate').addEventListener('click', function() { applyDateFilter('dashboard'); });
+    document.getElementById('dashboardDateRange').addEventListener('change', function() {
+        document.getElementById('dashboardCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+        applyDateFilter('dashboard');
+    });
+    document.getElementById('regionApplyBtn').addEventListener('click', function() { applyDateFilter('region'); });
+    document.getElementById('divisionApplyBtn').addEventListener('click', function() { applyDateFilter('division'); });
+    document.getElementById('subApplyBtn').addEventListener('click', function() { applyDateFilter('sub'); });
+    document.getElementById('offenderApplyBtn').addEventListener('click', function() { applyDateFilter('offender'); });
+
+    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+    document.getElementById('printReportBtn').addEventListener('click', printReport);
+    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
+
+    // ================================================================
+    // TAB SWITCHING
+    // ================================================================
+    document.querySelectorAll('.tabs button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('tab-' + this.dataset.tab).classList.add('active');
         });
-    }
-
-    const regionApplyDate = document.getElementById('regionApplyDate');
-    if (regionApplyDate) {
-        regionApplyDate.addEventListener('click', function() {
-            const range = document.getElementById('regionDateRange').value;
-            const custom = document.getElementById('regionCustomDate').value;
-            const iso = getDateFromRange(range, custom);
-            renderRegions(iso);
-        });
-    }
-
-    const regionDateRange = document.getElementById('regionDateRange');
-    if (regionDateRange) {
-        regionDateRange.addEventListener('change', function() {
-            document.getElementById('regionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-        });
-    }
-
-    const divisionApplyDate = document.getElementById('divisionApplyDate');
-    if (divisionApplyDate) {
-        divisionApplyDate.addEventListener('click', function() {
-            const range = document.getElementById('divisionDateRange').value;
-            const custom = document.getElementById('divisionCustomDate').value;
-            const iso = getDateFromRange(range, custom);
-            renderDivisions(iso);
-        });
-    }
-
-    const divisionDateRange = document.getElementById('divisionDateRange');
-    if (divisionDateRange) {
-        divisionDateRange.addEventListener('change', function() {
-            document.getElementById('divisionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-        });
-    }
-
-    const subApplyDate = document.getElementById('subApplyDate');
-    if (subApplyDate) {
-        subApplyDate.addEventListener('click', function() {
-            const range = document.getElementById('subDateRange').value;
-            const custom = document.getElementById('subCustomDate').value;
-            const iso = getDateFromRange(range, custom);
-            renderSubDivisions(iso);
-        });
-    }
-
-    const subDateRange = document.getElementById('subDateRange');
-    if (subDateRange) {
-        subDateRange.addEventListener('change', function() {
-            document.getElementById('subCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-        });
-    }
-
-    const offenderApplyDate = document.getElementById('offenderApplyDate');
-    if (offenderApplyDate) {
-        offenderApplyDate.addEventListener('click', function() {
-            const range = document.getElementById('offenderDateRange').value;
-            const custom = document.getElementById('offenderCustomDate').value;
-            const iso = getDateFromRange(range, custom);
-            renderOffenders(iso);
-        });
-    }
-
-    const offenderDateRange = document.getElementById('offenderDateRange');
-    if (offenderDateRange) {
-        offenderDateRange.addEventListener('change', function() {
-            document.getElementById('offenderCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-        });
-    }
-
-    const reportTypeSelect = document.getElementById('reportTypeSelect');
-    if (reportTypeSelect) {
-        reportTypeSelect.addEventListener('change', function() {
-            const type = this.value;
-            const dailySel = document.getElementById('reportDateSelect');
-            const startInput = document.getElementById('reportStartDate');
-            const endInput = document.getElementById('reportEndDate');
-            if (dailySel) dailySel.style.display = (type === 'daily' || type === 'weekly' || type === 'monthly') ? 'inline-block' : 'none';
-            if (startInput) startInput.style.display = type === 'custom' ? 'inline-block' : 'none';
-            if (endInput) endInput.style.display = type === 'custom' ? 'inline-block' : 'none';
-            if (type !== 'custom') {
-                const dates = getAvailableDates();
-                if (dailySel) {
-                    dailySel.innerHTML = '';
-                    dates.forEach(iso => {
-                        const opt = document.createElement('option');
-                        opt.value = iso;
-                        opt.textContent = formatDateWithDay(iso);
-                        dailySel.appendChild(opt);
-                    });
-                    if (dates.length > 0) dailySel.value = dates[dates.length-1];
-                }
-            }
-        });
-    }
-
-    const generateReportBtn = document.getElementById('generateReportBtn');
-    if (generateReportBtn) generateReportBtn.addEventListener('click', generateReport);
-    const exportReportBtn = document.getElementById('exportReportBtn');
-    if (exportReportBtn) exportReportBtn.addEventListener('click', exportReport);
-    const printReportBtn = document.getElementById('printReportBtn');
-    if (printReportBtn) printReportBtn.addEventListener('click', printReport);
-
-    const regionPrintBtn = document.getElementById('regionPrintBtn');
-    if (regionPrintBtn) regionPrintBtn.addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
-    const divisionPrintBtn = document.getElementById('divisionPrintBtn');
-    if (divisionPrintBtn) divisionPrintBtn.addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
-    const subPrintBtn = document.getElementById('subPrintBtn');
-    if (subPrintBtn) subPrintBtn.addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
-    const offenderPrintBtn = document.getElementById('offenderPrintBtn');
-    if (offenderPrintBtn) offenderPrintBtn.addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
-
-    const offenderExportBtn = document.getElementById('offenderExportBtn');
-    if (offenderExportBtn) {
-        offenderExportBtn.addEventListener('click', function() {
-            const table = document.getElementById('offenderTable');
-            if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
-            let csv = '';
-            for (let row of table.rows) {
-                let cells = [];
-                for (let cell of row.cells) cells.push(cell.textContent.trim());
-                csv += cells.join(',') + '\n';
-            }
-            const blob = new Blob([csv], {type: 'text/csv'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'NonOrganized.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-    }
+    });
 
     // ================================================================
     // INIT
@@ -1248,23 +957,30 @@
     async function init() {
         await loadFirebaseData();
         const dates = getAvailableDates();
-        if (dates.length > 0) {
-            const latest = dates[dates.length-1];
+        const latest = getLatestDate();
+        
+        // Populate all date selects
+        const selectors = ['reportDateSelect', 'regionDateSelect', 'divisionDateSelect', 'subDateSelect', 'offenderDateSelect'];
+        selectors.forEach(id => {
+            const sel = document.getElementById(id);
+            if (sel) {
+                sel.innerHTML = '<option value="latest">Latest Available</option>';
+                dates.forEach(iso => {
+                    const opt = document.createElement('option');
+                    opt.value = iso;
+                    opt.textContent = formatDateWithDay(iso);
+                    sel.appendChild(opt);
+                });
+                if (latest) sel.value = 'latest';
+            }
+        });
+
+        if (latest) {
             renderDashboard(latest);
             renderRegions(latest);
             renderDivisions(latest);
             renderSubDivisions(latest);
             renderOffenders(latest);
-            const reportSel = document.getElementById('reportDateSelect');
-            if (reportSel) {
-                dates.forEach(iso => {
-                    const opt = document.createElement('option');
-                    opt.value = iso;
-                    opt.textContent = formatDateWithDay(iso);
-                    reportSel.appendChild(opt);
-                });
-                reportSel.value = latest;
-            }
         } else {
             renderDashboard(null);
             renderRegions(null);
@@ -1273,31 +989,7 @@
             renderOffenders(null);
         }
         setText('connectionStatus', '🟢 Ready');
-        const typeSelect = document.getElementById('reportTypeSelect');
-        if (typeSelect) typeSelect.value = 'daily';
-        const dateSelect = document.getElementById('reportDateSelect');
-        if (dateSelect) dateSelect.style.display = 'inline-block';
-        const startDate = document.getElementById('reportStartDate');
-        if (startDate) startDate.style.display = 'none';
-        const endDate = document.getElementById('reportEndDate');
-        if (endDate) endDate.style.display = 'none';
-
-        const saved = localStorage.getItem('sheetSettings');
-        if (saved) {
-            try {
-                const settings = JSON.parse(saved);
-                const urlEl = document.getElementById('sheetUrl');
-                const nameEl = document.getElementById('sheetName');
-                const timeEl = document.getElementById('syncTime');
-                if (urlEl) urlEl.value = settings.url || '';
-                if (nameEl) nameEl.value = settings.name || 'Sheet1';
-                if (timeEl) timeEl.value = settings.time || '08:00';
-            } catch(e) {}
-        }
     }
-
-    window.drillToRegion = drillToRegion;
-    window.drillToDivision = drillToDivision;
 
     init();
 </script>
