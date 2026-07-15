@@ -487,6 +487,14 @@
     function formatDateWithDay(iso){ return getDayName(iso) + ', ' + isoToDisplay(iso); }
     function fmtNum(n){ return (n||0).toLocaleString('en-IN'); }
     function fmtRevenue(n){ return '₹' + fmtNum(Math.round(n||0)); }
+    function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
+    function setHTML(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = value;
+    }
 
     function aggregateRows(rows) {
         const bySub = new Map();
@@ -530,11 +538,11 @@
                     allRows = allRows.concat(data.rows);
                 }
             });
-            document.getElementById('connectionStatus').textContent = '🟢 Connected';
-            document.getElementById('lastSyncTime').textContent = '📅 Last sync: ' + new Date().toLocaleString();
+            setText('connectionStatus', '🟢 Connected');
+            setText('lastSyncTime', '📅 Last sync: ' + new Date().toLocaleString());
             return allRows;
         } catch(e) {
-            document.getElementById('connectionStatus').textContent = '🔴 Error';
+            setText('connectionStatus', '🔴 Error');
             return [];
         }
     }
@@ -562,18 +570,6 @@
             return customDate;
         }
         return null;
-    }
-
-    // ================================================================
-    // SAFE DOM UPDATES
-    // ================================================================
-    function setText(id, value) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = value;
-    }
-    function setHTML(id, value) {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = value;
     }
 
     // ================================================================
@@ -628,7 +624,8 @@
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
         setText('kpiCampsSub', label);
         setText('performerBadge', label);
-        document.getElementById('dashboardDateLabel').textContent = label;
+        const labelEl = document.getElementById('dashboardDateLabel');
+        if (labelEl) labelEl.textContent = label;
     }
 
     function renderRegions(iso) {
@@ -653,7 +650,8 @@
         setHTML('regionTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
         setText('regionBadge', label);
-        document.getElementById('regionDateLabel').textContent = label;
+        const labelEl = document.getElementById('regionDateLabel');
+        if (labelEl) labelEl.textContent = label;
     }
 
     function renderDivisions(iso) {
@@ -678,7 +676,8 @@
         setHTML('divisionTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
         setText('divisionBadge', label);
-        document.getElementById('divisionDateLabel').textContent = label;
+        const labelEl = document.getElementById('divisionDateLabel');
+        if (labelEl) labelEl.textContent = label;
     }
 
     function renderSubDivisions(iso) {
@@ -695,7 +694,8 @@
         setHTML('subTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
         setText('subBadge', label);
-        document.getElementById('subDateLabel').textContent = label;
+        const labelEl = document.getElementById('subDateLabel');
+        if (labelEl) labelEl.textContent = label;
     }
 
     function renderOffenders(iso) {
@@ -711,14 +711,21 @@
         setHTML('offenderTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
         setText('offenderBadge', label);
-        document.getElementById('offenderDateLabel').textContent = label;
+        const labelEl = document.getElementById('offenderDateLabel');
+        if (labelEl) labelEl.textContent = label;
     }
 
     // ================================================================
     // DRILL-DOWN
     // ================================================================
-    function drillToRegion(name) { switchTab('divisions'); }
-    function drillToDivision(name) { switchTab('subdivisions'); }
+    function drillToRegion(name) {
+        renderDivisions(null);
+        switchTab('divisions');
+    }
+    function drillToDivision(name) {
+        renderSubDivisions(null);
+        switchTab('subdivisions');
+    }
     function switchTab(tabId) {
         document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
         document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
@@ -850,107 +857,7 @@
     }
 
     // ================================================================
-    // EVENT BINDINGS
-    // ================================================================
-    document.getElementById('dashboardApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('dashboardDateRange').value;
-        const custom = document.getElementById('dashboardCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderDashboard(iso);
-    });
-    document.getElementById('dashboardDateRange').addEventListener('change', function() {
-        document.getElementById('dashboardCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
-
-    document.getElementById('regionApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('regionDateRange').value;
-        const custom = document.getElementById('regionCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderRegions(iso);
-    });
-    document.getElementById('regionDateRange').addEventListener('change', function() {
-        document.getElementById('regionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
-
-    document.getElementById('divisionApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('divisionDateRange').value;
-        const custom = document.getElementById('divisionCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderDivisions(iso);
-    });
-    document.getElementById('divisionDateRange').addEventListener('change', function() {
-        document.getElementById('divisionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
-
-    document.getElementById('subApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('subDateRange').value;
-        const custom = document.getElementById('subCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderSubDivisions(iso);
-    });
-    document.getElementById('subDateRange').addEventListener('change', function() {
-        document.getElementById('subCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
-
-    document.getElementById('offenderApplyDate').addEventListener('click', function() {
-        const range = document.getElementById('offenderDateRange').value;
-        const custom = document.getElementById('offenderCustomDate').value;
-        const iso = getDateFromRange(range, custom);
-        renderOffenders(iso);
-    });
-    document.getElementById('offenderDateRange').addEventListener('change', function() {
-        document.getElementById('offenderCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-    });
-
-    document.getElementById('reportTypeSelect').addEventListener('change', function() {
-        const type = this.value;
-        const dailySel = document.getElementById('reportDateSelect');
-        const startInput = document.getElementById('reportStartDate');
-        const endInput = document.getElementById('reportEndDate');
-        dailySel.style.display = (type === 'daily' || type === 'weekly' || type === 'monthly') ? 'inline-block' : 'none';
-        startInput.style.display = type === 'custom' ? 'inline-block' : 'none';
-        endInput.style.display = type === 'custom' ? 'inline-block' : 'none';
-        if (type !== 'custom') {
-            const dates = getAvailableDates();
-            dailySel.innerHTML = '';
-            dates.forEach(iso => {
-                const opt = document.createElement('option');
-                opt.value = iso;
-                opt.textContent = formatDateWithDay(iso);
-                dailySel.appendChild(opt);
-            });
-            if (dates.length > 0) dailySel.value = dates[dates.length-1];
-        }
-    });
-
-    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
-    document.getElementById('exportReportBtn').addEventListener('click', exportReport);
-    document.getElementById('printReportBtn').addEventListener('click', printReport);
-
-    document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
-    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
-    document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
-    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
-
-    document.getElementById('offenderExportBtn').addEventListener('click', function() {
-        const table = document.getElementById('offenderTable');
-        if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
-        let csv = '';
-        for (let row of table.rows) {
-            let cells = [];
-            for (let cell of row.cells) cells.push(cell.textContent.trim());
-            csv += cells.join(',') + '\n';
-        }
-        const blob = new Blob([csv], {type: 'text/csv'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'NonOrganized.csv';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-
-    // ================================================================
-    // GOOGLE SHEETS SYNC (WORKING)
+    // GOOGLE SHEETS SYNC
     // ================================================================
     function extractSheetId(url) {
         const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -986,7 +893,7 @@
         document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Settings saved.</div>';
     });
 
-    async function syncGoogleSheet() {
+    document.getElementById('syncNowBtn').addEventListener('click', async function() {
         const url = document.getElementById('sheetUrl').value.trim();
         const name = document.getElementById('sheetName').value.trim() || 'Sheet1';
         if (!url) {
@@ -1036,16 +943,16 @@
 
             const tabText = tabLines.join('\n');
 
-            document.getElementById('pasteArea').value = tabText;
+            const pasteArea = document.getElementById('pasteArea');
+            if (pasteArea) pasteArea.value = tabText;
             document.getElementById('sheetMsg').innerHTML = '<div class="msg ok">✅ Data loaded (' + (tabLines.length - 1) + ' rows)! Click "Parse Data" to preview.</div>';
-            document.getElementById('parseBtn').click();
+            const parseBtn = document.getElementById('parseBtn');
+            if (parseBtn) parseBtn.click();
 
         } catch (e) {
             document.getElementById('sheetMsg').innerHTML = '<div class="msg err">❌ Sync error: ' + e.message + '</div>';
         }
-    }
-
-    document.getElementById('syncNowBtn').addEventListener('click', syncGoogleSheet);
+    });
 
     // ================================================================
     // DATA ENTRY
@@ -1156,6 +1063,107 @@
     });
 
     // ================================================================
+    // EVENT BINDINGS FOR DATE FILTERS
+    // ================================================================
+    document.getElementById('dashboardApplyDate').addEventListener('click', function() {
+        const range = document.getElementById('dashboardDateRange').value;
+        const custom = document.getElementById('dashboardCustomDate').value;
+        const iso = getDateFromRange(range, custom);
+        renderDashboard(iso);
+    });
+    document.getElementById('dashboardDateRange').addEventListener('change', function() {
+        document.getElementById('dashboardCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+    });
+
+    document.getElementById('regionApplyDate').addEventListener('click', function() {
+        const range = document.getElementById('regionDateRange').value;
+        const custom = document.getElementById('regionCustomDate').value;
+        const iso = getDateFromRange(range, custom);
+        renderRegions(iso);
+    });
+    document.getElementById('regionDateRange').addEventListener('change', function() {
+        document.getElementById('regionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+    });
+
+    document.getElementById('divisionApplyDate').addEventListener('click', function() {
+        const range = document.getElementById('divisionDateRange').value;
+        const custom = document.getElementById('divisionCustomDate').value;
+        const iso = getDateFromRange(range, custom);
+        renderDivisions(iso);
+    });
+    document.getElementById('divisionDateRange').addEventListener('change', function() {
+        document.getElementById('divisionCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+    });
+
+    document.getElementById('subApplyDate').addEventListener('click', function() {
+        const range = document.getElementById('subDateRange').value;
+        const custom = document.getElementById('subCustomDate').value;
+        const iso = getDateFromRange(range, custom);
+        renderSubDivisions(iso);
+    });
+    document.getElementById('subDateRange').addEventListener('change', function() {
+        document.getElementById('subCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+    });
+
+    document.getElementById('offenderApplyDate').addEventListener('click', function() {
+        const range = document.getElementById('offenderDateRange').value;
+        const custom = document.getElementById('offenderCustomDate').value;
+        const iso = getDateFromRange(range, custom);
+        renderOffenders(iso);
+    });
+    document.getElementById('offenderDateRange').addEventListener('change', function() {
+        document.getElementById('offenderCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+    });
+
+    document.getElementById('reportTypeSelect').addEventListener('change', function() {
+        const type = this.value;
+        const dailySel = document.getElementById('reportDateSelect');
+        const startInput = document.getElementById('reportStartDate');
+        const endInput = document.getElementById('reportEndDate');
+        dailySel.style.display = (type === 'daily' || type === 'weekly' || type === 'monthly') ? 'inline-block' : 'none';
+        startInput.style.display = type === 'custom' ? 'inline-block' : 'none';
+        endInput.style.display = type === 'custom' ? 'inline-block' : 'none';
+        if (type !== 'custom') {
+            const dates = getAvailableDates();
+            dailySel.innerHTML = '';
+            dates.forEach(iso => {
+                const opt = document.createElement('option');
+                opt.value = iso;
+                opt.textContent = formatDateWithDay(iso);
+                dailySel.appendChild(opt);
+            });
+            if (dates.length > 0) dailySel.value = dates[dates.length-1];
+        }
+    });
+
+    // Generate report on load
+    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+    document.getElementById('exportReportBtn').addEventListener('click', exportReport);
+    document.getElementById('printReportBtn').addEventListener('click', printReport);
+
+    document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
+    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
+    document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
+    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
+
+    document.getElementById('offenderExportBtn').addEventListener('click', function() {
+        const table = document.getElementById('offenderTable');
+        if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
+        let csv = '';
+        for (let row of table.rows) {
+            let cells = [];
+            for (let cell of row.cells) cells.push(cell.textContent.trim());
+            csv += cells.join(',') + '\n';
+        }
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'NonOrganized.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // ================================================================
     // INIT
     // ================================================================
     async function init() {
@@ -1169,13 +1177,15 @@
             renderSubDivisions(latest);
             renderOffenders(latest);
             const reportSel = document.getElementById('reportDateSelect');
-            dates.forEach(iso => {
-                const opt = document.createElement('option');
-                opt.value = iso;
-                opt.textContent = formatDateWithDay(iso);
-                reportSel.appendChild(opt);
-            });
-            reportSel.value = latest;
+            if (reportSel) {
+                dates.forEach(iso => {
+                    const opt = document.createElement('option');
+                    opt.value = iso;
+                    opt.textContent = formatDateWithDay(iso);
+                    reportSel.appendChild(opt);
+                });
+                reportSel.value = latest;
+            }
         } else {
             renderDashboard(null);
             renderRegions(null);
@@ -1183,22 +1193,34 @@
             renderSubDivisions(null);
             renderOffenders(null);
         }
-        document.getElementById('connectionStatus').textContent = '🟢 Ready';
-        document.getElementById('reportTypeSelect').value = 'daily';
-        document.getElementById('reportDateSelect').style.display = 'inline-block';
-        document.getElementById('reportStartDate').style.display = 'none';
-        document.getElementById('reportEndDate').style.display = 'none';
+        setText('connectionStatus', '🟢 Ready');
+        const typeSelect = document.getElementById('reportTypeSelect');
+        if (typeSelect) typeSelect.value = 'daily';
+        const dateSelect = document.getElementById('reportDateSelect');
+        if (dateSelect) dateSelect.style.display = 'inline-block';
+        const startDate = document.getElementById('reportStartDate');
+        if (startDate) startDate.style.display = 'none';
+        const endDate = document.getElementById('reportEndDate');
+        if (endDate) endDate.style.display = 'none';
+
         // Load saved sheet settings
         const saved = localStorage.getItem('sheetSettings');
         if (saved) {
             try {
                 const settings = JSON.parse(saved);
-                document.getElementById('sheetUrl').value = settings.url || '';
-                document.getElementById('sheetName').value = settings.name || 'Sheet1';
-                document.getElementById('syncTime').value = settings.time || '08:00';
+                const urlEl = document.getElementById('sheetUrl');
+                const nameEl = document.getElementById('sheetName');
+                const timeEl = document.getElementById('syncTime');
+                if (urlEl) urlEl.value = settings.url || '';
+                if (nameEl) nameEl.value = settings.name || 'Sheet1';
+                if (timeEl) timeEl.value = settings.time || '08:00';
             } catch(e) {}
         }
     }
+
+    // Make drill functions globally accessible
+    window.drillToRegion = drillToRegion;
+    window.drillToDivision = drillToDivision;
 
     init();
 </script>
