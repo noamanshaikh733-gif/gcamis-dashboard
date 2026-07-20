@@ -442,28 +442,34 @@
     document.getElementById('kpiTotalSD').textContent = TOTAL_SD;
 
     // ================================================================
-    // UPDATED: Normalize function to handle division name variations
+    // UPDATED: Normalize function with explicit Valsad/Valasad mapping
     // ================================================================
     function normalize(str) {
         if (!str) return '';
-        return str.toLowerCase().trim()
+        let s = str.toLowerCase().trim()
             .replace(/\s*division\s*/g, ' ')
             .replace(/\s*dn\s*/g, ' ')
             .replace(/\s*sub\s*division\s*/g, ' ')
             .replace(/\s*sub\s*dn\s*/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
+        
+        // Explicit mapping for Valsad/Valasad variations
+        if (s === 'valsad' || s === 'valasad' || s === 'valsad d' || s === 'valasad d') {
+            s = 'valsad';
+        }
+        return s;
     }
 
     // ================================================================
-    // UPDATED: subKey uses normalization
+    // subKey uses normalization
     // ================================================================
     function subKey(r, d, s) {
         return normalize(r) + '||' + normalize(d) + '||' + normalize(s);
     }
 
     // ================================================================
-    // HELPERS
+    // HELPERS (same as before)
     // ================================================================
     function parseDateFlexible(raw) {
         if(!raw) return null;
@@ -645,7 +651,7 @@
     }
 
     // ================================================================
-    // RENDER FUNCTIONS
+    // RENDER FUNCTIONS (same as before)
     // ================================================================
     function renderDashboard(iso) {
         const rows = iso ? getRowsForDate(iso) : allRows;
@@ -778,7 +784,7 @@
     }
 
     // ================================================================
-    // REPORT FUNCTIONS WITH FILTERS
+    // REPORT FUNCTIONS WITH FILTERS (same as before)
     // ================================================================
     function generateReportHTML(startDate, endDate, regionFilter, divisionFilter, subFilter) {
         let filteredRows = getRowsForDateRange(startDate, endDate);
@@ -927,7 +933,7 @@
     }
 
     // ================================================================
-    // REPORT EVENT HANDLERS
+    // REPORT EVENT HANDLERS (same as before)
     // ================================================================
     let lastReportData = null;
 
@@ -1058,7 +1064,7 @@
     };
 
     // ================================================================
-    // GOOGLE SHEETS SYNC
+    // GOOGLE SHEETS SYNC (same as before)
     // ================================================================
     function extractSheetId(url) {
         const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -1125,7 +1131,7 @@
     });
 
     // ================================================================
-    // DATA ENTRY
+    // DATA ENTRY (same as before)
     // ================================================================
     document.getElementById('parseBtn').addEventListener('click', function() {
         const text = document.getElementById('pasteArea').value;
@@ -1200,7 +1206,7 @@
     });
 
     // ================================================================
-    // PRINT FUNCTIONS FOR TABLES
+    // PRINT FUNCTIONS FOR TABLES (same as before)
     // ================================================================
     function printTable(tableId, title) {
         const table = document.getElementById(tableId);
@@ -1219,7 +1225,7 @@
     document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
 
     // ================================================================
-    // EXPORT
+    // EXPORT (same as before)
     // ================================================================
     document.getElementById('exportExcelBtn').addEventListener('click', function() {
         if (!allRows.length) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data.</div>'; return; }
@@ -1261,7 +1267,7 @@
     });
 
     // ================================================================
-    // DATE FILTER HANDLERS
+    // DATE FILTER HANDLERS (same as before)
     // ================================================================
     function applyDateFilter(type) {
         const sel = document.getElementById(type + 'DateSelect');
