@@ -91,6 +91,16 @@
         .filter-group select { padding: 6px 10px; border-radius: 6px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; min-width: 160px; }
         @media print { .no-print { display: none !important; } .report-preview { border: none !important; } }
         @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } .header { flex-direction: column; align-items: stretch; } .tabs button { font-size: 12px; padding: 8px 12px; } .filter-group { flex-direction: column; align-items: stretch; } .filter-group select { min-width: auto; } }
+        
+        /* Print styles for Non-Organized report */
+        @media print {
+            .no-print { display: none !important; }
+            .report-preview { border: none !important; padding: 0 !important; }
+            .report-preview table { font-size: 10px; }
+            .report-preview table th, .report-preview table td { padding: 4px 6px; }
+            .report-header h2 { font-size: 16px; }
+            .report-header p { font-size: 11px; }
+        }
     </style>
 </head>
 <body>
@@ -282,17 +292,25 @@
         </div>
     </section>
 
-    <!-- ================= NON-ORGANIZED ================= -->
+    <!-- ================= NON-ORGANIZED (with Date Header) ================= -->
     <section class="section" id="tab-offenders">
         <div class="card">
             <h2>⚠️ Non-Organized Tracker <span class="badge" id="offenderBadge">--</span></h2>
-            <div class="desc">Sub-divisions with ZERO successful camps.</div>
+            <div class="desc">Sub-divisions with ZERO successful camps for the selected date. (Successful camp = address + total transactions &gt; 0)</div>
             <div class="toolbar">
                 <select id="offenderDateSelect"><option value="latest">Latest</option></select>
                 <button class="gold" id="offenderApplyBtn">Apply</button>
                 <button class="secondary" id="offenderPrintBtn">🖨️ Print</button>
+                <button class="success" id="offenderExportBtn">📤 CSV</button>
             </div>
-            <div class="table-wrap"><table class="data" id="offenderTable"></table></div>
+            <!-- Report preview with date header -->
+            <div id="offenderReportContainer">
+                <div id="offenderReportHeader" style="text-align:center;margin-bottom:10px;display:none;">
+                    <h2 style="color:#0f2138;font-size:18px;">🚫 Non-Organized Sub-Divisions</h2>
+                    <p id="offenderReportDate" style="color:#697180;font-size:13px;"></p>
+                </div>
+                <div class="table-wrap"><table class="data" id="offenderTable"></table></div>
+            </div>
         </div>
     </section>
 
@@ -439,7 +457,7 @@
     document.getElementById('kpiTotalSD').textContent = TOTAL_SD;
 
     // ================================================================
-    // FIX: Map both spellings to the same sub-division
+    // NORMALIZATION – Map both spellings to the same sub-division
     // ================================================================
     function normalize(str) {
         if (!str) return '';
@@ -451,16 +469,13 @@
             .replace(/\s+/g, ' ')
             .trim();
         
-        // Map both spellings to the same sub-division
-        if (s === 'valsad sub division' || s === 'valasad sub division') {
+        // Force-map any variation of Valsad/Valasad
+        if (s.includes('valsad') || s.includes('valasad')) {
             return 'valasad sub division';
         }
         return s;
     }
 
-    // ================================================================
-    // subKey uses normalization
-    // ================================================================
     function subKey(r, d, s) {
         return normalize(r) + '||' + normalize(d) + '||' + normalize(s);
     }
@@ -765,12 +780,34 @@
         setText('subBadge', label);
     }
 
+    // ================================================================
+    // RENDER OFFENDERS – WITH DATE HEADER
+    // ================================================================
     function renderOffenders(iso) {
         const rows = iso ? getRowsForDate(iso) : allRows;
         const agg = aggregateRows(rows);
-        if(!agg) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">No data</td></tr>'); return; }
+        
+        // Show/hide header
+        const headerEl = document.getElementById('offenderReportHeader');
+        const dateEl = document.getElementById('offenderReportDate');
+        
+        if (iso) {
+            headerEl.style.display = 'block';
+            dateEl.textContent = '📅 ' + formatDateWithDay(iso);
+        } else {
+            headerEl.style.display = 'block';
+            dateEl.textContent = '📅 All Dates (combined)';
+        }
+        
+        if(!agg) { 
+            setHTML('offenderTable', '<tr><td colspan="5" class="empty">No data</td></tr>'); 
+            return; 
+        }
         const list = agg.filter(s => s.hasRows && !s.organized);
-        if(list.length === 0) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">🎉 All sub-divisions organized at least one camp!</td></tr>'); return; }
+        if(list.length === 0) { 
+            setHTML('offenderTable', '<tr><td colspan="5" class="empty">🎉 All sub-divisions organized at least one camp!</td></tr>'); 
+            return; 
+        }
         let html = `<tr><th>#</th><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Rows</th></tr>`;
         list.forEach((s, i) => {
             html += `<tr><td>${i+1}</td><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td class="num">${s.hasRows}</td></tr>`;
@@ -1219,7 +1256,22 @@
     document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
     document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
     document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
-    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
+    
+    // Override offender print to include date header
+    document.getElementById('offenderPrintBtn').addEventListener('click', function() {
+        const table = document.getElementById('offenderTable');
+        if (!table || table.rows.length === 0) { alert('No data.'); return; }
+        const headerEl = document.getElementById('offenderReportHeader');
+        const dateText = document.getElementById('offenderReportDate').textContent || '';
+        const win = window.open('', '_blank', 'width=900,height=600');
+        win.document.write(`<html><head><title>Non-Organized Report</title>
+            <style>body{font-family:Arial;padding:20px;}h2{color:#0f2138;text-align:center;}p{color:#697180;text-align:center;margin-bottom:15px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:left;}th{background:#0f2138;color:#fff;}</style>
+            </head><body><h2>🚫 Non-Organized Sub-Divisions</h2><p>${dateText}</p>`);
+        win.document.write(table.outerHTML);
+        win.document.write('</body></html>');
+        win.document.close();
+        win.print();
+    });
 
     // ================================================================
     // EXPORT
@@ -1289,7 +1341,12 @@
     document.getElementById('regionApplyBtn').addEventListener('click', function() { applyDateFilter('region'); });
     document.getElementById('divisionApplyBtn').addEventListener('click', function() { applyDateFilter('division'); });
     document.getElementById('subApplyBtn').addEventListener('click', function() { applyDateFilter('sub'); });
-    document.getElementById('offenderApplyBtn').addEventListener('click', function() { applyDateFilter('offender'); });
+    document.getElementById('offenderApplyBtn').addEventListener('click', function() { 
+        const sel = document.getElementById('offenderDateSelect');
+        const val = sel ? sel.value : 'latest';
+        const iso = val === 'latest' ? getLatestDate() : val;
+        renderOffenders(iso);
+    });
 
     // ================================================================
     // TAB SWITCHING
@@ -1302,6 +1359,13 @@
             document.getElementById('tab-' + this.dataset.tab).classList.add('active');
             if (this.dataset.tab === 'report') {
                 loadSavedReports();
+            }
+            if (this.dataset.tab === 'offenders') {
+                // Auto-load offender data
+                const sel = document.getElementById('offenderDateSelect');
+                const val = sel ? sel.value : 'latest';
+                const iso = val === 'latest' ? getLatestDate() : val;
+                renderOffenders(iso);
             }
         });
     });
