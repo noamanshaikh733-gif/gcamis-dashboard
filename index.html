@@ -198,7 +198,7 @@
         </div>
     </section>
 
-    <!-- ================= REPORTS (Enhanced with Filters) ================= -->
+    <!-- ================= REPORTS ================= -->
     <section class="section" id="tab-report">
         <div class="card">
             <h2>📋 Reports <span class="badge">Custom Date Range &amp; Filters</span></h2>
@@ -237,10 +237,8 @@
                 <div class="report-preview" id="reportPreview"></div>
             </div>
         </div>
-        <!-- Saved Reports List -->
         <div class="card" id="savedReportsCard" style="display:none;">
-            <h2>📂 Saved Reports <span class="badge">Previously Generated</span></h2>
-            <div class="desc">Access all previously generated reports. Click to view, download, or print.</div>
+            <h2>📂 Saved Reports</h2>
             <div id="savedReportsList"></div>
         </div>
     </section>
@@ -442,7 +440,25 @@
     document.getElementById('kpiTotalSD').textContent = TOTAL_SD;
 
     // ================================================================
-    // UPDATED: Normalize function with explicit Valsad/Valasad mapping
+    // EXPLICIT DIVISION MAPPING – THIS FIXES VALSAD!
+    // ================================================================
+    const DIVISION_MAP = {
+        // Valsad variations
+        'valsad': 'Valsad Division',
+        'valasad': 'Valsad Division',
+        'valsad dn': 'Valsad Division',
+        'valasad dn': 'Valsad Division',
+        'valsad division': 'Valsad Division',
+        'valasad division': 'Valsad Division',
+        // Ahmedabad variations
+        'ahmedabad city': 'Ahmedabad City Division',
+        'ahmedabad city dn': 'Ahmedabad City Division',
+        'ahmedabad city division': 'Ahmedabad City Division',
+        // Add more mappings as needed
+    };
+
+    // ================================================================
+    // Normalize with explicit mapping
     // ================================================================
     function normalize(str) {
         if (!str) return '';
@@ -454,9 +470,9 @@
             .replace(/\s+/g, ' ')
             .trim();
         
-        // Explicit mapping for Valsad/Valasad variations
-        if (s === 'valsad' || s === 'valasad' || s === 'valsad d' || s === 'valasad d') {
-            s = 'valsad';
+        // Check if this maps to a known division
+        if (DIVISION_MAP[s]) {
+            return DIVISION_MAP[s];
         }
         return s;
     }
@@ -469,7 +485,7 @@
     }
 
     // ================================================================
-    // HELPERS (same as before)
+    // HELPERS
     // ================================================================
     function parseDateFlexible(raw) {
         if(!raw) return null;
@@ -509,12 +525,14 @@
     function aggregateRows(rows) {
         const bySub = new Map();
         rows.forEach(r => {
-            const key = subKey(r.region, r.division, r.subDivision);
+            // Normalize the division using the mapping
+            const normalizedDivision = normalize(r.division);
+            const key = normalize(r.region) + '||' + normalizedDivision + '||' + normalize(r.subDivision);
             if(!bySub.has(key)) bySub.set(key, []);
             bySub.get(key).push(r);
         });
         return MASTER.map(m => {
-            const key = subKey(m.r, m.d, m.s);
+            const key = normalize(m.r) + '||' + normalize(m.d) + '||' + normalize(m.s);
             const matched = bySub.get(key) || [];
             const successful = matched.filter(r => r.address && r.address.trim() !== '' && (r.totalTransactions || 0) > 0);
             const camps = successful.length;
@@ -651,7 +669,7 @@
     }
 
     // ================================================================
-    // RENDER FUNCTIONS (same as before)
+    // RENDER FUNCTIONS
     // ================================================================
     function renderDashboard(iso) {
         const rows = iso ? getRowsForDate(iso) : allRows;
@@ -784,7 +802,7 @@
     }
 
     // ================================================================
-    // REPORT FUNCTIONS WITH FILTERS (same as before)
+    // REPORT FUNCTIONS
     // ================================================================
     function generateReportHTML(startDate, endDate, regionFilter, divisionFilter, subFilter) {
         let filteredRows = getRowsForDateRange(startDate, endDate);
@@ -933,7 +951,7 @@
     }
 
     // ================================================================
-    // REPORT EVENT HANDLERS (same as before)
+    // REPORT EVENT HANDLERS
     // ================================================================
     let lastReportData = null;
 
@@ -1064,7 +1082,7 @@
     };
 
     // ================================================================
-    // GOOGLE SHEETS SYNC (same as before)
+    // GOOGLE SHEETS SYNC
     // ================================================================
     function extractSheetId(url) {
         const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -1131,7 +1149,7 @@
     });
 
     // ================================================================
-    // DATA ENTRY (same as before)
+    // DATA ENTRY
     // ================================================================
     document.getElementById('parseBtn').addEventListener('click', function() {
         const text = document.getElementById('pasteArea').value;
@@ -1206,7 +1224,7 @@
     });
 
     // ================================================================
-    // PRINT FUNCTIONS FOR TABLES (same as before)
+    // PRINT FUNCTIONS FOR TABLES
     // ================================================================
     function printTable(tableId, title) {
         const table = document.getElementById(tableId);
@@ -1225,7 +1243,7 @@
     document.getElementById('offenderPrintBtn').addEventListener('click', function() { printTable('offenderTable', 'Non-Organized List'); });
 
     // ================================================================
-    // EXPORT (same as before)
+    // EXPORT
     // ================================================================
     document.getElementById('exportExcelBtn').addEventListener('click', function() {
         if (!allRows.length) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data.</div>'; return; }
@@ -1267,7 +1285,7 @@
     });
 
     // ================================================================
-    // DATE FILTER HANDLERS (same as before)
+    // DATE FILTER HANDLERS
     // ================================================================
     function applyDateFilter(type) {
         const sel = document.getElementById(type + 'DateSelect');
