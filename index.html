@@ -431,7 +431,6 @@
         {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West North Sub Division",h:"Shri j v parmar",m:"9429083529"},
         {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West South Sub Division",h:"Shri D N Parmar",m:"9601587327"},
         {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West West Sub Division",h:"Shri Krati Shri Agnihotri",m:"9098641686"},
-        {r:"Vadodara Region",d:"Valsad Division",s:"Dharampur Sub Division",h:"Shri Rohan Sharma",m:"6395047549"},
         {r:"Vadodara Region",d:"Valsad Division",s:"Valasad Sub Division",h:"Shri Chandulal D Padvi",m:"6351283422"},
         {r:"Vadodara Region",d:"Valsad Division",s:"Vapi Sub Division",h:"Shri Vijaypal Singh",m:"9410247811"}
     ];
@@ -440,25 +439,7 @@
     document.getElementById('kpiTotalSD').textContent = TOTAL_SD;
 
     // ================================================================
-    // EXPLICIT DIVISION MAPPING – THIS FIXES VALSAD!
-    // ================================================================
-    const DIVISION_MAP = {
-        // Valsad variations
-        'valsad': 'Valsad Division',
-        'valasad': 'Valsad Division',
-        'valsad dn': 'Valsad Division',
-        'valasad dn': 'Valsad Division',
-        'valsad division': 'Valsad Division',
-        'valasad division': 'Valsad Division',
-        // Ahmedabad variations
-        'ahmedabad city': 'Ahmedabad City Division',
-        'ahmedabad city dn': 'Ahmedabad City Division',
-        'ahmedabad city division': 'Ahmedabad City Division',
-        // Add more mappings as needed
-    };
-
-    // ================================================================
-    // Normalize with explicit mapping
+    // FIX: Map both spellings to the same sub-division
     // ================================================================
     function normalize(str) {
         if (!str) return '';
@@ -470,9 +451,9 @@
             .replace(/\s+/g, ' ')
             .trim();
         
-        // Check if this maps to a known division
-        if (DIVISION_MAP[s]) {
-            return DIVISION_MAP[s];
+        // Map both spellings to the same sub-division
+        if (s === 'valsad sub division' || s === 'valasad sub division') {
+            return 'valasad sub division';
         }
         return s;
     }
@@ -525,14 +506,12 @@
     function aggregateRows(rows) {
         const bySub = new Map();
         rows.forEach(r => {
-            // Normalize the division using the mapping
-            const normalizedDivision = normalize(r.division);
-            const key = normalize(r.region) + '||' + normalizedDivision + '||' + normalize(r.subDivision);
+            const key = subKey(r.region, r.division, r.subDivision);
             if(!bySub.has(key)) bySub.set(key, []);
             bySub.get(key).push(r);
         });
         return MASTER.map(m => {
-            const key = normalize(m.r) + '||' + normalize(m.d) + '||' + normalize(m.s);
+            const key = subKey(m.r, m.d, m.s);
             const matched = bySub.get(key) || [];
             const successful = matched.filter(r => r.address && r.address.trim() !== '' && (r.totalTransactions || 0) > 0);
             const camps = successful.length;
