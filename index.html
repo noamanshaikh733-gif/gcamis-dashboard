@@ -10,28 +10,20 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; color: #1b2430; }
         .app { max-width: 1440px; margin: 0 auto; }
-        
-        /* HEADER */
         .header { background: linear-gradient(135deg, #0f2138, #173355); color: #fff; padding: 16px 24px; border-radius: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 20px; }
         .brand { display: flex; align-items: center; gap: 12px; }
         .brand .logo { width: 44px; height: 44px; background: radial-gradient(circle at 35% 30%, #b9812c, #8a5f1c); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: #1a1200; }
         .brand h1 { font-size: 20px; } .brand h1 span { color: #f3e4c6; }
         .brand small { font-size: 12px; color: #a0b4cc; display: block; }
         .badge-count { background: rgba(255,255,255,0.12); padding: 4px 14px; border-radius: 20px; font-size: 12px; border: 1px solid rgba(255,255,255,0.1); }
-        
-        /* TABS */
-        .tabs { display: flex; gap: 4px; background: #fff; border-radius: 10px; padding: 4px 6px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow-x: auto; }
-        .tabs button { padding: 10px 18px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #697180; cursor: pointer; border-radius: 6px; white-space: nowrap; font-family: inherit; transition: all 0.2s; }
+        .tabs { display: flex; gap: 4px; background: #fff; border-radius: 10px; padding: 4px 6px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow-x: auto; flex-wrap: nowrap; }
+        .tabs button { padding: 10px 14px; border: none; background: transparent; font-weight: 600; font-size: 12px; color: #697180; cursor: pointer; border-radius: 6px; white-space: nowrap; font-family: inherit; transition: all 0.2s; }
         .tabs button:hover { background: #f0f2f5; color: #1b2430; }
         .tabs button.active { background: #0f2138; color: #fff; }
-        
-        /* CARDS */
         .card { background: #fff; border-radius: 10px; padding: 18px 20px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .card h2 { font-size: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
         .card h2 .badge { font-size: 11px; font-weight: 600; background: #e3edf7; color: #2a6b9e; padding: 1px 12px; border-radius: 12px; }
         .card .desc { font-size: 12.5px; color: #697180; margin-bottom: 14px; }
-        
-        /* KPI GRID – matches image layout */
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 20px; }
         .kpi-card { background: #fff; border-radius: 10px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #2a6b9e; }
         .kpi-card .label { font-size: 11px; text-transform: uppercase; color: #697180; font-weight: 600; }
@@ -41,8 +33,6 @@
         .kpi-card.gold { border-left-color: #b9812c; } .kpi-card.gold .value { color: #b9812c; }
         .kpi-card.red { border-left-color: #b3392b; } .kpi-card.red .value { color: #b3392b; }
         .kpi-card.blue { border-left-color: #2a6b9e; } .kpi-card.blue .value { color: #2a6b9e; }
-        
-        /* ALERTS – matches image */
         .alerts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 12px; margin-bottom: 20px; }
         .alert-card { border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .alert-card .icon { font-size: 24px; }
@@ -55,25 +45,21 @@
         .alert-card.warning .info .desc { color: #FF9800; }
         .alert-card.success { background: #e5f4eb; border-left: 4px solid #1c7a45; }
         .alert-card.success .info .desc { color: #1c7a45; }
-        
-        /* TOP PERFORMERS – matches image */
         .performer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 12px; margin-top: 8px; }
         .performer-card { background: #f8f9fa; padding: 12px 16px; border-radius: 8px; border-left: 3px solid #b9812c; }
         .performer-card .label { font-size: 11px; color: #697180; font-weight: 600; }
         .performer-card .value { font-weight: 700; font-size: 16px; color: #0f2138; }
         .performer-card .sub { font-size: 12px; color: #697180; }
-        
-        /* DATA ENTRY */
         .data-entry-area { width: 100%; min-height: 200px; font-family: 'Courier New', monospace; font-size: 13px; padding: 12px; border: 2px dashed #e1e4e9; border-radius: 8px; background: #fafbfc; resize: vertical; tab-size: 4; }
         .table-wrap { overflow-x: auto; max-height: 500px; overflow-y: auto; }
         table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
-        table.data th { text-align: left; font-size: 10.5px; text-transform: uppercase; color: #697180; padding: 8px 10px; border-bottom: 2px solid #e1e4e9; position: sticky; top: 0; background: #fff; }
+        table.data th { text-align: left; font-size: 10.5px; text-transform: uppercase; color: #697180; padding: 8px 10px; border-bottom: 2px solid #e1e4e9; position: sticky; top: 0; background: #fff; z-index: 2; }
         table.data td { padding: 7px 10px; border-bottom: 1px solid #eef0f3; }
         table.data .num { text-align: right; }
         table.data .total-row td { background: #0f2138; color: #fff; font-weight: 700; }
         table.data .sub-total td { background: #eef1f5; font-weight: 600; }
-        
-        /* TOOLBAR */
+        table.data .highlight-low { background: #fff3e0; }
+        table.data .highlight-high { background: #e8f5e9; }
         .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; padding: 6px 10px; background: #f8f9fa; border-radius: 6px; }
         .toolbar button { font-family: inherit; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 6px; border: none; background: #0f2138; color: #fff; cursor: pointer; transition: opacity 0.15s; }
         .toolbar button:hover { opacity: 0.85; }
@@ -81,20 +67,15 @@
         .toolbar button.gold { background: #b9812c; }
         .toolbar button.danger { background: #b3392b; }
         .toolbar button.secondary { background: #e9ecef; color: #1b2430; }
-        
-        /* DATE FILTER – matches image */
         .date-filter-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
         .date-filter-group select, .date-filter-group input { padding: 6px 10px; border-radius: 6px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; }
         .date-filter-group label { font-weight: 600; font-size: 13px; color: #697180; }
-        
         .section { display: none; } .section.active { display: block; }
         .empty { text-align: center; padding: 40px 20px; color: #697180; }
         .msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 10px; }
         .msg.ok { background: #e5f4eb; color: #1c7a45; }
         .msg.err { background: #fbeae7; color: #b3392b; }
         .msg.info { background: #fdf0e6; color: #FF9800; }
-        
-        /* REPORT PREVIEW */
         .report-preview { background: #fafbfc; padding: 16px; border-radius: 6px; border: 1px solid #e1e4e9; margin: 10px 0; overflow-x: auto; }
         .report-preview table { width: 100%; font-size: 12px; border-collapse: collapse; }
         .report-preview table th, .report-preview table td { padding: 6px 8px; border: 1px solid #ddd; text-align: center; }
@@ -104,33 +85,32 @@
         .report-header { text-align: center; margin-bottom: 15px; }
         .report-header h2 { color: #0f2138; font-size: 18px; }
         .report-header p { color: #697180; font-size: 13px; margin-top: 4px; }
-        
-        /* GOOGLE SHEETS SETUP */
         .google-sheet-setup { background: #f8f9fa; padding: 12px 16px; border-radius: 6px; margin: 10px 0; border: 1px solid #e1e4e9; }
         .google-sheet-setup input { padding: 6px 10px; border-radius: 4px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; width: 100%; max-width: 400px; margin: 4px 0; }
         .google-sheet-setup label { font-weight: 600; font-size: 13px; color: #697180; display: block; margin-top: 6px; }
-        
-        /* FILTERS */
         .filter-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-        .filter-group select { padding: 6px 10px; border-radius: 6px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; min-width: 160px; }
-        
-        /* PRINT */
-        @media print { .no-print { display: none !important; } .report-preview { border: none !important; } }
+        .filter-group select { padding: 6px 10px; border-radius: 6px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; min-width: 150px; }
+        .filter-group label { font-weight: 600; font-size: 13px; color: #697180; }
+        .status-pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .status-pill.green { background: #e8f5e9; color: #1c7a45; }
+        .status-pill.red { background: #fbeae7; color: #b3392b; }
+        .status-pill.orange { background: #fff3e0; color: #e65100; }
+        .status-pill.blue { background: #e3edf7; color: #2a6b9e; }
         @media (max-width: 768px) { 
             .kpi-grid { grid-template-columns: repeat(2,1fr); } 
             .header { flex-direction: column; align-items: stretch; } 
-            .tabs button { font-size: 12px; padding: 8px 12px; } 
+            .tabs button { font-size: 10px; padding: 6px 10px; } 
             .filter-group { flex-direction: column; align-items: stretch; } 
             .filter-group select { min-width: auto; } 
             .performer-grid { grid-template-columns: 1fr; }
         }
+        @media print { .no-print { display: none !important; } .report-preview { border: none !important; } }
     </style>
 </head>
 <body>
 
 <div class="app">
 
-    <!-- HEADER -->
     <header class="header">
         <div class="brand">
             <div class="logo">G</div>
@@ -142,7 +122,6 @@
         </div>
     </header>
 
-    <!-- TABS -->
     <nav class="tabs">
         <button class="active" data-tab="today">📊 Dashboard</button>
         <button data-tab="entry">📥 Data Entry</button>
@@ -151,13 +130,14 @@
         <button data-tab="regions">🌍 Regions</button>
         <button data-tab="divisions">🏢 Divisions</button>
         <button data-tab="subdivisions">📍 Sub-Divisions</button>
+        <button data-tab="lowtxn">📉 Low Txns</button>
+        <button data-tab="benchmark">🎯 Benchmark</button>
         <button data-tab="offenders">⚠️ Non-Organized</button>
         <button data-tab="export">📤 Export</button>
     </nav>
 
     <!-- ================= DASHBOARD ================= -->
     <section class="section active" id="tab-today">
-        <!-- Date Filter – matches image -->
         <div class="card" style="padding:10px 16px;">
             <div class="date-filter-group">
                 <label>📅 View Data For:</label>
@@ -170,8 +150,6 @@
                 <span id="dashboardDateLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
             </div>
         </div>
-
-        <!-- KPI Cards – matches image -->
         <div class="kpi-grid">
             <div class="kpi-card green"><div class="label">🏕️ Camps</div><div class="value" id="kpiCamps">0</div><div class="sub" id="kpiCampsSub">--</div></div>
             <div class="kpi-card gold"><div class="label">📊 Transactions</div><div class="value" id="kpiTxns">0</div><div class="sub">Total</div></div>
@@ -180,15 +158,12 @@
             <div class="kpi-card green"><div class="label">✅ Active SD</div><div class="value" id="kpiActive">0</div><div class="sub">/ <span id="kpiTotalSD">104</span></div></div>
             <div class="kpi-card red"><div class="label">⏳ Non-Organized</div><div class="value" id="kpiPending">0</div><div class="sub">Zero camps</div></div>
         </div>
-
-        <!-- Alerts – matches image -->
         <div class="alerts-grid">
             <div class="alert-card danger"><div class="icon">🔴</div><div class="info"><div class="title">No Data</div><div class="desc" id="alertNoDataCount">0</div></div></div>
             <div class="alert-card warning"><div class="icon">🟠</div><div class="info"><div class="title">Non-Organized</div><div class="desc" id="alertNoCampsCount">0</div></div></div>
-            <div class="alert-card warning"><div class="icon">🟠</div><div class="info"><div class="title">Low Txns</div><div class="desc" id="alertLowTxnsCount">0</div></div></div>
+            <div class="alert-card warning"><div class="icon">🟠</div><div class="info"><div class="title">Low Txns (&lt;10)</div><div class="desc" id="alertLowTxnsCount">0</div></div></div>
+            <div class="alert-card success"><div class="icon">✅</div><div class="info"><div class="title">Benchmark (≥25)</div><div class="desc" id="alertBenchmarkCount">0</div></div></div>
         </div>
-
-        <!-- Top Performers – matches image -->
         <div class="card">
             <h2>🏆 Top Performers <span class="badge" id="performerBadge">--</span></h2>
             <div class="performer-grid">
@@ -277,10 +252,14 @@
     <section class="section" id="tab-regions">
         <div class="card">
             <h2>🌍 Region Summary <span class="badge" id="regionBadge">--</span></h2>
-            <div class="toolbar">
+            <div class="filter-group" style="margin-bottom:10px;">
+                <label>📅 Date:</label>
                 <select id="regionDateSelect"><option value="latest">Latest</option></select>
+                <label>🏢 Division:</label>
+                <select id="regionDivisionFilter"><option value="all">All Divisions</option></select>
                 <button class="gold" id="regionApplyBtn">Apply</button>
                 <button class="secondary" id="regionPrintBtn">🖨️ Print</button>
+                <button class="success" id="regionExportBtn">📤 CSV</button>
             </div>
             <div class="table-wrap"><table class="data" id="regionTable"></table></div>
         </div>
@@ -290,10 +269,14 @@
     <section class="section" id="tab-divisions">
         <div class="card">
             <h2>🏢 Division Summary <span class="badge" id="divisionBadge">--</span></h2>
-            <div class="toolbar">
+            <div class="filter-group" style="margin-bottom:10px;">
+                <label>📅 Date:</label>
                 <select id="divisionDateSelect"><option value="latest">Latest</option></select>
+                <label>🌍 Region:</label>
+                <select id="divisionRegionFilter"><option value="all">All Regions</option></select>
                 <button class="gold" id="divisionApplyBtn">Apply</button>
                 <button class="secondary" id="divisionPrintBtn">🖨️ Print</button>
+                <button class="success" id="divisionExportBtn">📤 CSV</button>
             </div>
             <div class="table-wrap"><table class="data" id="divisionTable"></table></div>
         </div>
@@ -303,12 +286,56 @@
     <section class="section" id="tab-subdivisions">
         <div class="card">
             <h2>📍 Sub-Division Summary <span class="badge" id="subBadge">--</span></h2>
-            <div class="toolbar">
+            <div class="filter-group" style="margin-bottom:10px;">
+                <label>📅 Date:</label>
                 <select id="subDateSelect"><option value="latest">Latest</option></select>
+                <label>🌍 Region:</label>
+                <select id="subRegionFilter"><option value="all">All Regions</option></select>
+                <label>🏢 Division:</label>
+                <select id="subDivisionFilter"><option value="all">All Divisions</option></select>
                 <button class="gold" id="subApplyBtn">Apply</button>
                 <button class="secondary" id="subPrintBtn">🖨️ Print</button>
+                <button class="success" id="subExportBtn">📤 CSV</button>
             </div>
             <div class="table-wrap"><table class="data" id="subTable"></table></div>
+        </div>
+    </section>
+
+    <!-- ================= LOW TRANSACTIONS (<10) ================= -->
+    <section class="section" id="tab-lowtxn">
+        <div class="card">
+            <h2>📉 Low Transaction Sub-Divisions <span class="badge">&lt; 10 per camp</span></h2>
+            <div class="desc">Sub-divisions with average transactions per camp less than 10. These need attention.</div>
+            <div class="filter-group" style="margin-bottom:10px;">
+                <label>📅 Date:</label>
+                <select id="lowTxnDateSelect"><option value="latest">Latest</option></select>
+                <label>🌍 Region:</label>
+                <select id="lowTxnRegionFilter"><option value="all">All Regions</option></select>
+                <label>🏢 Division:</label>
+                <select id="lowTxnDivisionFilter"><option value="all">All Divisions</option></select>
+                <button class="gold" id="lowTxnApplyBtn">Apply</button>
+                <button class="success" id="lowTxnExportBtn">📤 CSV</button>
+            </div>
+            <div class="table-wrap"><table class="data" id="lowTxnTable"></table></div>
+        </div>
+    </section>
+
+    <!-- ================= BENCHMARK (≥25) ================= -->
+    <section class="section" id="tab-benchmark">
+        <div class="card">
+            <h2>🎯 Benchmark Performance <span class="badge">≥ 25 transactions per camp</span></h2>
+            <div class="desc">Sub-divisions meeting or exceeding the benchmark of 25 transactions per camp.</div>
+            <div class="filter-group" style="margin-bottom:10px;">
+                <label>📅 Date:</label>
+                <select id="benchmarkDateSelect"><option value="latest">Latest</option></select>
+                <label>🌍 Region:</label>
+                <select id="benchmarkRegionFilter"><option value="all">All Regions</option></select>
+                <label>🏢 Division:</label>
+                <select id="benchmarkDivisionFilter"><option value="all">All Divisions</option></select>
+                <button class="gold" id="benchmarkApplyBtn">Apply</button>
+                <button class="success" id="benchmarkExportBtn">📤 CSV</button>
+            </div>
+            <div class="table-wrap"><table class="data" id="benchmarkTable"></table></div>
         </div>
     </section>
 
@@ -317,8 +344,13 @@
         <div class="card">
             <h2>⚠️ Non-Organized Tracker <span class="badge" id="offenderBadge">--</span></h2>
             <div class="desc">Sub-divisions with ZERO successful camps for the selected date.</div>
-            <div class="toolbar">
+            <div class="filter-group" style="margin-bottom:10px;">
+                <label>📅 Date:</label>
                 <select id="offenderDateSelect"><option value="latest">Latest</option></select>
+                <label>🌍 Region:</label>
+                <select id="offenderRegionFilter"><option value="all">All Regions</option></select>
+                <label>🏢 Division:</label>
+                <select id="offenderDivisionFilter"><option value="all">All Divisions</option></select>
                 <button class="gold" id="offenderApplyBtn">Apply</button>
                 <button class="secondary" id="offenderPrintBtn">🖨️ Print</button>
                 <button class="success" id="offenderExportBtn">📤 CSV</button>
@@ -364,7 +396,7 @@
     const db = firebase.firestore();
 
     // ================================================================
-    // MASTER DATA – 104 SUB-DIVISIONS (Dharampur INCLUDED)
+    // MASTER DATA – 104 SUB-DIVISIONS (DHARAMPUR INCLUDED)
     // ================================================================
     const MASTER = [
         {r:"Ahmedabad Region",d:"Ahmedabad City Division",s:"North Sub Division",h:"Shri V S Chauhan",m:"9662513288"},
@@ -468,7 +500,7 @@
         {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West North Sub Division",h:"Shri j v parmar",m:"9429083529"},
         {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West South Sub Division",h:"Shri D N Parmar",m:"9601587327"},
         {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West West Sub Division",h:"Shri Krati Shri Agnihotri",m:"9098641686"},
-        // ===== VALSAD DIVISION – DHARAMPUR NOW INCLUDED =====
+        // ===== VALSAD DIVISION – DHARAMPUR INCLUDED =====
         {r:"Vadodara Region",d:"Valsad Division",s:"Valasad Sub Division",h:"Shri Chandulal D Padvi",m:"6351283422"},
         {r:"Vadodara Region",d:"Valsad Division",s:"Vapi Sub Division",h:"Shri Vijaypal Singh",m:"9410247811"},
         {r:"Vadodara Region",d:"Valsad Division",s:"Dharampur Sub Division",h:"Shri Rohan Sharma",m:"6395047549"}
@@ -500,13 +532,18 @@
         }
         return null;
     }
-    function isoToDisplay(iso) { if(!iso) return ''; const [y,m,d]=iso.split('-'); return d+'.'+m+'.'+y; }
+    function isoToDisplay(iso) { 
+        if(!iso) return ''; 
+        const d = new Date(iso + 'T00:00:00');
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
     function getDayName(iso) { if(!iso) return ''; const date = new Date(iso+'T00:00:00'); return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()]; }
     function formatDateWithDay(iso) { return getDayName(iso) + ', ' + isoToDisplay(iso); }
     function fmtNum(n) { return (n||0).toLocaleString('en-IN'); }
     function fmtRevenue(n) { return '₹' + fmtNum(Math.round(n||0)); }
     function setText(id, value) { const el = document.getElementById(id); if (el) el.textContent = value; }
     function setHTML(id, value) { const el = document.getElementById(id); if (el) el.innerHTML = value; }
+    function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
     function aggregateRows(rows) {
         const bySub = new Map();
@@ -525,11 +562,13 @@
             const mbu = matched.reduce((a,r) => a + (r.mbu||0), 0);
             const txns = matched.reduce((a,r) => a + (r.totalTransactions||0), 0);
             const revenue = mbu * 125;
+            const avgTxnsPerCamp = camps > 0 ? txns / camps : 0;
             return {
                 region: m.r, division: m.d, subDivision: m.s,
                 head: m.h, mobile: m.m,
                 organized, camps, mbu, transactions: txns, revenue,
-                hasRows, partial: hasRows && !organized
+                hasRows, partial: hasRows && !organized,
+                avgTxnsPerCamp
             };
         });
     }
@@ -563,36 +602,69 @@
 
     function populateFilters() {
         const regions = [...new Set(MASTER.map(m => m.r))].sort();
+        const divisions = [...new Set(MASTER.map(m => m.d))].sort();
+
+        // Report filters
         const regionSel = document.getElementById('reportRegionFilter');
         regionSel.innerHTML = '<option value="all">All Regions</option>';
-        regions.forEach(r => {
-            const opt = document.createElement('option');
-            opt.value = r;
-            opt.textContent = r;
-            regionSel.appendChild(opt);
-        });
+        regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; regionSel.appendChild(opt); });
 
-        const divisions = [...new Set(MASTER.map(m => m.d))].sort();
         const divSel = document.getElementById('reportDivisionFilter');
         divSel.innerHTML = '<option value="all">All Divisions</option>';
-        divisions.forEach(d => {
-            const opt = document.createElement('option');
-            opt.value = d;
-            opt.textContent = d;
-            divSel.appendChild(opt);
-        });
+        divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; divSel.appendChild(opt); });
 
-        const subs = [...new Set(MASTER.map(m => m.s))].sort();
         const subSel = document.getElementById('reportSubFilter');
         subSel.innerHTML = '<option value="all">All Sub-Divisions</option>';
-        subs.forEach(s => {
-            const opt = document.createElement('option');
-            opt.value = s;
-            opt.textContent = s;
-            subSel.appendChild(opt);
-        });
+        MASTER.forEach(m => { const opt = document.createElement('option'); opt.value = m.s; opt.textContent = m.s; subSel.appendChild(opt); });
 
-        ['regionDateSelect', 'divisionDateSelect', 'subDateSelect', 'offenderDateSelect'].forEach(id => {
+        // Region tab division filter
+        const regDivSel = document.getElementById('regionDivisionFilter');
+        regDivSel.innerHTML = '<option value="all">All Divisions</option>';
+        divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; regDivSel.appendChild(opt); });
+
+        // Division tab region filter
+        const divRegSel = document.getElementById('divisionRegionFilter');
+        divRegSel.innerHTML = '<option value="all">All Regions</option>';
+        regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; divRegSel.appendChild(opt); });
+
+        // Sub-division filters
+        const subRegSel = document.getElementById('subRegionFilter');
+        subRegSel.innerHTML = '<option value="all">All Regions</option>';
+        regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; subRegSel.appendChild(opt); });
+
+        const subDivSel = document.getElementById('subDivisionFilter');
+        subDivSel.innerHTML = '<option value="all">All Divisions</option>';
+        divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; subDivSel.appendChild(opt); });
+
+        // Low Txn filters
+        const ltRegSel = document.getElementById('lowTxnRegionFilter');
+        ltRegSel.innerHTML = '<option value="all">All Regions</option>';
+        regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; ltRegSel.appendChild(opt); });
+
+        const ltDivSel = document.getElementById('lowTxnDivisionFilter');
+        ltDivSel.innerHTML = '<option value="all">All Divisions</option>';
+        divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; ltDivSel.appendChild(opt); });
+
+        // Benchmark filters
+        const bmRegSel = document.getElementById('benchmarkRegionFilter');
+        bmRegSel.innerHTML = '<option value="all">All Regions</option>';
+        regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; bmRegSel.appendChild(opt); });
+
+        const bmDivSel = document.getElementById('benchmarkDivisionFilter');
+        bmDivSel.innerHTML = '<option value="all">All Divisions</option>';
+        divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; bmDivSel.appendChild(opt); });
+
+        // Offender filters
+        const offRegSel = document.getElementById('offenderRegionFilter');
+        offRegSel.innerHTML = '<option value="all">All Regions</option>';
+        regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; offRegSel.appendChild(opt); });
+
+        const offDivSel = document.getElementById('offenderDivisionFilter');
+        offDivSel.innerHTML = '<option value="all">All Divisions</option>';
+        divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; offDivSel.appendChild(opt); });
+
+        // Date selects
+        ['regionDateSelect', 'divisionDateSelect', 'subDateSelect', 'lowTxnDateSelect', 'benchmarkDateSelect', 'offenderDateSelect'].forEach(id => {
             const sel = document.getElementById(id);
             if (sel) {
                 sel.innerHTML = '<option value="latest">Latest Available</option>';
@@ -627,7 +699,7 @@
     }
 
     // ================================================================
-    // RENDER DASHBOARD – matches image layout
+    // RENDER DASHBOARD
     // ================================================================
     function renderDashboard(iso) {
         const rows = iso ? getRowsForDate(iso) : allRows;
@@ -638,23 +710,24 @@
             acc.txns += s.transactions || 0;
             acc.revenue += s.revenue || 0;
             acc.active += s.organized ? 1 : 0;
+            acc.lowTxns += (s.organized && s.avgTxnsPerCamp < 10) ? 1 : 0;
+            acc.benchmark += (s.organized && s.avgTxnsPerCamp >= 25) ? 1 : 0;
             return acc;
-        }, {camps:0, mbu:0, txns:0, revenue:0, active:0});
+        }, {camps:0, mbu:0, txns:0, revenue:0, active:0, lowTxns:0, benchmark:0});
         setText('kpiCamps', fmtNum(t.camps));
         setText('kpiTxns', fmtNum(t.txns));
         setText('kpiMBU', fmtNum(t.mbu));
         setText('kpiRevenue', fmtRevenue(t.revenue));
         setText('kpiActive', t.active);
         setText('kpiPending', TOTAL_SD - t.active);
+        setText('alertLowTxnsCount', t.lowTxns);
+        setText('alertBenchmarkCount', t.benchmark);
 
         const noData = agg.filter(s => !s.hasRows);
         const noCamps = agg.filter(s => s.hasRows && !s.organized);
-        const lowTxns = agg.filter(s => s.organized && s.transactions < 20);
         setText('alertNoDataCount', noData.length);
         setText('alertNoCampsCount', noCamps.length);
-        setText('alertLowTxnsCount', lowTxns.length);
 
-        // Top Performers – matches image
         const byRegion = {};
         const byDivision = {};
         agg.forEach(s => {
@@ -690,12 +763,15 @@
     }
 
     // ================================================================
-    // RENDER FUNCTIONS for Regions, Divisions, Sub-Divisions
+    // RENDER FUNCTIONS with filters
     // ================================================================
-    function renderRegions(iso) {
+    function renderRegions(iso, divFilter) {
         const rows = iso ? getRowsForDate(iso) : allRows;
-        const agg = aggregateRows(rows);
-        if(!agg) { setHTML('regionTable', '<tr><td colspan="7" class="empty">No data</td></tr>'); return; }
+        let agg = aggregateRows(rows);
+        if (divFilter && divFilter !== 'all') {
+            agg = agg.filter(s => s.division === divFilter);
+        }
+        if(!agg || agg.length === 0) { setHTML('regionTable', '<tr><td colspan="7" class="empty">No data</td></tr>'); return; }
         const byRegion = {};
         agg.forEach(s => {
             if(!byRegion[s.region]) byRegion[s.region] = {camps:0, mbu:0, txns:0, revenue:0, active:0, total:0, missing:0};
@@ -713,13 +789,16 @@
         });
         setHTML('regionTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
-        setText('regionBadge', label);
+        setText('regionBadge', label + (divFilter && divFilter !== 'all' ? ' · ' + divFilter : ''));
     }
 
-    function renderDivisions(iso) {
+    function renderDivisions(iso, regFilter) {
         const rows = iso ? getRowsForDate(iso) : allRows;
-        const agg = aggregateRows(rows);
-        if(!agg) { setHTML('divisionTable', '<tr><td colspan="8" class="empty">No data</td></tr>'); return; }
+        let agg = aggregateRows(rows);
+        if (regFilter && regFilter !== 'all') {
+            agg = agg.filter(s => s.region === regFilter);
+        }
+        if(!agg || agg.length === 0) { setHTML('divisionTable', '<tr><td colspan="8" class="empty">No data</td></tr>'); return; }
         const byDivision = {};
         agg.forEach(s => {
             if(!byDivision[s.division]) byDivision[s.division] = {camps:0, mbu:0, txns:0, revenue:0, active:0, total:0, missing:0, region:s.region};
@@ -737,31 +816,76 @@
         });
         setHTML('divisionTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
-        setText('divisionBadge', label);
+        setText('divisionBadge', label + (regFilter && regFilter !== 'all' ? ' · ' + regFilter : ''));
     }
 
-    function renderSubDivisions(iso) {
+    function renderSubDivisions(iso, regFilter, divFilter) {
         const rows = iso ? getRowsForDate(iso) : allRows;
-        const agg = aggregateRows(rows);
-        if(!agg) { setHTML('subTable', '<tr><td colspan="9" class="empty">No data</td></tr>'); return; }
-        let html = `<tr><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Status</th><th class="num">Camps</th><th class="num">MBU</th><th class="num">Txns</th><th class="num">Revenue</th></tr>`;
+        let agg = aggregateRows(rows);
+        if (regFilter && regFilter !== 'all') agg = agg.filter(s => s.region === regFilter);
+        if (divFilter && divFilter !== 'all') agg = agg.filter(s => s.division === divFilter);
+        if(!agg || agg.length === 0) { setHTML('subTable', '<tr><td colspan="9" class="empty">No data</td></tr>'); return; }
+        let html = `<tr><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Status</th><th class="num">Camps</th><th class="num">Avg Txns</th><th class="num">MBU</th><th class="num">Txns</th><th class="num">Revenue</th></tr>`;
         agg.sort((a,b) => b.transactions - a.transactions).forEach(s => {
             let status = '🔴 No Camp', cls = 'red';
-            if(s.organized) { status = '✅ Active'; cls = 'green'; }
-            else if(s.hasRows) { status = '🟠 Partial'; cls = 'orange'; }
-            html += `<tr><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td><span style="color:${cls === 'green' ? '#1c7a45' : cls === 'orange' ? '#d4772a' : '#b3392b'}">${status}</span></td><td class="num">${s.camps}</td><td class="num">${fmtNum(s.mbu)}</td><td class="num">${fmtNum(s.transactions)}</td><td class="num">${fmtRevenue(s.revenue)}</td></tr>`;
+            if(s.organized) { 
+                if(s.avgTxnsPerCamp >= 25) { status = '✅ Benchmark'; cls = 'green'; }
+                else if(s.avgTxnsPerCamp >= 10) { status = '🟢 Active'; cls = 'blue'; }
+                else { status = '🟠 Low Txns'; cls = 'orange'; }
+            } else if(s.hasRows) { status = '🟠 Partial'; cls = 'orange'; }
+            const avgClass = s.organized && s.avgTxnsPerCamp < 10 ? 'highlight-low' : (s.organized && s.avgTxnsPerCamp >= 25 ? 'highlight-high' : '');
+            html += `<tr class="${avgClass}"><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td><span class="status-pill ${cls === 'green' ? 'green' : cls === 'red' ? 'red' : cls === 'orange' ? 'orange' : 'blue'}">${status}</span></td><td class="num">${s.camps}</td><td class="num">${s.avgTxnsPerCamp.toFixed(1)}</td><td class="num">${fmtNum(s.mbu)}</td><td class="num">${fmtNum(s.transactions)}</td><td class="num">${fmtRevenue(s.revenue)}</td></tr>`;
         });
         setHTML('subTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
-        setText('subBadge', label);
+        let filterText = '';
+        if (regFilter && regFilter !== 'all') filterText += ' · ' + regFilter;
+        if (divFilter && divFilter !== 'all') filterText += ' · ' + divFilter;
+        setText('subBadge', label + filterText);
     }
 
     // ================================================================
-    // RENDER OFFENDERS – with date header
+    // LOW TRANSACTIONS (<10)
     // ================================================================
-    function renderOffenders(iso) {
+    function renderLowTxns(iso, regFilter, divFilter) {
         const rows = iso ? getRowsForDate(iso) : allRows;
-        const agg = aggregateRows(rows);
+        let agg = aggregateRows(rows);
+        if (regFilter && regFilter !== 'all') agg = agg.filter(s => s.region === regFilter);
+        if (divFilter && divFilter !== 'all') agg = agg.filter(s => s.division === divFilter);
+        const list = agg.filter(s => s.organized && s.avgTxnsPerCamp < 10);
+        if(!list || list.length === 0) { setHTML('lowTxnTable', '<tr><td colspan="7" class="empty">✅ No sub-divisions with low transactions!</td></tr>'); return; }
+        let html = `<tr><th>#</th><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Camps</th><th class="num">Avg Txns</th><th class="num">Total Txns</th><th class="num">MBU</th></tr>`;
+        list.sort((a,b) => a.avgTxnsPerCamp - b.avgTxnsPerCamp).forEach((s, i) => {
+            html += `<tr class="highlight-low"><td>${i+1}</td><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td class="num">${s.camps}</td><td class="num">${s.avgTxnsPerCamp.toFixed(1)}</td><td class="num">${fmtNum(s.transactions)}</td><td class="num">${fmtNum(s.mbu)}</td></tr>`;
+        });
+        setHTML('lowTxnTable', html);
+    }
+
+    // ================================================================
+    // BENCHMARK (≥25)
+    // ================================================================
+    function renderBenchmark(iso, regFilter, divFilter) {
+        const rows = iso ? getRowsForDate(iso) : allRows;
+        let agg = aggregateRows(rows);
+        if (regFilter && regFilter !== 'all') agg = agg.filter(s => s.region === regFilter);
+        if (divFilter && divFilter !== 'all') agg = agg.filter(s => s.division === divFilter);
+        const list = agg.filter(s => s.organized && s.avgTxnsPerCamp >= 25);
+        if(!list || list.length === 0) { setHTML('benchmarkTable', '<tr><td colspan="7" class="empty">📊 No sub-divisions have reached the benchmark yet.</td></tr>'); return; }
+        let html = `<tr><th>#</th><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Camps</th><th class="num">Avg Txns</th><th class="num">Total Txns</th><th class="num">MBU</th></tr>`;
+        list.sort((a,b) => b.avgTxnsPerCamp - a.avgTxnsPerCamp).forEach((s, i) => {
+            html += `<tr class="highlight-high"><td>${i+1}</td><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td class="num">${s.camps}</td><td class="num">${s.avgTxnsPerCamp.toFixed(1)}</td><td class="num">${fmtNum(s.transactions)}</td><td class="num">${fmtNum(s.mbu)}</td></tr>`;
+        });
+        setHTML('benchmarkTable', html);
+    }
+
+    // ================================================================
+    // RENDER OFFENDERS
+    // ================================================================
+    function renderOffenders(iso, regFilter, divFilter) {
+        const rows = iso ? getRowsForDate(iso) : allRows;
+        let agg = aggregateRows(rows);
+        if (regFilter && regFilter !== 'all') agg = agg.filter(s => s.region === regFilter);
+        if (divFilter && divFilter !== 'all') agg = agg.filter(s => s.division === divFilter);
         const headerEl = document.getElementById('offenderReportHeader');
         const dateEl = document.getElementById('offenderReportDate');
         if (iso) {
@@ -771,7 +895,7 @@
             headerEl.style.display = 'block';
             dateEl.textContent = '📅 All Dates (combined)';
         }
-        if(!agg) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">No data</td></tr>'); return; }
+        if(!agg || agg.length === 0) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">No data</td></tr>'); return; }
         const list = agg.filter(s => s.hasRows && !s.organized);
         if(list.length === 0) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">🎉 All sub-divisions organized at least one camp!</td></tr>'); return; }
         let html = `<tr><th>#</th><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Rows</th></tr>`;
@@ -780,7 +904,10 @@
         });
         setHTML('offenderTable', html);
         const label = iso ? formatDateWithDay(iso) : 'All Dates';
-        setText('offenderBadge', label);
+        let filterText = '';
+        if (regFilter && regFilter !== 'all') filterText += ' · ' + regFilter;
+        if (divFilter && divFilter !== 'all') filterText += ' · ' + divFilter;
+        setText('offenderBadge', label + filterText);
     }
 
     // ================================================================
@@ -818,7 +945,7 @@
             d.txns += s.transactions || 0;
         });
 
-        let dateLabel = startDate === endDate ? formatDateWithDay(startDate) : formatDateRange(startDate, endDate);
+        let dateLabel = startDate === endDate ? formatDateWithDay(startDate) : formatDateWithDay(startDate) + ' to ' + formatDateWithDay(endDate);
         let html = `<div class="report-header"><h2>📋 Review of MBU Camps${filterDesc}</h2><p>${dateLabel} · Total Rows: ${filteredRows.length}</p></div>`;
         html += `<table><thead><tr><th>Region / Division</th><th>SD</th><th>Active</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Productivity</th></tr></thead><tbody>`;
         let grandTotal = {sd:0, active:0, camps:0, mbu:0, txns:0};
@@ -861,11 +988,6 @@
         };
     }
 
-    function formatDateRange(start, end) {
-        if (start === end) return formatDateWithDay(start);
-        return formatDateWithDay(start) + ' to ' + formatDateWithDay(end);
-    }
-
     function displayReport(reportData) {
         if (!reportData) {
             document.getElementById('reportMsg').innerHTML = '<div class="msg err">No data in selected date range with current filters.</div>';
@@ -877,40 +999,23 @@
         document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report generated for ' + reportData.dateLabel + '.</div>';
     }
 
-    function exportReportCSV(reportData) {
-        if (!reportData) { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
-        const rows = document.getElementById('reportPreview').querySelectorAll('tr');
+    function exportTableCSV(tableId, filename) {
+        const table = document.getElementById(tableId);
+        if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
         let csv = '';
+        const rows = table.querySelectorAll('tr');
         rows.forEach(row => {
             const cells = row.querySelectorAll('th, td');
             const values = [];
             cells.forEach(cell => values.push(cell.textContent.trim()));
             csv += values.join(',') + '\n';
         });
-        let filename = `GCAMIS_Report_${reportData.startDate}_to_${reportData.endDate}`;
-        if (reportData.regionFilter && reportData.regionFilter !== 'all') filename += '_' + reportData.regionFilter.replace(/\s/g, '_');
-        if (reportData.divisionFilter && reportData.divisionFilter !== 'all') filename += '_' + reportData.divisionFilter.replace(/\s/g, '_');
-        if (reportData.subFilter && reportData.subFilter !== 'all') filename += '_' + reportData.subFilter.replace(/\s/g, '_');
-        filename += '.csv';
         const blob = new Blob([csv], {type: 'text/csv'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
+        a.href = url; a.download = filename + '.csv';
         a.click();
         URL.revokeObjectURL(url);
-        document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report exported as CSV.</div>';
-    }
-
-    function printReportContent() {
-        const content = document.getElementById('reportPreview');
-        if (!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
-        const win = window.open('', '_blank', 'width=900,height=600');
-        win.document.write('<html><head><title>GCAMIS Report</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:center;}th{background:#0f2138;color:#fff;}.sub-total td{background:#eef1f5;font-weight:600;}.total-row td{background:#0f2138;color:#fff;font-weight:700;}</style></head><body>');
-        win.document.write(content.innerHTML);
-        win.document.write('</body></html>');
-        win.document.close();
-        win.print();
     }
 
     // ================================================================
@@ -938,10 +1043,38 @@
 
     document.getElementById('exportReportBtn').addEventListener('click', function() {
         if (!lastReportData) { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
-        exportReportCSV(lastReportData);
+        const rows = document.getElementById('reportPreview').querySelectorAll('tr');
+        let csv = '';
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('th, td');
+            const values = [];
+            cells.forEach(cell => values.push(cell.textContent.trim()));
+            csv += values.join(',') + '\n';
+        });
+        let filename = `GCAMIS_Report_${lastReportData.startDate}_to_${lastReportData.endDate}`;
+        if (lastReportData.regionFilter && lastReportData.regionFilter !== 'all') filename += '_' + lastReportData.regionFilter.replace(/\s/g, '_');
+        if (lastReportData.divisionFilter && lastReportData.divisionFilter !== 'all') filename += '_' + lastReportData.divisionFilter.replace(/\s/g, '_');
+        if (lastReportData.subFilter && lastReportData.subFilter !== 'all') filename += '_' + lastReportData.subFilter.replace(/\s/g, '_');
+        filename += '.csv';
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById('reportMsg').innerHTML = '<div class="msg ok">✅ Report exported as CSV.</div>';
     });
 
-    document.getElementById('printReportBtn').addEventListener('click', printReportContent);
+    document.getElementById('printReportBtn').addEventListener('click', function() {
+        const content = document.getElementById('reportPreview');
+        if (!content || content.innerHTML.trim() === '') { document.getElementById('reportMsg').innerHTML = '<div class="msg err">Generate a report first.</div>'; return; }
+        const win = window.open('', '_blank', 'width=900,height=600');
+        win.document.write('<html><head><title>GCAMIS Report</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:center;}th{background:#0f2138;color:#fff;}.sub-total td{background:#eef1f5;font-weight:600;}.total-row td{background:#0f2138;color:#fff;font-weight:700;}</style></head><body>');
+        win.document.write(content.innerHTML);
+        win.document.write('</body></html>');
+        win.document.close();
+        win.print();
+    });
 
     document.getElementById('viewSavedReportsBtn').addEventListener('click', function() {
         const card = document.getElementById('savedReportsCard');
@@ -1079,6 +1212,16 @@
     });
 
     // ================================================================
+    // EXPORT FUNCTIONS
+    // ================================================================
+    document.getElementById('regionExportBtn').addEventListener('click', function() { exportTableCSV('regionTable', 'Region_Summary'); });
+    document.getElementById('divisionExportBtn').addEventListener('click', function() { exportTableCSV('divisionTable', 'Division_Summary'); });
+    document.getElementById('subExportBtn').addEventListener('click', function() { exportTableCSV('subTable', 'SubDivision_Summary'); });
+    document.getElementById('lowTxnExportBtn').addEventListener('click', function() { exportTableCSV('lowTxnTable', 'Low_Transactions'); });
+    document.getElementById('benchmarkExportBtn').addEventListener('click', function() { exportTableCSV('benchmarkTable', 'Benchmark_Performance'); });
+    document.getElementById('offenderExportBtn').addEventListener('click', function() { exportTableCSV('offenderTable', 'Non_Organized'); });
+
+    // ================================================================
     // PRINT FUNCTIONS
     // ================================================================
     function printTable(tableId, title) {
@@ -1095,7 +1238,7 @@
     document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
     document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
     document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
-
+    
     document.getElementById('offenderPrintBtn').addEventListener('click', function() {
         const table = document.getElementById('offenderTable');
         if (!table || table.rows.length === 0) { alert('No data.'); return; }
@@ -1111,7 +1254,7 @@
     });
 
     // ================================================================
-    // EXPORT
+    // EXPORT (Main)
     // ================================================================
     document.getElementById('exportExcelBtn').addEventListener('click', function() {
         if (!allRows.length) { document.getElementById('exportMsg').innerHTML = '<div class="msg err">No data.</div>'; return; }
@@ -1164,10 +1307,29 @@
             const range = document.getElementById('dashboardDateRange').value;
             if (range === 'custom' && customDate) iso = customDate;
             renderDashboard(iso);
-        } else if (type === 'region') { renderRegions(iso); }
-        else if (type === 'division') { renderDivisions(iso); }
-        else if (type === 'sub') { renderSubDivisions(iso); }
-        else if (type === 'offender') { renderOffenders(iso); }
+        } else if (type === 'region') {
+            const divFilter = document.getElementById('regionDivisionFilter').value;
+            renderRegions(iso, divFilter);
+        } else if (type === 'division') {
+            const regFilter = document.getElementById('divisionRegionFilter').value;
+            renderDivisions(iso, regFilter);
+        } else if (type === 'sub') {
+            const regFilter = document.getElementById('subRegionFilter').value;
+            const divFilter = document.getElementById('subDivisionFilter').value;
+            renderSubDivisions(iso, regFilter, divFilter);
+        } else if (type === 'lowTxn') {
+            const regFilter = document.getElementById('lowTxnRegionFilter').value;
+            const divFilter = document.getElementById('lowTxnDivisionFilter').value;
+            renderLowTxns(iso, regFilter, divFilter);
+        } else if (type === 'benchmark') {
+            const regFilter = document.getElementById('benchmarkRegionFilter').value;
+            const divFilter = document.getElementById('benchmarkDivisionFilter').value;
+            renderBenchmark(iso, regFilter, divFilter);
+        } else if (type === 'offender') {
+            const regFilter = document.getElementById('offenderRegionFilter').value;
+            const divFilter = document.getElementById('offenderDivisionFilter').value;
+            renderOffenders(iso, regFilter, divFilter);
+        }
     }
 
     document.getElementById('dashboardApplyDate').addEventListener('click', function() { applyDateFilter('dashboard'); });
@@ -1178,34 +1340,9 @@
     document.getElementById('regionApplyBtn').addEventListener('click', function() { applyDateFilter('region'); });
     document.getElementById('divisionApplyBtn').addEventListener('click', function() { applyDateFilter('division'); });
     document.getElementById('subApplyBtn').addEventListener('click', function() { applyDateFilter('sub'); });
-    document.getElementById('offenderApplyBtn').addEventListener('click', function() {
-        const sel = document.getElementById('offenderDateSelect');
-        const val = sel ? sel.value : 'latest';
-        const iso = val === 'latest' ? getLatestDate() : val;
-        renderOffenders(iso);
-    });
-
-    // Offender export
-    document.getElementById('offenderExportBtn').addEventListener('click', function() {
-        const table = document.getElementById('offenderTable');
-        if (!table || table.rows.length === 0) { alert('No data to export.'); return; }
-        let csv = 'Sl No,Sub-Division,Division,Region,Rows\n';
-        const rows = table.querySelectorAll('tr');
-        rows.forEach((row, idx) => {
-            if (idx === 0) return; // skip header
-            const cells = row.querySelectorAll('td');
-            if (cells.length < 5) return;
-            const values = [];
-            cells.forEach(cell => values.push(cell.textContent.trim()));
-            csv += values.join(',') + '\n';
-        });
-        const blob = new Blob([csv], {type: 'text/csv'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'NonOrganized_Report.csv';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
+    document.getElementById('lowTxnApplyBtn').addEventListener('click', function() { applyDateFilter('lowTxn'); });
+    document.getElementById('benchmarkApplyBtn').addEventListener('click', function() { applyDateFilter('benchmark'); });
+    document.getElementById('offenderApplyBtn').addEventListener('click', function() { applyDateFilter('offender'); });
 
     // ================================================================
     // TAB SWITCHING
@@ -1216,11 +1353,9 @@
             this.classList.add('active');
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById('tab-' + this.dataset.tab).classList.add('active');
-            if (this.dataset.tab === 'offenders') {
-                const sel = document.getElementById('offenderDateSelect');
-                const val = sel ? sel.value : 'latest';
-                const iso = val === 'latest' ? getLatestDate() : val;
-                renderOffenders(iso);
+            const tab = this.dataset.tab;
+            if (tab === 'offenders' || tab === 'lowTxn' || tab === 'benchmark') {
+                applyDateFilter(tab === 'offenders' ? 'offender' : tab === 'lowTxn' ? 'lowTxn' : 'benchmark');
             }
         });
     });
@@ -1233,21 +1368,6 @@
         const dates = getAvailableDates();
         const latest = getLatestDate();
 
-        const selectors = ['regionDateSelect', 'divisionDateSelect', 'subDateSelect', 'offenderDateSelect'];
-        selectors.forEach(id => {
-            const sel = document.getElementById(id);
-            if (sel) {
-                sel.innerHTML = '<option value="latest">Latest Available</option>';
-                dates.forEach(iso => {
-                    const opt = document.createElement('option');
-                    opt.value = iso;
-                    opt.textContent = formatDateWithDay(iso);
-                    sel.appendChild(opt);
-                });
-                if (latest) sel.value = 'latest';
-            }
-        });
-
         if (latest) {
             document.getElementById('reportStartDate').value = latest;
             document.getElementById('reportEndDate').value = latest;
@@ -1255,16 +1375,20 @@
 
         if (latest) {
             renderDashboard(latest);
-            renderRegions(latest);
-            renderDivisions(latest);
-            renderSubDivisions(latest);
-            renderOffenders(latest);
+            renderRegions(latest, 'all');
+            renderDivisions(latest, 'all');
+            renderSubDivisions(latest, 'all', 'all');
+            renderLowTxns(latest, 'all', 'all');
+            renderBenchmark(latest, 'all', 'all');
+            renderOffenders(latest, 'all', 'all');
         } else {
             renderDashboard(null);
-            renderRegions(null);
-            renderDivisions(null);
-            renderSubDivisions(null);
-            renderOffenders(null);
+            renderRegions(null, 'all');
+            renderDivisions(null, 'all');
+            renderSubDivisions(null, 'all', 'all');
+            renderLowTxns(null, 'all', 'all');
+            renderBenchmark(null, 'all', 'all');
+            renderOffenders(null, 'all', 'all');
         }
         setText('connectionStatus', '🟢 Ready');
     }
