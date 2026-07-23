@@ -82,8 +82,8 @@
         .report-preview table th { background: #0f2138; color: #fff; font-weight: 700; }
         .report-preview table .sub-total td { background: #eef1f5; font-weight: 600; }
         .report-preview table .total-row td { background: #0f2138; color: #fff; font-weight: 700; }
-        .report-header { text-align: center; margin-bottom: 15px; }
-        .report-header h2 { color: #0f2138; font-size: 18px; }
+        .report-header { text-align: center; margin-bottom: 15px; border-bottom: 2px solid #0f2138; padding-bottom: 10px; }
+        .report-header h2 { color: #0f2138; font-size: 18px; margin: 0; }
         .report-header p { color: #697180; font-size: 13px; margin-top: 4px; }
         .google-sheet-setup { background: #f8f9fa; padding: 12px 16px; border-radius: 6px; margin: 10px 0; border: 1px solid #e1e4e9; }
         .google-sheet-setup input { padding: 6px 10px; border-radius: 4px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; width: 100%; max-width: 400px; margin: 4px 0; }
@@ -98,6 +98,28 @@
         .status-pill.blue { background: #e3edf7; color: #2a6b9e; }
         .month-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .month-selector input[type="month"] { padding: 6px 10px; border-radius: 6px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; }
+        /* Print Styles */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff; padding: 0; }
+            .app { max-width: 100%; padding: 10px; }
+            .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+            .header { border-radius: 0; }
+            .report-preview { border: none !important; padding: 0 !important; }
+            .report-preview table { font-size: 10px; }
+            .report-preview table th, .report-preview table td { padding: 4px 6px; }
+            .report-header h2 { font-size: 16px; }
+            .report-header p { font-size: 11px; }
+            .table-wrap { max-height: none; overflow: visible; }
+            table.data th { position: static; }
+            .tabs { display: none; }
+            .section { display: block !important; }
+            .section.active { display: block !important; }
+            .filter-group, .toolbar, .date-filter-group { display: none !important; }
+            .kpi-grid { grid-template-columns: repeat(3,1fr); }
+            .alerts-grid { grid-template-columns: repeat(2,1fr); }
+            .performer-grid { grid-template-columns: repeat(3,1fr); }
+        }
         @media (max-width: 768px) { 
             .kpi-grid { grid-template-columns: repeat(2,1fr); } 
             .header { flex-direction: column; align-items: stretch; } 
@@ -106,14 +128,13 @@
             .filter-group select { min-width: auto; } 
             .performer-grid { grid-template-columns: 1fr; }
         }
-        @media print { .no-print { display: none !important; } .report-preview { border: none !important; } }
     </style>
 </head>
 <body>
 
 <div class="app">
 
-    <header class="header">
+    <header class="header no-print">
         <div class="brand">
             <div class="logo">G</div>
             <div><h1>G<span>CAMIS</span></h1><small>Gujarat Circle Aadhaar Camp Monitoring</small></div>
@@ -124,7 +145,7 @@
         </div>
     </header>
 
-    <nav class="tabs">
+    <nav class="tabs no-print">
         <button class="active" data-tab="today">📊 Dashboard</button>
         <button data-tab="entry">📥 Data Entry</button>
         <button data-tab="googlesheet">📊 Google Sheets</button>
@@ -141,7 +162,7 @@
 
     <!-- ================= DASHBOARD ================= -->
     <section class="section active" id="tab-today">
-        <div class="card" style="padding:10px 16px;">
+        <div class="card no-print" style="padding:10px 16px;">
             <div class="date-filter-group">
                 <label>📅 View Data For:</label>
                 <select id="dashboardDateRange">
@@ -152,6 +173,11 @@
                 <button class="gold" id="dashboardApplyDate">Apply</button>
                 <span id="dashboardDateLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
             </div>
+        </div>
+        <!-- Report Header for Dashboard (visible on print) -->
+        <div class="report-header" id="dashboardPrintHeader" style="display:none;">
+            <h2>📊 GCAMIS Dashboard</h2>
+            <p id="dashboardPrintDate">Date: --</p>
         </div>
         <div class="kpi-grid">
             <div class="kpi-card green"><div class="label">🏕️ Camps</div><div class="value" id="kpiCamps">0</div><div class="sub" id="kpiCampsSub">--</div></div>
@@ -175,7 +201,6 @@
                 <div class="performer-card"><div class="label">🏆 Best Sub-Division</div><div class="value" id="bestSubDivision">—</div><div class="sub" id="bestSubDivisionSub"></div></div>
             </div>
         </div>
-        <!-- Region-wise Productivity -->
         <div class="card">
             <h2>📊 Region-wise Camp Productivity <span class="badge">Txns per Camp</span></h2>
             <div class="desc">Average transactions per camp across each region for the selected date.</div>
@@ -225,7 +250,7 @@
 
     <!-- ================= REPORTS ================= -->
     <section class="section" id="tab-report">
-        <div class="card">
+        <div class="card no-print">
             <h2>📋 Reports <span class="badge">Custom Date Range &amp; Filters</span></h2>
             <div class="desc">Generate reports for any date range with region/division/sub-division filters.</div>
             <div class="filter-group" style="margin-bottom:14px;">
@@ -247,9 +272,9 @@
                 <button class="secondary" id="viewSavedReportsBtn">📂 View Saved</button>
             </div>
             <div id="reportMsg"></div>
-            <div id="reportContent" style="display:none;">
-                <div class="report-preview" id="reportPreview"></div>
-            </div>
+        </div>
+        <div id="reportContent" style="display:none;">
+            <div class="report-preview" id="reportPreview"></div>
         </div>
         <div class="card" id="savedReportsCard" style="display:none;">
             <h2>📂 Saved Reports</h2>
@@ -259,16 +284,24 @@
 
     <!-- ================= REGIONS ================= -->
     <section class="section" id="tab-regions">
-        <div class="card">
+        <div class="card no-print">
             <h2>🌍 Region Summary <span class="badge" id="regionBadge">--</span></h2>
             <div class="filter-group" style="margin-bottom:10px;">
-                <label>📅 Date:</label>
-                <select id="regionDateSelect"><option value="latest">Latest</option></select>
+                <label>📅 From:</label>
+                <input type="date" id="regionStartDate">
+                <label>To:</label>
+                <input type="date" id="regionEndDate">
                 <label>🏢 Division:</label>
                 <select id="regionDivisionFilter"><option value="all">All Divisions</option></select>
                 <button class="gold" id="regionApplyBtn">Apply</button>
                 <button class="secondary" id="regionPrintBtn">🖨️ Print</button>
                 <button class="success" id="regionExportBtn">📤 CSV</button>
+            </div>
+        </div>
+        <div id="regionReportContainer">
+            <div class="report-header" id="regionReportHeader" style="display:none;">
+                <h2>🌍 Region Summary Report</h2>
+                <p id="regionReportDate">Date: --</p>
             </div>
             <div class="table-wrap"><table class="data" id="regionTable"></table></div>
         </div>
@@ -276,16 +309,24 @@
 
     <!-- ================= DIVISIONS ================= -->
     <section class="section" id="tab-divisions">
-        <div class="card">
+        <div class="card no-print">
             <h2>🏢 Division Summary <span class="badge" id="divisionBadge">--</span></h2>
             <div class="filter-group" style="margin-bottom:10px;">
-                <label>📅 Date:</label>
-                <select id="divisionDateSelect"><option value="latest">Latest</option></select>
+                <label>📅 From:</label>
+                <input type="date" id="divisionStartDate">
+                <label>To:</label>
+                <input type="date" id="divisionEndDate">
                 <label>🌍 Region:</label>
                 <select id="divisionRegionFilter"><option value="all">All Regions</option></select>
                 <button class="gold" id="divisionApplyBtn">Apply</button>
                 <button class="secondary" id="divisionPrintBtn">🖨️ Print</button>
                 <button class="success" id="divisionExportBtn">📤 CSV</button>
+            </div>
+        </div>
+        <div id="divisionReportContainer">
+            <div class="report-header" id="divisionReportHeader" style="display:none;">
+                <h2>🏢 Division Summary Report</h2>
+                <p id="divisionReportDate">Date: --</p>
             </div>
             <div class="table-wrap"><table class="data" id="divisionTable"></table></div>
         </div>
@@ -293,11 +334,13 @@
 
     <!-- ================= SUB-DIVISIONS ================= -->
     <section class="section" id="tab-subdivisions">
-        <div class="card">
+        <div class="card no-print">
             <h2>📍 Sub-Division Summary <span class="badge" id="subBadge">--</span></h2>
             <div class="filter-group" style="margin-bottom:10px;">
-                <label>📅 Date:</label>
-                <select id="subDateSelect"><option value="latest">Latest</option></select>
+                <label>📅 From:</label>
+                <input type="date" id="subStartDate">
+                <label>To:</label>
+                <input type="date" id="subEndDate">
                 <label>🌍 Region:</label>
                 <select id="subRegionFilter"><option value="all">All Regions</option></select>
                 <label>🏢 Division:</label>
@@ -306,24 +349,39 @@
                 <button class="secondary" id="subPrintBtn">🖨️ Print</button>
                 <button class="success" id="subExportBtn">📤 CSV</button>
             </div>
+        </div>
+        <div id="subReportContainer">
+            <div class="report-header" id="subReportHeader" style="display:none;">
+                <h2>📍 Sub-Division Summary Report</h2>
+                <p id="subReportDate">Date: --</p>
+            </div>
             <div class="table-wrap"><table class="data" id="subTable"></table></div>
         </div>
     </section>
 
     <!-- ================= LOW TRANSACTIONS ================= -->
     <section class="section" id="tab-lowtxn">
-        <div class="card">
+        <div class="card no-print">
             <h2>📉 Low Transaction Sub-Divisions <span class="badge">&lt; 10 per camp</span></h2>
             <div class="desc">Sub-divisions with average transactions per camp less than 10.</div>
             <div class="filter-group" style="margin-bottom:10px;">
-                <label>📅 Date:</label>
-                <select id="lowTxnDateSelect"><option value="latest">Latest</option></select>
+                <label>📅 From:</label>
+                <input type="date" id="lowTxnStartDate">
+                <label>To:</label>
+                <input type="date" id="lowTxnEndDate">
                 <label>🌍 Region:</label>
                 <select id="lowTxnRegionFilter"><option value="all">All Regions</option></select>
                 <label>🏢 Division:</label>
                 <select id="lowTxnDivisionFilter"><option value="all">All Divisions</option></select>
                 <button class="gold" id="lowTxnApplyBtn">Apply</button>
                 <button class="success" id="lowTxnExportBtn">📤 CSV</button>
+                <button class="secondary" id="lowTxnPrintBtn">🖨️ Print</button>
+            </div>
+        </div>
+        <div id="lowTxnReportContainer">
+            <div class="report-header" id="lowTxnReportHeader" style="display:none;">
+                <h2>📉 Low Transaction Sub-Divisions (&lt;10 per camp)</h2>
+                <p id="lowTxnReportDate">Date: --</p>
             </div>
             <div class="table-wrap"><table class="data" id="lowTxnTable"></table></div>
         </div>
@@ -331,18 +389,27 @@
 
     <!-- ================= BENCHMARK ================= -->
     <section class="section" id="tab-benchmark">
-        <div class="card">
+        <div class="card no-print">
             <h2>🎯 Benchmark Performance <span class="badge">≥ 25 transactions per camp</span></h2>
             <div class="desc">Sub-divisions meeting or exceeding the benchmark of 25 transactions per camp.</div>
             <div class="filter-group" style="margin-bottom:10px;">
-                <label>📅 Date:</label>
-                <select id="benchmarkDateSelect"><option value="latest">Latest</option></select>
+                <label>📅 From:</label>
+                <input type="date" id="benchmarkStartDate">
+                <label>To:</label>
+                <input type="date" id="benchmarkEndDate">
                 <label>🌍 Region:</label>
                 <select id="benchmarkRegionFilter"><option value="all">All Regions</option></select>
                 <label>🏢 Division:</label>
                 <select id="benchmarkDivisionFilter"><option value="all">All Divisions</option></select>
                 <button class="gold" id="benchmarkApplyBtn">Apply</button>
                 <button class="success" id="benchmarkExportBtn">📤 CSV</button>
+                <button class="secondary" id="benchmarkPrintBtn">🖨️ Print</button>
+            </div>
+        </div>
+        <div id="benchmarkReportContainer">
+            <div class="report-header" id="benchmarkReportHeader" style="display:none;">
+                <h2>🎯 Benchmark Performance (≥25 Txns/Camp)</h2>
+                <p id="benchmarkReportDate">Date: --</p>
             </div>
             <div class="table-wrap"><table class="data" id="benchmarkTable"></table></div>
         </div>
@@ -350,12 +417,14 @@
 
     <!-- ================= NON-ORGANIZED ================= -->
     <section class="section" id="tab-offenders">
-        <div class="card">
+        <div class="card no-print">
             <h2>⚠️ Non-Organized Tracker <span class="badge" id="offenderBadge">--</span></h2>
-            <div class="desc">Sub-divisions with ZERO successful camps for the selected date.</div>
+            <div class="desc">Sub-divisions with ZERO successful camps for the selected date range.</div>
             <div class="filter-group" style="margin-bottom:10px;">
-                <label>📅 Date:</label>
-                <select id="offenderDateSelect"><option value="latest">Latest</option></select>
+                <label>📅 From:</label>
+                <input type="date" id="offenderStartDate">
+                <label>To:</label>
+                <input type="date" id="offenderEndDate">
                 <label>🌍 Region:</label>
                 <select id="offenderRegionFilter"><option value="all">All Regions</option></select>
                 <label>🏢 Division:</label>
@@ -364,19 +433,19 @@
                 <button class="secondary" id="offenderPrintBtn">🖨️ Print</button>
                 <button class="success" id="offenderExportBtn">📤 CSV</button>
             </div>
-            <div id="offenderReportContainer">
-                <div id="offenderReportHeader" style="text-align:center;margin-bottom:10px;display:none;">
-                    <h2 style="color:#0f2138;font-size:18px;">🚫 Non-Organized Sub-Divisions</h2>
-                    <p id="offenderReportDate" style="color:#697180;font-size:13px;"></p>
-                </div>
-                <div class="table-wrap"><table class="data" id="offenderTable"></table></div>
+        </div>
+        <div id="offenderReportContainer">
+            <div class="report-header" id="offenderReportHeader" style="display:none;">
+                <h2>🚫 Non-Organized Sub-Divisions</h2>
+                <p id="offenderReportDate">Date: --</p>
             </div>
+            <div class="table-wrap"><table class="data" id="offenderTable"></table></div>
         </div>
     </section>
 
     <!-- ================= MONTHLY SUMMARY ================= -->
     <section class="section" id="tab-monthly">
-        <div class="card">
+        <div class="card no-print">
             <h2>📅 Monthly Circle Summary <span class="badge">Day-wise Camp Data</span></h2>
             <div class="desc">Circle-wide summary showing number of camps arranged, total transactions, and MBU transactions broken down by day for the selected month.</div>
             <div class="month-selector" style="margin-bottom:14px;">
@@ -384,11 +453,16 @@
                 <input type="month" id="monthPicker">
                 <button class="gold" id="monthlyApplyBtn">Apply</button>
                 <button class="success" id="monthlyExportBtn">📤 CSV</button>
+                <button class="secondary" id="monthlyPrintBtn">🖨️ Print</button>
                 <span id="monthlySummaryLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
             </div>
-            <div id="monthlySummaryContainer">
-                <div class="table-wrap"><table class="data" id="monthlyTable"></table></div>
+        </div>
+        <div id="monthlyReportContainer">
+            <div class="report-header" id="monthlyReportHeader" style="display:none;">
+                <h2>📅 Monthly Circle Summary</h2>
+                <p id="monthlyReportDate">Month: --</p>
             </div>
+            <div class="table-wrap"><table class="data" id="monthlyTable"></table></div>
         </div>
     </section>
 
@@ -565,6 +639,10 @@
     }
     function getDayName(iso) { if(!iso) return ''; const date = new Date(iso+'T00:00:00'); return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()]; }
     function formatDateWithDay(iso) { return getDayName(iso) + ', ' + isoToDisplay(iso); }
+    function formatDateRange(start, end) {
+        if (start === end) return formatDateWithDay(start);
+        return formatDateWithDay(start) + ' to ' + formatDateWithDay(end);
+    }
     function fmtNum(n) { return (n||0).toLocaleString('en-IN'); }
     function fmtRevenue(n) { return '₹' + fmtNum(Math.round(n||0)); }
     function setText(id, value) { const el = document.getElementById(id); if (el) el.textContent = value; }
@@ -689,21 +767,6 @@
         offDivSel.innerHTML = '<option value="all">All Divisions</option>';
         divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; offDivSel.appendChild(opt); });
 
-        // Date selects
-        ['regionDateSelect', 'divisionDateSelect', 'subDateSelect', 'lowTxnDateSelect', 'benchmarkDateSelect', 'offenderDateSelect'].forEach(id => {
-            const sel = document.getElementById(id);
-            if (sel) {
-                sel.innerHTML = '<option value="latest">Latest Available</option>';
-                const dates = getAvailableDates();
-                dates.forEach(iso => {
-                    const opt = document.createElement('option');
-                    opt.value = iso;
-                    opt.textContent = formatDateWithDay(iso);
-                    sel.appendChild(opt);
-                });
-            }
-        });
-
         // Set month picker to current month
         const monthPicker = document.getElementById('monthPicker');
         if (monthPicker) {
@@ -712,6 +775,30 @@
             const month = String(now.getMonth() + 1).padStart(2, '0');
             monthPicker.value = `${year}-${month}`;
         }
+
+        // Set default dates for all reports
+        const dates = getAvailableDates();
+        const latest = getLatestDate();
+        const firstDate = dates.length > 0 ? dates[0] : null;
+        
+        const dateInputs = [
+            'regionStartDate', 'regionEndDate',
+            'divisionStartDate', 'divisionEndDate',
+            'subStartDate', 'subEndDate',
+            'lowTxnStartDate', 'lowTxnEndDate',
+            'benchmarkStartDate', 'benchmarkEndDate',
+            'offenderStartDate', 'offenderEndDate'
+        ];
+        dateInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (id.includes('End')) {
+                    el.value = latest || '';
+                } else {
+                    el.value = firstDate || '';
+                }
+            }
+        });
     }
 
     function getAvailableDates() {
@@ -720,11 +807,10 @@
         return [...dates].sort();
     }
 
-    function getRowsForDate(iso) {
-        return allRows.filter(r => r.date === iso);
-    }
-
     function getRowsForDateRange(start, end) {
+        if (!start && !end) return allRows;
+        if (!start) return allRows.filter(r => r.date <= end);
+        if (!end) return allRows.filter(r => r.date >= start);
         return allRows.filter(r => r.date >= start && r.date <= end);
     }
 
@@ -737,7 +823,7 @@
     // RENDER DASHBOARD
     // ================================================================
     function renderDashboard(iso) {
-        const rows = iso ? getRowsForDate(iso) : allRows;
+        const rows = iso ? allRows.filter(r => r.date === iso) : allRows;
         const agg = aggregateRows(rows);
         const t = agg.reduce((acc,s) => {
             acc.camps += s.camps || 0;
@@ -796,6 +882,12 @@
         const labelEl = document.getElementById('dashboardDateLabel');
         if (labelEl) labelEl.textContent = label;
 
+        // Update print header
+        const printHeader = document.getElementById('dashboardPrintHeader');
+        const printDate = document.getElementById('dashboardPrintDate');
+        if (printHeader) printHeader.style.display = 'block';
+        if (printDate) printDate.textContent = 'Date: ' + (iso ? formatDateWithDay(iso) : 'All Dates');
+
         // Render region productivity
         renderRegionProductivity(agg);
     }
@@ -823,10 +915,10 @@
     }
 
     // ================================================================
-    // RENDER FUNCTIONS with filters
+    // RENDER FUNCTIONS with date range and filters
     // ================================================================
-    function renderRegions(iso, divFilter) {
-        const rows = iso ? getRowsForDate(iso) : allRows;
+    function renderRegions(startDate, endDate, divFilter) {
+        const rows = getRowsForDateRange(startDate, endDate);
         let agg = aggregateRows(rows);
         if (divFilter && divFilter !== 'all') {
             agg = agg.filter(s => s.division === divFilter);
@@ -848,12 +940,20 @@
             html += `<tr><td>${name}</td><td class="num">${data.total}</td><td class="num">${data.active}</td><td class="num">${data.missing}</td><td class="num">${fmtNum(data.camps)}</td><td class="num">${fmtNum(data.mbu)}</td><td class="num">${fmtNum(data.txns)}</td><td class="num">${fmtRevenue(data.revenue)}</td></tr>`;
         });
         setHTML('regionTable', html);
-        const label = iso ? formatDateWithDay(iso) : 'All Dates';
-        setText('regionBadge', label + (divFilter && divFilter !== 'all' ? ' · ' + divFilter : ''));
+        
+        // Update report header
+        const header = document.getElementById('regionReportHeader');
+        const dateEl = document.getElementById('regionReportDate');
+        if (header) header.style.display = 'block';
+        if (dateEl) {
+            const label = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
+            dateEl.textContent = 'Date: ' + label + (divFilter && divFilter !== 'all' ? ' · Division: ' + divFilter : '');
+        }
+        setText('regionBadge', (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates');
     }
 
-    function renderDivisions(iso, regFilter) {
-        const rows = iso ? getRowsForDate(iso) : allRows;
+    function renderDivisions(startDate, endDate, regFilter) {
+        const rows = getRowsForDateRange(startDate, endDate);
         let agg = aggregateRows(rows);
         if (regFilter && regFilter !== 'all') {
             agg = agg.filter(s => s.region === regFilter);
@@ -875,12 +975,19 @@
             html += `<tr><td>${name}</td><td>${data.region}</td><td class="num">${data.total}</td><td class="num">${data.active}</td><td class="num">${data.missing}</td><td class="num">${fmtNum(data.camps)}</td><td class="num">${fmtNum(data.mbu)}</td><td class="num">${fmtNum(data.txns)}</td><td class="num">${fmtRevenue(data.revenue)}</td></tr>`;
         });
         setHTML('divisionTable', html);
-        const label = iso ? formatDateWithDay(iso) : 'All Dates';
-        setText('divisionBadge', label + (regFilter && regFilter !== 'all' ? ' · ' + regFilter : ''));
+        
+        const header = document.getElementById('divisionReportHeader');
+        const dateEl = document.getElementById('divisionReportDate');
+        if (header) header.style.display = 'block';
+        if (dateEl) {
+            const label = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
+            dateEl.textContent = 'Date: ' + label + (regFilter && regFilter !== 'all' ? ' · Region: ' + regFilter : '');
+        }
+        setText('divisionBadge', (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates');
     }
 
-    function renderSubDivisions(iso, regFilter, divFilter) {
-        const rows = iso ? getRowsForDate(iso) : allRows;
+    function renderSubDivisions(startDate, endDate, regFilter, divFilter) {
+        const rows = getRowsForDateRange(startDate, endDate);
         let agg = aggregateRows(rows);
         if (regFilter && regFilter !== 'all') agg = agg.filter(s => s.region === regFilter);
         if (divFilter && divFilter !== 'all') agg = agg.filter(s => s.division === divFilter);
@@ -897,18 +1004,25 @@
             html += `<tr class="${avgClass}"><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td><span class="status-pill ${cls === 'green' ? 'green' : cls === 'red' ? 'red' : cls === 'orange' ? 'orange' : 'blue'}">${status}</span></td><td class="num">${s.camps}</td><td class="num">${s.avgTxnsPerCamp.toFixed(1)}</td><td class="num">${fmtNum(s.mbu)}</td><td class="num">${fmtNum(s.transactions)}</td><td class="num">${fmtRevenue(s.revenue)}</td></tr>`;
         });
         setHTML('subTable', html);
-        const label = iso ? formatDateWithDay(iso) : 'All Dates';
-        let filterText = '';
-        if (regFilter && regFilter !== 'all') filterText += ' · ' + regFilter;
-        if (divFilter && divFilter !== 'all') filterText += ' · ' + divFilter;
-        setText('subBadge', label + filterText);
+        
+        const header = document.getElementById('subReportHeader');
+        const dateEl = document.getElementById('subReportDate');
+        if (header) header.style.display = 'block';
+        if (dateEl) {
+            let label = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
+            let filters = '';
+            if (regFilter && regFilter !== 'all') filters += ' · Region: ' + regFilter;
+            if (divFilter && divFilter !== 'all') filters += ' · Division: ' + divFilter;
+            dateEl.textContent = 'Date: ' + label + filters;
+        }
+        setText('subBadge', (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates');
     }
 
     // ================================================================
     // LOW TRANSACTIONS
     // ================================================================
-    function renderLowTxns(iso, regFilter, divFilter) {
-        const rows = iso ? getRowsForDate(iso) : allRows;
+    function renderLowTxns(startDate, endDate, regFilter, divFilter) {
+        const rows = getRowsForDateRange(startDate, endDate);
         let agg = aggregateRows(rows);
         if (regFilter && regFilter !== 'all') agg = agg.filter(s => s.region === regFilter);
         if (divFilter && divFilter !== 'all') agg = agg.filter(s => s.division === divFilter);
@@ -919,13 +1033,21 @@
             html += `<tr class="highlight-low"><td>${i+1}</td><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td class="num">${s.camps}</td><td class="num">${s.avgTxnsPerCamp.toFixed(1)}</td><td class="num">${fmtNum(s.transactions)}</td><td class="num">${fmtNum(s.mbu)}</td></tr>`;
         });
         setHTML('lowTxnTable', html);
+        
+        const header = document.getElementById('lowTxnReportHeader');
+        const dateEl = document.getElementById('lowTxnReportDate');
+        if (header) header.style.display = 'block';
+        if (dateEl) {
+            const label = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
+            dateEl.textContent = 'Date: ' + label;
+        }
     }
 
     // ================================================================
     // BENCHMARK
     // ================================================================
-    function renderBenchmark(iso, regFilter, divFilter) {
-        const rows = iso ? getRowsForDate(iso) : allRows;
+    function renderBenchmark(startDate, endDate, regFilter, divFilter) {
+        const rows = getRowsForDateRange(startDate, endDate);
         let agg = aggregateRows(rows);
         if (regFilter && regFilter !== 'all') agg = agg.filter(s => s.region === regFilter);
         if (divFilter && divFilter !== 'all') agg = agg.filter(s => s.division === divFilter);
@@ -936,24 +1058,31 @@
             html += `<tr class="highlight-high"><td>${i+1}</td><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td class="num">${s.camps}</td><td class="num">${s.avgTxnsPerCamp.toFixed(1)}</td><td class="num">${fmtNum(s.transactions)}</td><td class="num">${fmtNum(s.mbu)}</td></tr>`;
         });
         setHTML('benchmarkTable', html);
+        
+        const header = document.getElementById('benchmarkReportHeader');
+        const dateEl = document.getElementById('benchmarkReportDate');
+        if (header) header.style.display = 'block';
+        if (dateEl) {
+            const label = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
+            dateEl.textContent = 'Date: ' + label;
+        }
     }
 
     // ================================================================
     // RENDER OFFENDERS
     // ================================================================
-    function renderOffenders(iso, regFilter, divFilter) {
-        const rows = iso ? getRowsForDate(iso) : allRows;
+    function renderOffenders(startDate, endDate, regFilter, divFilter) {
+        const rows = getRowsForDateRange(startDate, endDate);
         let agg = aggregateRows(rows);
         if (regFilter && regFilter !== 'all') agg = agg.filter(s => s.region === regFilter);
         if (divFilter && divFilter !== 'all') agg = agg.filter(s => s.division === divFilter);
+        
         const headerEl = document.getElementById('offenderReportHeader');
         const dateEl = document.getElementById('offenderReportDate');
-        if (iso) {
-            headerEl.style.display = 'block';
-            dateEl.textContent = '📅 ' + formatDateWithDay(iso);
-        } else {
-            headerEl.style.display = 'block';
-            dateEl.textContent = '📅 All Dates (combined)';
+        if (headerEl) headerEl.style.display = 'block';
+        if (dateEl) {
+            const label = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
+            dateEl.textContent = 'Date: ' + label;
         }
         if(!agg || agg.length === 0) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">No data</td></tr>'); return; }
         const list = agg.filter(s => s.hasRows && !s.organized);
@@ -963,11 +1092,8 @@
             html += `<tr><td>${i+1}</td><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td class="num">${s.hasRows}</td></tr>`;
         });
         setHTML('offenderTable', html);
-        const label = iso ? formatDateWithDay(iso) : 'All Dates';
-        let filterText = '';
-        if (regFilter && regFilter !== 'all') filterText += ' · ' + regFilter;
-        if (divFilter && divFilter !== 'all') filterText += ' · ' + divFilter;
-        setText('offenderBadge', label + filterText);
+        const label = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
+        setText('offenderBadge', label);
     }
 
     // ================================================================
@@ -1029,6 +1155,15 @@
         html += `<tr class="total-row"><td><strong>Total</strong></td><td>${monthlySummary.length} days</td><td class="num"><strong>${fmtNum(totals.camps)}</strong></td><td class="num"><strong>${fmtNum(totals.txns)}</strong></td><td class="num"><strong>${fmtNum(totals.mbu)}</strong></td></tr>`;
         setHTML('monthlyTable', html);
         document.getElementById('monthlySummaryLabel').textContent = `${monthlySummary.length} days · ${fmtNum(totals.camps)} camps · ${fmtNum(totals.txns)} txns · ${fmtNum(totals.mbu)} MBU`;
+        
+        // Update monthly report header
+        const header = document.getElementById('monthlyReportHeader');
+        const dateEl = document.getElementById('monthlyReportDate');
+        if (header) header.style.display = 'block';
+        if (dateEl) {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            dateEl.textContent = 'Month: ' + monthNames[month-1] + ' ' + year;
+        }
     }
 
     // ================================================================
@@ -1066,7 +1201,7 @@
             d.txns += s.transactions || 0;
         });
 
-        let dateLabel = startDate === endDate ? formatDateWithDay(startDate) : formatDateWithDay(startDate) + ' to ' + formatDateWithDay(endDate);
+        let dateLabel = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
         let html = `<div class="report-header"><h2>📋 Review of MBU Camps${filterDesc}</h2><p>${dateLabel} · Total Rows: ${filteredRows.length}</p></div>`;
         html += `<table><thead><tr><th>Region / Division</th><th>SD</th><th>Active</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Productivity</th></tr></thead><tbody>`;
         let grandTotal = {sd:0, active:0, camps:0, mbu:0, txns:0};
@@ -1349,33 +1484,56 @@
     // ================================================================
     // PRINT FUNCTIONS
     // ================================================================
-    function printTable(tableId, title) {
+    function printSection(tableId, title, headerId) {
         const table = document.getElementById(tableId);
-        if (!table || table.rows.length === 0) { alert('No data.'); return; }
+        if (!table || table.rows.length === 0) { alert('No data to print.'); return; }
+        const headerEl = document.getElementById(headerId);
+        let headerHTML = '';
+        if (headerEl) headerHTML = headerEl.outerHTML;
         const win = window.open('', '_blank', 'width=900,height=600');
-        win.document.write('<html><head><title>'+title+'</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:left;}th{background:#0f2138;color:#fff;}</style></head><body><h2>'+title+'</h2>');
+        win.document.write(`<html><head><title>${title}</title>
+            <style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:left;}th{background:#0f2138;color:#fff;}.total-row td{background:#0f2138;color:#fff;font-weight:700;}.sub-total td{background:#eef1f5;font-weight:600;}.report-header{text-align:center;margin-bottom:15px;border-bottom:2px solid #0f2138;padding-bottom:10px;}.report-header h2{color:#0f2138;font-size:18px;margin:0;}.report-header p{color:#697180;font-size:13px;margin-top:4px;}.num{text-align:right;}@media print{body{padding:10px;}}</style>
+            </head><body>`);
+        win.document.write(headerHTML);
         win.document.write(table.outerHTML);
         win.document.write('</body></html>');
         win.document.close();
         win.print();
     }
 
-    document.getElementById('regionPrintBtn').addEventListener('click', function() { printTable('regionTable', 'Region Summary'); });
-    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printTable('divisionTable', 'Division Summary'); });
-    document.getElementById('subPrintBtn').addEventListener('click', function() { printTable('subTable', 'Sub-Division Summary'); });
-    
+    // Region print
+    document.getElementById('regionPrintBtn').addEventListener('click', function() {
+        printSection('regionTable', 'Region Summary', 'regionReportHeader');
+    });
+
+    // Division print
+    document.getElementById('divisionPrintBtn').addEventListener('click', function() {
+        printSection('divisionTable', 'Division Summary', 'divisionReportHeader');
+    });
+
+    // Sub-Division print
+    document.getElementById('subPrintBtn').addEventListener('click', function() {
+        printSection('subTable', 'Sub-Division Summary', 'subReportHeader');
+    });
+
+    // Low Txn print
+    document.getElementById('lowTxnPrintBtn').addEventListener('click', function() {
+        printSection('lowTxnTable', 'Low Transaction Report', 'lowTxnReportHeader');
+    });
+
+    // Benchmark print
+    document.getElementById('benchmarkPrintBtn').addEventListener('click', function() {
+        printSection('benchmarkTable', 'Benchmark Performance Report', 'benchmarkReportHeader');
+    });
+
+    // Offender print
     document.getElementById('offenderPrintBtn').addEventListener('click', function() {
-        const table = document.getElementById('offenderTable');
-        if (!table || table.rows.length === 0) { alert('No data.'); return; }
-        const dateText = document.getElementById('offenderReportDate').textContent || '';
-        const win = window.open('', '_blank', 'width=900,height=600');
-        win.document.write(`<html><head><title>Non-Organized Report</title>
-            <style>body{font-family:Arial;padding:20px;}h2{color:#0f2138;text-align:center;}p{color:#697180;text-align:center;margin-bottom:15px;}table{width:100%;border-collapse:collapse;font-size:12px;}th,td{border:1px solid #ddd;padding:6px;text-align:left;}th{background:#0f2138;color:#fff;}</style>
-            </head><body><h2>🚫 Non-Organized Sub-Divisions</h2><p>${dateText}</p>`);
-        win.document.write(table.outerHTML);
-        win.document.write('</body></html>');
-        win.document.close();
-        win.print();
+        printSection('offenderTable', 'Non-Organized Report', 'offenderReportHeader');
+    });
+
+    // Monthly print
+    document.getElementById('monthlyPrintBtn').addEventListener('click', function() {
+        printSection('monthlyTable', 'Monthly Summary Report', 'monthlyReportHeader');
     });
 
     // ================================================================
@@ -1423,51 +1581,59 @@
     // ================================================================
     // DATE FILTER HANDLERS
     // ================================================================
-    function applyDateFilter(type) {
-        const sel = document.getElementById(type + 'DateSelect');
-        const val = sel ? sel.value : 'latest';
-        let iso = val === 'latest' ? getLatestDate() : val;
-        if (type === 'dashboard') {
-            const customDate = document.getElementById('dashboardCustomDate').value;
-            const range = document.getElementById('dashboardDateRange').value;
-            if (range === 'custom' && customDate) iso = customDate;
-            renderDashboard(iso);
-        } else if (type === 'region') {
+    function applyReportFilter(type) {
+        const startEl = document.getElementById(type + 'StartDate');
+        const endEl = document.getElementById(type + 'EndDate');
+        const startDate = startEl ? startEl.value : '';
+        const endDate = endEl ? endEl.value : '';
+        
+        if (type === 'region') {
             const divFilter = document.getElementById('regionDivisionFilter').value;
-            renderRegions(iso, divFilter);
+            renderRegions(startDate, endDate, divFilter);
         } else if (type === 'division') {
             const regFilter = document.getElementById('divisionRegionFilter').value;
-            renderDivisions(iso, regFilter);
+            renderDivisions(startDate, endDate, regFilter);
         } else if (type === 'sub') {
             const regFilter = document.getElementById('subRegionFilter').value;
             const divFilter = document.getElementById('subDivisionFilter').value;
-            renderSubDivisions(iso, regFilter, divFilter);
+            renderSubDivisions(startDate, endDate, regFilter, divFilter);
         } else if (type === 'lowTxn') {
             const regFilter = document.getElementById('lowTxnRegionFilter').value;
             const divFilter = document.getElementById('lowTxnDivisionFilter').value;
-            renderLowTxns(iso, regFilter, divFilter);
+            renderLowTxns(startDate, endDate, regFilter, divFilter);
         } else if (type === 'benchmark') {
             const regFilter = document.getElementById('benchmarkRegionFilter').value;
             const divFilter = document.getElementById('benchmarkDivisionFilter').value;
-            renderBenchmark(iso, regFilter, divFilter);
+            renderBenchmark(startDate, endDate, regFilter, divFilter);
         } else if (type === 'offender') {
             const regFilter = document.getElementById('offenderRegionFilter').value;
             const divFilter = document.getElementById('offenderDivisionFilter').value;
-            renderOffenders(iso, regFilter, divFilter);
+            renderOffenders(startDate, endDate, regFilter, divFilter);
         }
     }
 
-    document.getElementById('dashboardApplyDate').addEventListener('click', function() { applyDateFilter('dashboard'); });
+    document.getElementById('regionApplyBtn').addEventListener('click', function() { applyReportFilter('region'); });
+    document.getElementById('divisionApplyBtn').addEventListener('click', function() { applyReportFilter('division'); });
+    document.getElementById('subApplyBtn').addEventListener('click', function() { applyReportFilter('sub'); });
+    document.getElementById('lowTxnApplyBtn').addEventListener('click', function() { applyReportFilter('lowTxn'); });
+    document.getElementById('benchmarkApplyBtn').addEventListener('click', function() { applyReportFilter('benchmark'); });
+    document.getElementById('offenderApplyBtn').addEventListener('click', function() { applyReportFilter('offender'); });
+
+    // Dashboard
+    document.getElementById('dashboardApplyDate').addEventListener('click', function() {
+        const range = document.getElementById('dashboardDateRange').value;
+        let iso = null;
+        if (range === 'latest') {
+            iso = getLatestDate();
+        } else {
+            const customDate = document.getElementById('dashboardCustomDate').value;
+            if (customDate) iso = customDate;
+        }
+        renderDashboard(iso);
+    });
     document.getElementById('dashboardDateRange').addEventListener('change', function() {
         document.getElementById('dashboardCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-        applyDateFilter('dashboard');
     });
-    document.getElementById('regionApplyBtn').addEventListener('click', function() { applyDateFilter('region'); });
-    document.getElementById('divisionApplyBtn').addEventListener('click', function() { applyDateFilter('division'); });
-    document.getElementById('subApplyBtn').addEventListener('click', function() { applyDateFilter('sub'); });
-    document.getElementById('lowTxnApplyBtn').addEventListener('click', function() { applyDateFilter('lowTxn'); });
-    document.getElementById('benchmarkApplyBtn').addEventListener('click', function() { applyDateFilter('benchmark'); });
-    document.getElementById('offenderApplyBtn').addEventListener('click', function() { applyDateFilter('offender'); });
 
     // Monthly summary
     document.getElementById('monthlyApplyBtn').addEventListener('click', function() {
@@ -1490,11 +1656,30 @@
             document.getElementById('tab-' + this.dataset.tab).classList.add('active');
             const tab = this.dataset.tab;
             if (tab === 'offenders' || tab === 'lowTxn' || tab === 'benchmark') {
-                applyDateFilter(tab === 'offenders' ? 'offender' : tab === 'lowTxn' ? 'lowTxn' : 'benchmark');
+                applyReportFilter(tab === 'offenders' ? 'offender' : tab === 'lowTxn' ? 'lowTxn' : 'benchmark');
             }
             if (tab === 'monthly') {
                 const month = document.getElementById('monthPicker').value;
                 if (month) renderMonthlySummary(month);
+            }
+            if (tab === 'regions') {
+                const startDate = document.getElementById('regionStartDate').value;
+                const endDate = document.getElementById('regionEndDate').value;
+                const divFilter = document.getElementById('regionDivisionFilter').value;
+                renderRegions(startDate, endDate, divFilter);
+            }
+            if (tab === 'divisions') {
+                const startDate = document.getElementById('divisionStartDate').value;
+                const endDate = document.getElementById('divisionEndDate').value;
+                const regFilter = document.getElementById('divisionRegionFilter').value;
+                renderDivisions(startDate, endDate, regFilter);
+            }
+            if (tab === 'subdivisions') {
+                const startDate = document.getElementById('subStartDate').value;
+                const endDate = document.getElementById('subEndDate').value;
+                const regFilter = document.getElementById('subRegionFilter').value;
+                const divFilter = document.getElementById('subDivisionFilter').value;
+                renderSubDivisions(startDate, endDate, regFilter, divFilter);
             }
         });
     });
@@ -1506,11 +1691,24 @@
         await loadFirebaseData();
         const dates = getAvailableDates();
         const latest = getLatestDate();
+        const firstDate = dates.length > 0 ? dates[0] : null;
 
-        if (latest) {
-            document.getElementById('reportStartDate').value = latest;
-            document.getElementById('reportEndDate').value = latest;
-        }
+        // Set default dates for all reports
+        const dateInputs = [
+            ['regionStartDate', 'regionEndDate'],
+            ['divisionStartDate', 'divisionEndDate'],
+            ['subStartDate', 'subEndDate'],
+            ['lowTxnStartDate', 'lowTxnEndDate'],
+            ['benchmarkStartDate', 'benchmarkEndDate'],
+            ['offenderStartDate', 'offenderEndDate'],
+            ['reportStartDate', 'reportEndDate']
+        ];
+        dateInputs.forEach(([startId, endId]) => {
+            const startEl = document.getElementById(startId);
+            const endEl = document.getElementById(endId);
+            if (startEl) startEl.value = firstDate || '';
+            if (endEl) endEl.value = latest || '';
+        });
 
         // Set month picker
         const now = new Date();
@@ -1521,21 +1719,21 @@
 
         if (latest) {
             renderDashboard(latest);
-            renderRegions(latest, 'all');
-            renderDivisions(latest, 'all');
-            renderSubDivisions(latest, 'all', 'all');
-            renderLowTxns(latest, 'all', 'all');
-            renderBenchmark(latest, 'all', 'all');
-            renderOffenders(latest, 'all', 'all');
+            renderRegions(firstDate, latest, 'all');
+            renderDivisions(firstDate, latest, 'all');
+            renderSubDivisions(firstDate, latest, 'all', 'all');
+            renderLowTxns(firstDate, latest, 'all', 'all');
+            renderBenchmark(firstDate, latest, 'all', 'all');
+            renderOffenders(firstDate, latest, 'all', 'all');
             renderMonthlySummary(`${year}-${month}`);
         } else {
             renderDashboard(null);
-            renderRegions(null, 'all');
-            renderDivisions(null, 'all');
-            renderSubDivisions(null, 'all', 'all');
-            renderLowTxns(null, 'all', 'all');
-            renderBenchmark(null, 'all', 'all');
-            renderOffenders(null, 'all', 'all');
+            renderRegions(null, null, 'all');
+            renderDivisions(null, null, 'all');
+            renderSubDivisions(null, null, 'all', 'all');
+            renderLowTxns(null, null, 'all', 'all');
+            renderBenchmark(null, null, 'all', 'all');
+            renderOffenders(null, null, 'all', 'all');
             renderMonthlySummary(`${year}-${month}`);
         }
         setText('connectionStatus', '🟢 Ready');
