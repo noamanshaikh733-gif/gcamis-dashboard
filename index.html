@@ -96,6 +96,8 @@
         .status-pill.red { background: #fbeae7; color: #b3392b; }
         .status-pill.orange { background: #fff3e0; color: #e65100; }
         .status-pill.blue { background: #e3edf7; color: #2a6b9e; }
+        .month-selector { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .month-selector input[type="month"] { padding: 6px 10px; border-radius: 6px; border: 1px solid #e1e4e9; font-family: inherit; font-size: 13px; }
         @media (max-width: 768px) { 
             .kpi-grid { grid-template-columns: repeat(2,1fr); } 
             .header { flex-direction: column; align-items: stretch; } 
@@ -133,6 +135,7 @@
         <button data-tab="lowtxn">📉 Low Txns</button>
         <button data-tab="benchmark">🎯 Benchmark</button>
         <button data-tab="offenders">⚠️ Non-Organized</button>
+        <button data-tab="monthly">📅 Monthly Summary</button>
         <button data-tab="export">📤 Export</button>
     </nav>
 
@@ -171,6 +174,12 @@
                 <div class="performer-card"><div class="label">🏆 Best Division</div><div class="value" id="bestDivision">—</div><div class="sub" id="bestDivisionSub"></div></div>
                 <div class="performer-card"><div class="label">🏆 Best Sub-Division</div><div class="value" id="bestSubDivision">—</div><div class="sub" id="bestSubDivisionSub"></div></div>
             </div>
+        </div>
+        <!-- Region-wise Productivity -->
+        <div class="card">
+            <h2>📊 Region-wise Camp Productivity <span class="badge">Txns per Camp</span></h2>
+            <div class="desc">Average transactions per camp across each region for the selected date.</div>
+            <div class="table-wrap"><table class="data" id="regionProductivityTable"></table></div>
         </div>
     </section>
 
@@ -218,7 +227,7 @@
     <section class="section" id="tab-report">
         <div class="card">
             <h2>📋 Reports <span class="badge">Custom Date Range &amp; Filters</span></h2>
-            <div class="desc">Generate reports for any date range with region/division/sub-division filters. All reports are downloadable and printable.</div>
+            <div class="desc">Generate reports for any date range with region/division/sub-division filters.</div>
             <div class="filter-group" style="margin-bottom:14px;">
                 <label>📅 From:</label>
                 <input type="date" id="reportStartDate">
@@ -301,11 +310,11 @@
         </div>
     </section>
 
-    <!-- ================= LOW TRANSACTIONS (<10) ================= -->
+    <!-- ================= LOW TRANSACTIONS ================= -->
     <section class="section" id="tab-lowtxn">
         <div class="card">
             <h2>📉 Low Transaction Sub-Divisions <span class="badge">&lt; 10 per camp</span></h2>
-            <div class="desc">Sub-divisions with average transactions per camp less than 10. These need attention.</div>
+            <div class="desc">Sub-divisions with average transactions per camp less than 10.</div>
             <div class="filter-group" style="margin-bottom:10px;">
                 <label>📅 Date:</label>
                 <select id="lowTxnDateSelect"><option value="latest">Latest</option></select>
@@ -320,7 +329,7 @@
         </div>
     </section>
 
-    <!-- ================= BENCHMARK (≥25) ================= -->
+    <!-- ================= BENCHMARK ================= -->
     <section class="section" id="tab-benchmark">
         <div class="card">
             <h2>🎯 Benchmark Performance <span class="badge">≥ 25 transactions per camp</span></h2>
@@ -361,6 +370,24 @@
                     <p id="offenderReportDate" style="color:#697180;font-size:13px;"></p>
                 </div>
                 <div class="table-wrap"><table class="data" id="offenderTable"></table></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= MONTHLY SUMMARY ================= -->
+    <section class="section" id="tab-monthly">
+        <div class="card">
+            <h2>📅 Monthly Circle Summary <span class="badge">Day-wise Camp Data</span></h2>
+            <div class="desc">Circle-wide summary showing number of camps arranged, total transactions, and MBU transactions broken down by day for the selected month.</div>
+            <div class="month-selector" style="margin-bottom:14px;">
+                <label>📆 Select Month:</label>
+                <input type="month" id="monthPicker">
+                <button class="gold" id="monthlyApplyBtn">Apply</button>
+                <button class="success" id="monthlyExportBtn">📤 CSV</button>
+                <span id="monthlySummaryLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
+            </div>
+            <div id="monthlySummaryContainer">
+                <div class="table-wrap"><table class="data" id="monthlyTable"></table></div>
             </div>
         </div>
     </section>
@@ -500,7 +527,6 @@
         {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West North Sub Division",h:"Shri j v parmar",m:"9429083529"},
         {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West South Sub Division",h:"Shri D N Parmar",m:"9601587327"},
         {r:"Vadodara Region",d:"Vadodara West Division",s:"Vadodara West West Sub Division",h:"Shri Krati Shri Agnihotri",m:"9098641686"},
-        // ===== VALSAD DIVISION – DHARAMPUR INCLUDED =====
         {r:"Vadodara Region",d:"Valsad Division",s:"Valasad Sub Division",h:"Shri Chandulal D Padvi",m:"6351283422"},
         {r:"Vadodara Region",d:"Valsad Division",s:"Vapi Sub Division",h:"Shri Vijaypal Singh",m:"9410247811"},
         {r:"Vadodara Region",d:"Valsad Division",s:"Dharampur Sub Division",h:"Shri Rohan Sharma",m:"6395047549"}
@@ -677,6 +703,15 @@
                 });
             }
         });
+
+        // Set month picker to current month
+        const monthPicker = document.getElementById('monthPicker');
+        if (monthPicker) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            monthPicker.value = `${year}-${month}`;
+        }
     }
 
     function getAvailableDates() {
@@ -760,6 +795,31 @@
         setText('performerBadge', label);
         const labelEl = document.getElementById('dashboardDateLabel');
         if (labelEl) labelEl.textContent = label;
+
+        // Render region productivity
+        renderRegionProductivity(agg);
+    }
+
+    // ================================================================
+    // REGION PRODUCTIVITY
+    // ================================================================
+    function renderRegionProductivity(agg) {
+        const byRegion = {};
+        agg.forEach(s => {
+            if(!byRegion[s.region]) byRegion[s.region] = {camps:0, txns:0, mbu:0, active:0, total:0};
+            byRegion[s.region].camps += s.camps || 0;
+            byRegion[s.region].txns += s.transactions || 0;
+            byRegion[s.region].mbu += s.mbu || 0;
+            byRegion[s.region].active += s.organized ? 1 : 0;
+            byRegion[s.region].total += 1;
+        });
+        let html = `<tr><th>Region</th><th class="num">Active SD</th><th class="num">Total SD</th><th class="num">Camps</th><th class="num">Total Txns</th><th class="num">Productivity (Txns/Camp)</th><th class="num">MBU</th></tr>`;
+        Object.entries(byRegion).sort((a,b) => b[1].txns - a[1].txns).forEach(([name, data]) => {
+            const prod = data.camps > 0 ? (data.txns / data.camps).toFixed(1) : '0';
+            const status = data.camps > 0 ? '🟢' : '🔴';
+            html += `<tr><td>${status} ${name}</td><td class="num">${data.active}</td><td class="num">${data.total}</td><td class="num">${fmtNum(data.camps)}</td><td class="num">${fmtNum(data.txns)}</td><td class="num"><strong>${prod}</strong></td><td class="num">${fmtNum(data.mbu)}</td></tr>`;
+        });
+        setHTML('regionProductivityTable', html);
     }
 
     // ================================================================
@@ -845,7 +905,7 @@
     }
 
     // ================================================================
-    // LOW TRANSACTIONS (<10)
+    // LOW TRANSACTIONS
     // ================================================================
     function renderLowTxns(iso, regFilter, divFilter) {
         const rows = iso ? getRowsForDate(iso) : allRows;
@@ -862,7 +922,7 @@
     }
 
     // ================================================================
-    // BENCHMARK (≥25)
+    // BENCHMARK
     // ================================================================
     function renderBenchmark(iso, regFilter, divFilter) {
         const rows = iso ? getRowsForDate(iso) : allRows;
@@ -908,6 +968,67 @@
         if (regFilter && regFilter !== 'all') filterText += ' · ' + regFilter;
         if (divFilter && divFilter !== 'all') filterText += ' · ' + divFilter;
         setText('offenderBadge', label + filterText);
+    }
+
+    // ================================================================
+    // MONTHLY SUMMARY
+    // ================================================================
+    function renderMonthlySummary(monthStr) {
+        if (!monthStr) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            monthStr = `${year}-${month}`;
+        }
+        const [year, month] = monthStr.split('-').map(Number);
+        const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+        const lastDay = new Date(year, month, 0).getDate();
+        const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+        
+        const rows = getRowsForDateRange(startDate, endDate);
+        const agg = aggregateRows(rows);
+        
+        // Group by day
+        const byDay = {};
+        rows.forEach(r => {
+            if (!byDay[r.date]) byDay[r.date] = [];
+            byDay[r.date].push(r);
+        });
+
+        const sortedDates = Object.keys(byDay).sort();
+        const monthlySummary = sortedDates.map(iso => {
+            const dayRows = byDay[iso];
+            const dayAgg = aggregateRows(dayRows);
+            const t = dayAgg.reduce((acc,s) => {
+                acc.camps += s.camps || 0;
+                acc.mbu += s.mbu || 0;
+                acc.txns += s.transactions || 0;
+                acc.active += s.organized ? 1 : 0;
+                return acc;
+            }, {camps:0, mbu:0, txns:0, active:0});
+            return { date: iso, ...t };
+        });
+
+        if (monthlySummary.length === 0) {
+            setHTML('monthlyTable', `<tr><td colspan="5" class="empty">📭 No data available for ${monthStr}</td></tr>`);
+            document.getElementById('monthlySummaryLabel').textContent = 'No data';
+            return;
+        }
+
+        const totals = monthlySummary.reduce((acc, d) => {
+            acc.camps += d.camps;
+            acc.mbu += d.mbu;
+            acc.txns += d.txns;
+            return acc;
+        }, {camps:0, mbu:0, txns:0});
+
+        let html = `<tr><th>Date</th><th>Day</th><th class="num">Camps Arranged</th><th class="num">Total Transactions</th><th class="num">MBU Transactions</th></tr>`;
+        monthlySummary.forEach(d => {
+            html += `<tr><td>${isoToDisplay(d.date)}</td><td>${getDayName(d.date)}</td><td class="num">${fmtNum(d.camps)}</td><td class="num">${fmtNum(d.txns)}</td><td class="num">${fmtNum(d.mbu)}</td></tr>`;
+        });
+        html += `<tr class="total-row"><td><strong>Total</strong></td><td>${monthlySummary.length} days</td><td class="num"><strong>${fmtNum(totals.camps)}</strong></td><td class="num"><strong>${fmtNum(totals.txns)}</strong></td><td class="num"><strong>${fmtNum(totals.mbu)}</strong></td></tr>`;
+        setHTML('monthlyTable', html);
+        document.getElementById('monthlySummaryLabel').textContent = `${monthlySummary.length} days · ${fmtNum(totals.camps)} camps · ${fmtNum(totals.txns)} txns · ${fmtNum(totals.mbu)} MBU`;
     }
 
     // ================================================================
@@ -1220,6 +1341,10 @@
     document.getElementById('lowTxnExportBtn').addEventListener('click', function() { exportTableCSV('lowTxnTable', 'Low_Transactions'); });
     document.getElementById('benchmarkExportBtn').addEventListener('click', function() { exportTableCSV('benchmarkTable', 'Benchmark_Performance'); });
     document.getElementById('offenderExportBtn').addEventListener('click', function() { exportTableCSV('offenderTable', 'Non_Organized'); });
+    document.getElementById('monthlyExportBtn').addEventListener('click', function() { 
+        const month = document.getElementById('monthPicker').value;
+        exportTableCSV('monthlyTable', `Monthly_Summary_${month}`); 
+    });
 
     // ================================================================
     // PRINT FUNCTIONS
@@ -1344,6 +1469,16 @@
     document.getElementById('benchmarkApplyBtn').addEventListener('click', function() { applyDateFilter('benchmark'); });
     document.getElementById('offenderApplyBtn').addEventListener('click', function() { applyDateFilter('offender'); });
 
+    // Monthly summary
+    document.getElementById('monthlyApplyBtn').addEventListener('click', function() {
+        const month = document.getElementById('monthPicker').value;
+        if (month) renderMonthlySummary(month);
+    });
+    document.getElementById('monthPicker').addEventListener('change', function() {
+        const month = this.value;
+        if (month) renderMonthlySummary(month);
+    });
+
     // ================================================================
     // TAB SWITCHING
     // ================================================================
@@ -1356,6 +1491,10 @@
             const tab = this.dataset.tab;
             if (tab === 'offenders' || tab === 'lowTxn' || tab === 'benchmark') {
                 applyDateFilter(tab === 'offenders' ? 'offender' : tab === 'lowTxn' ? 'lowTxn' : 'benchmark');
+            }
+            if (tab === 'monthly') {
+                const month = document.getElementById('monthPicker').value;
+                if (month) renderMonthlySummary(month);
             }
         });
     });
@@ -1373,6 +1512,13 @@
             document.getElementById('reportEndDate').value = latest;
         }
 
+        // Set month picker
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const monthPicker = document.getElementById('monthPicker');
+        if (monthPicker) monthPicker.value = `${year}-${month}`;
+
         if (latest) {
             renderDashboard(latest);
             renderRegions(latest, 'all');
@@ -1381,6 +1527,7 @@
             renderLowTxns(latest, 'all', 'all');
             renderBenchmark(latest, 'all', 'all');
             renderOffenders(latest, 'all', 'all');
+            renderMonthlySummary(`${year}-${month}`);
         } else {
             renderDashboard(null);
             renderRegions(null, 'all');
@@ -1389,6 +1536,7 @@
             renderLowTxns(null, 'all', 'all');
             renderBenchmark(null, 'all', 'all');
             renderOffenders(null, 'all', 'all');
+            renderMonthlySummary(`${year}-${month}`);
         }
         setText('connectionStatus', '🟢 Ready');
     }
