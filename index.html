@@ -419,7 +419,7 @@
     <section class="section" id="tab-offenders">
         <div class="card no-print">
             <h2>⚠️ Non-Organized Tracker <span class="badge" id="offenderBadge">--</span></h2>
-            <div class="desc">Sub-divisions with ZERO successful camps for the selected date range.</div>
+            <div class="desc">Sub-divisions with ZERO successful camps (camp = row with totalTransactions > 0). Address field is ignored.</div>
             <div class="filter-group" style="margin-bottom:10px;">
                 <label>📅 From:</label>
                 <input type="date" id="offenderStartDate">
@@ -649,6 +649,9 @@
     function setHTML(id, value) { const el = document.getElementById(id); if (el) el.innerHTML = value; }
     function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
+    // ================================================================
+    // AGGREGATION – FIXED: Camp organized = totalTransactions > 0
+    // ================================================================
     function aggregateRows(rows) {
         const bySub = new Map();
         rows.forEach(r => {
@@ -659,7 +662,10 @@
         return MASTER.map(m => {
             const key = subKey(m.r, m.d, m.s);
             const matched = bySub.get(key) || [];
-            const successful = matched.filter(r => r.address && r.address.trim() !== '' && (r.totalTransactions || 0) > 0);
+            
+            // ✅ NEW: A camp is successful if totalTransactions > 0
+            // Address is completely ignored
+            const successful = matched.filter(r => (r.totalTransactions || 0) > 0);
             const camps = successful.length;
             const organized = camps > 0;
             const hasRows = matched.length > 0;
@@ -708,7 +714,6 @@
         const regions = [...new Set(MASTER.map(m => m.r))].sort();
         const divisions = [...new Set(MASTER.map(m => m.d))].sort();
 
-        // Report filters
         const regionSel = document.getElementById('reportRegionFilter');
         regionSel.innerHTML = '<option value="all">All Regions</option>';
         regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; regionSel.appendChild(opt); });
@@ -721,17 +726,14 @@
         subSel.innerHTML = '<option value="all">All Sub-Divisions</option>';
         MASTER.forEach(m => { const opt = document.createElement('option'); opt.value = m.s; opt.textContent = m.s; subSel.appendChild(opt); });
 
-        // Region tab division filter
         const regDivSel = document.getElementById('regionDivisionFilter');
         regDivSel.innerHTML = '<option value="all">All Divisions</option>';
         divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; regDivSel.appendChild(opt); });
 
-        // Division tab region filter
         const divRegSel = document.getElementById('divisionRegionFilter');
         divRegSel.innerHTML = '<option value="all">All Regions</option>';
         regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; divRegSel.appendChild(opt); });
 
-        // Sub-division filters
         const subRegSel = document.getElementById('subRegionFilter');
         subRegSel.innerHTML = '<option value="all">All Regions</option>';
         regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; subRegSel.appendChild(opt); });
@@ -740,7 +742,6 @@
         subDivSel.innerHTML = '<option value="all">All Divisions</option>';
         divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; subDivSel.appendChild(opt); });
 
-        // Low Txn filters
         const ltRegSel = document.getElementById('lowTxnRegionFilter');
         ltRegSel.innerHTML = '<option value="all">All Regions</option>';
         regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; ltRegSel.appendChild(opt); });
@@ -749,7 +750,6 @@
         ltDivSel.innerHTML = '<option value="all">All Divisions</option>';
         divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; ltDivSel.appendChild(opt); });
 
-        // Benchmark filters
         const bmRegSel = document.getElementById('benchmarkRegionFilter');
         bmRegSel.innerHTML = '<option value="all">All Regions</option>';
         regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; bmRegSel.appendChild(opt); });
@@ -758,7 +758,6 @@
         bmDivSel.innerHTML = '<option value="all">All Divisions</option>';
         divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; bmDivSel.appendChild(opt); });
 
-        // Offender filters
         const offRegSel = document.getElementById('offenderRegionFilter');
         offRegSel.innerHTML = '<option value="all">All Regions</option>';
         regions.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; offRegSel.appendChild(opt); });
@@ -767,7 +766,6 @@
         offDivSel.innerHTML = '<option value="all">All Divisions</option>';
         divisions.forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; offDivSel.appendChild(opt); });
 
-        // Set month picker to current month
         const monthPicker = document.getElementById('monthPicker');
         if (monthPicker) {
             const now = new Date();
@@ -776,7 +774,6 @@
             monthPicker.value = `${year}-${month}`;
         }
 
-        // Set default dates for all reports
         const dates = getAvailableDates();
         const latest = getLatestDate();
         const firstDate = dates.length > 0 ? dates[0] : null;
@@ -882,13 +879,11 @@
         const labelEl = document.getElementById('dashboardDateLabel');
         if (labelEl) labelEl.textContent = label;
 
-        // Update print header
         const printHeader = document.getElementById('dashboardPrintHeader');
         const printDate = document.getElementById('dashboardPrintDate');
         if (printHeader) printHeader.style.display = 'block';
         if (printDate) printDate.textContent = 'Date: ' + (iso ? formatDateWithDay(iso) : 'All Dates');
 
-        // Render region productivity
         renderRegionProductivity(agg);
     }
 
@@ -941,7 +936,6 @@
         });
         setHTML('regionTable', html);
         
-        // Update report header
         const header = document.getElementById('regionReportHeader');
         const dateEl = document.getElementById('regionReportDate');
         if (header) header.style.display = 'block';
@@ -1114,7 +1108,6 @@
         const rows = getRowsForDateRange(startDate, endDate);
         const agg = aggregateRows(rows);
         
-        // Group by day
         const byDay = {};
         rows.forEach(r => {
             if (!byDay[r.date]) byDay[r.date] = [];
@@ -1156,7 +1149,6 @@
         setHTML('monthlyTable', html);
         document.getElementById('monthlySummaryLabel').textContent = `${monthlySummary.length} days · ${fmtNum(totals.camps)} camps · ${fmtNum(totals.txns)} txns · ${fmtNum(totals.mbu)} MBU`;
         
-        // Update monthly report header
         const header = document.getElementById('monthlyReportHeader');
         const dateEl = document.getElementById('monthlyReportDate');
         if (header) header.style.display = 'block';
@@ -1399,7 +1391,7 @@
     });
 
     // ================================================================
-    // DATA ENTRY
+    // DATA ENTRY – FIXED: organized = totalTransactions > 0
     // ================================================================
     document.getElementById('parseBtn').addEventListener('click', function() {
         const text = document.getElementById('pasteArea').value;
@@ -1418,6 +1410,7 @@
         let totalCamps=0,totalMBU=0,totalTxns=0,totalRevenue=0;
         dateArray.forEach(iso => {
             const r = rows.filter(row => parseDateFlexible(row[0]) === iso);
+            // ✅ NEW: organized based on totalTransactions > 0
             const agg = aggregateRows(r.map(row => ({
                 date: iso, region: row[1]||'', division: row[2]||'', subDivision: row[3]||'',
                 address: row[8]||'', totalTransactions: parseFloat(row[14])||0, mbu: parseFloat(row[12])||0
@@ -1441,13 +1434,15 @@
             const iso = parseDateFlexible(r[0]);
             if (!iso) return;
             if (!byDate[iso]) byDate[iso] = [];
+            // ✅ NEW: organized based on totalTransactions > 0 (address ignored)
+            const totalTxns = parseFloat(r[14]) || 0;
             byDate[iso].push({
                 date: iso, region: r[1]||'', division: r[2]||'', subDivision: r[3]||'',
                 headName: r[4]||'', headMobile: r[5]||'', stationId: r[6]||'', machineId: r[7]||'',
                 address: r[8]||'', operatorName: r[9]||'', operatorContact: r[10]||'',
                 newEnrolment: parseFloat(r[11])||0, mbu: parseFloat(r[12])||0,
-                otherUpdation: parseFloat(r[13])||0, totalTransactions: parseFloat(r[14])||0,
-                organized: !!(r[8] && parseFloat(r[14]) > 0)
+                otherUpdation: parseFloat(r[13])||0, totalTransactions: totalTxns,
+                organized: totalTxns > 0  // ✅ Camp organized = transactions > 0
             });
         });
         let count = 0;
@@ -1501,40 +1496,13 @@
         win.print();
     }
 
-    // Region print
-    document.getElementById('regionPrintBtn').addEventListener('click', function() {
-        printSection('regionTable', 'Region Summary', 'regionReportHeader');
-    });
-
-    // Division print
-    document.getElementById('divisionPrintBtn').addEventListener('click', function() {
-        printSection('divisionTable', 'Division Summary', 'divisionReportHeader');
-    });
-
-    // Sub-Division print
-    document.getElementById('subPrintBtn').addEventListener('click', function() {
-        printSection('subTable', 'Sub-Division Summary', 'subReportHeader');
-    });
-
-    // Low Txn print
-    document.getElementById('lowTxnPrintBtn').addEventListener('click', function() {
-        printSection('lowTxnTable', 'Low Transaction Report', 'lowTxnReportHeader');
-    });
-
-    // Benchmark print
-    document.getElementById('benchmarkPrintBtn').addEventListener('click', function() {
-        printSection('benchmarkTable', 'Benchmark Performance Report', 'benchmarkReportHeader');
-    });
-
-    // Offender print
-    document.getElementById('offenderPrintBtn').addEventListener('click', function() {
-        printSection('offenderTable', 'Non-Organized Report', 'offenderReportHeader');
-    });
-
-    // Monthly print
-    document.getElementById('monthlyPrintBtn').addEventListener('click', function() {
-        printSection('monthlyTable', 'Monthly Summary Report', 'monthlyReportHeader');
-    });
+    document.getElementById('regionPrintBtn').addEventListener('click', function() { printSection('regionTable', 'Region Summary', 'regionReportHeader'); });
+    document.getElementById('divisionPrintBtn').addEventListener('click', function() { printSection('divisionTable', 'Division Summary', 'divisionReportHeader'); });
+    document.getElementById('subPrintBtn').addEventListener('click', function() { printSection('subTable', 'Sub-Division Summary', 'subReportHeader'); });
+    document.getElementById('lowTxnPrintBtn').addEventListener('click', function() { printSection('lowTxnTable', 'Low Transaction Report', 'lowTxnReportHeader'); });
+    document.getElementById('benchmarkPrintBtn').addEventListener('click', function() { printSection('benchmarkTable', 'Benchmark Performance Report', 'benchmarkReportHeader'); });
+    document.getElementById('offenderPrintBtn').addEventListener('click', function() { printSection('offenderTable', 'Non-Organized Report', 'offenderReportHeader'); });
+    document.getElementById('monthlyPrintBtn').addEventListener('click', function() { printSection('monthlyTable', 'Monthly Summary Report', 'monthlyReportHeader'); });
 
     // ================================================================
     // EXPORT (Main)
@@ -1619,7 +1587,6 @@
     document.getElementById('benchmarkApplyBtn').addEventListener('click', function() { applyReportFilter('benchmark'); });
     document.getElementById('offenderApplyBtn').addEventListener('click', function() { applyReportFilter('offender'); });
 
-    // Dashboard
     document.getElementById('dashboardApplyDate').addEventListener('click', function() {
         const range = document.getElementById('dashboardDateRange').value;
         let iso = null;
@@ -1635,7 +1602,6 @@
         document.getElementById('dashboardCustomDate').style.display = this.value === 'custom' ? 'inline-block' : 'none';
     });
 
-    // Monthly summary
     document.getElementById('monthlyApplyBtn').addEventListener('click', function() {
         const month = document.getElementById('monthPicker').value;
         if (month) renderMonthlySummary(month);
@@ -1693,7 +1659,6 @@
         const latest = getLatestDate();
         const firstDate = dates.length > 0 ? dates[0] : null;
 
-        // Set default dates for all reports
         const dateInputs = [
             ['regionStartDate', 'regionEndDate'],
             ['divisionStartDate', 'divisionEndDate'],
@@ -1710,7 +1675,6 @@
             if (endEl) endEl.value = latest || '';
         });
 
-        // Set month picker
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
