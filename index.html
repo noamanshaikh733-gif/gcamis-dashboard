@@ -142,6 +142,7 @@
         <div>
             <span class="badge-count" id="connectionStatus">🔄 Connecting...</span>
             <span class="badge-count" id="lastSyncTime">📅 Last sync: --</span>
+            <span class="badge-count" id="dataRangeBadge">📊 Data: --</span>
         </div>
     </header>
 
@@ -206,17 +207,22 @@
             <div class="desc">Average transactions per camp across each region for the selected date.</div>
             <div class="table-wrap"><table class="data" id="regionProductivityTable"></table></div>
         </div>
+        <div class="card" style="background:#f8f9fa;">
+            <h2>📅 Data Availability <span class="badge">Historical Range</span></h2>
+            <div id="dataRangeInfo" style="font-size:14px;color:#697180;">Loading data range...</div>
+        </div>
     </section>
 
     <!-- ================= DATA ENTRY ================= -->
     <section class="section" id="tab-entry">
         <div class="card">
-            <h2>📥 Data Entry</h2>
-            <div class="desc">Paste your Excel data below (tab-separated, including header).</div>
+            <h2>📥 Data Entry <span class="badge">Supports bulk historical data</span></h2>
+            <div class="desc">Paste your Excel data below (tab-separated, including header). Supports multiple dates (April, May, June, etc.)</div>
             <textarea class="data-entry-area" id="pasteArea" placeholder="Paste tab-separated data here…"></textarea>
             <div class="toolbar">
                 <button class="success" id="parseBtn">▶ Parse Data</button>
                 <button class="secondary" id="clearBtn">✕ Clear</button>
+                <button class="gold" id="loadSampleBtn">📋 Load Sample</button>
             </div>
             <div id="parseMsg"></div>
         </div>
@@ -224,7 +230,7 @@
             <h2>👁️ Preview</h2>
             <div id="previewSummary"></div>
             <div class="table-wrap"><table class="data" id="previewTable"></table></div>
-            <div class="toolbar"><button class="success" id="saveBtn">💾 Save</button></div>
+            <div class="toolbar"><button class="success" id="saveBtn">💾 Save All Dates</button></div>
             <div id="saveMsg"></div>
         </div>
     </section>
@@ -618,10 +624,13 @@
     function parseDateFlexible(raw) {
         if(!raw) return null;
         raw = raw.trim();
+        // Try DD.MM.YYYY
         let m = raw.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
         if(m) { const dd=m[1].padStart(2,'0'), mm=m[2].padStart(2,'0'), yyyy=m[3]; return yyyy+'-'+mm+'-'+dd; }
+        // Try YYYY-MM-DD
         m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
         if(m) { return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'); }
+        // Try Excel serial number
         if(/^\d+(\.\d+)?$/.test(raw)) {
             const serial = parseFloat(raw);
             if(serial > 20000 && serial < 60000) {
@@ -650,7 +659,7 @@
     function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
     // ================================================================
-    // AGGREGATION – FIXED: Camp organized = totalTransactions > 0
+    // AGGREGATION – Camp organized = totalTransactions > 0
     // ================================================================
     function aggregateRows(rows) {
         const bySub = new Map();
@@ -662,9 +671,6 @@
         return MASTER.map(m => {
             const key = subKey(m.r, m.d, m.s);
             const matched = bySub.get(key) || [];
-            
-            // ✅ NEW: A camp is successful if totalTransactions > 0
-            // Address is completely ignored
             const successful = matched.filter(r => (r.totalTransactions || 0) > 0);
             const camps = successful.length;
             const organized = camps > 0;
@@ -702,12 +708,33 @@
                 }
             });
             setText('connectionStatus', '🟢 Connected');
+            updateDataRangeInfo();
             populateFilters();
             return allRows;
         } catch(e) {
             setText('connectionStatus', '🔴 Error');
             return [];
         }
+    }
+
+    function updateDataRangeInfo() {
+        const dates = getAvailableDates();
+        const infoEl = document.getElementById('dataRangeInfo');
+        const badgeEl = document.getElementById('dataRangeBadge');
+        if (dates.length === 0) {
+            infoEl.textContent = '📭 No data loaded yet. Use "Data Entry" to add data.';
+            badgeEl.textContent = '📊 Data: None';
+            return;
+        }
+        const first = dates[0];
+        const last = dates[dates.length - 1];
+        const totalDays = dates.length;
+        infoEl.innerHTML = `
+            <strong>📆 ${totalDays} days of data</strong><br>
+            From: <strong>${formatDateWithDay(first)}</strong><br>
+            To: <strong>${formatDateWithDay(last)}</strong>
+        `;
+        badgeEl.textContent = `📊 ${isoToDisplay(first)} to ${isoToDisplay(last)} (${totalDays} days)`;
     }
 
     function populateFilters() {
@@ -885,6 +912,7 @@
         if (printDate) printDate.textContent = 'Date: ' + (iso ? formatDateWithDay(iso) : 'All Dates');
 
         renderRegionProductivity(agg);
+        updateDataRangeInfo();
     }
 
     // ================================================================
@@ -1391,26 +1419,42 @@
     });
 
     // ================================================================
-    // DATA ENTRY – FIXED: organized = totalTransactions > 0
+    // DATA ENTRY – Supports bulk historical data
     // ================================================================
+    // Sample data loader
+    document.getElementById('loadSampleBtn').addEventListener('click', function() {
+        const sampleData = `Date	Region	Division	Sub Division	Head	Mobile	Station ID	Machine ID	Address	Operator	Operator Contact	New Enrolment	MBU	Other Updation	Total Transactions
+15.04.2026	Vadodara Region	Valsad Division	Dharampur Sub Division	Shri Rohan Sharma	6395047549	ST123	MC456	Camp at Dharampur	Rahul	9876543210	5	10	2	17
+16.04.2026	Vadodara Region	Valsad Division	Dharampur Sub Division	Shri Rohan Sharma	6395047549	ST124	MC457	Camp at Dharampur	Rahul	9876543210	8	15	3	26
+17.04.2026	Vadodara Region	Valsad Division	Dharampur Sub Division	Shri Rohan Sharma	6395047549	ST125	MC458		Rahul	9876543210	3	5	1	9
+15.04.2026	Vadodara Region	Valsad Division	Valasad Sub Division	Shri Chandulal D Padvi	6351283422	ST126	MC459	Camp at Valasad	Ankit	9876543211	10	20	5	35
+15.04.2026	Ahmedabad Region	Ahmedabad City Division	North Sub Division	Shri V S Chauhan	9662513288	ST127	MC460	Camp at Ahmedabad	Priya	9876543212	12	25	4	41
+15.04.2026	Rajkot Region	Rajkot Division	Rajkot East Sub Division	Shri Nilay Parmar	9408005211	ST128	MC461	Camp at Rajkot	Meera	9876543213	7	12	2	21`;
+        document.getElementById('pasteArea').value = sampleData;
+        document.getElementById('parseMsg').innerHTML = '<div class="msg info">📋 Sample data loaded! Click "Parse Data" to preview.</div>';
+    });
+
     document.getElementById('parseBtn').addEventListener('click', function() {
         const text = document.getElementById('pasteArea').value;
         const msgEl = document.getElementById('parseMsg');
         if (!text.trim()) { msgEl.innerHTML = '<div class="msg err">Paste data first.</div>'; return; }
         const lines = text.split('\n').filter(l => l.trim());
         if (lines.length < 2) { msgEl.innerHTML = '<div class="msg err">Not enough rows.</div>'; return; }
+        
+        // Detect header and parse
         const rows = lines.slice(1).map(l => l.split('\t'));
         const dates = new Set();
         rows.forEach(r => { if (r[0]) dates.add(parseDateFlexible(r[0])); });
         const dateArray = Array.from(dates).filter(d => d);
-        if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found.</div>'; return; }
+        if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found. Check your date format.</div>'; return; }
+        
         msgEl.innerHTML = '<div class="msg ok">✅ Parsed ' + rows.length + ' rows across ' + dateArray.length + ' date(s).</div>';
         document.getElementById('previewCard').style.display = 'block';
+        
         let previewRows = '<tr><th>Date</th><th>Rows</th><th>Camps</th><th>MBU</th><th>Txns</th><th>Revenue</th></tr>';
         let totalCamps=0,totalMBU=0,totalTxns=0,totalRevenue=0;
         dateArray.forEach(iso => {
             const r = rows.filter(row => parseDateFlexible(row[0]) === iso);
-            // ✅ NEW: organized based on totalTransactions > 0
             const agg = aggregateRows(r.map(row => ({
                 date: iso, region: row[1]||'', division: row[2]||'', subDivision: row[3]||'',
                 address: row[8]||'', totalTransactions: parseFloat(row[14])||0, mbu: parseFloat(row[12])||0
@@ -1434,7 +1478,6 @@
             const iso = parseDateFlexible(r[0]);
             if (!iso) return;
             if (!byDate[iso]) byDate[iso] = [];
-            // ✅ NEW: organized based on totalTransactions > 0 (address ignored)
             const totalTxns = parseFloat(r[14]) || 0;
             byDate[iso].push({
                 date: iso, region: r[1]||'', division: r[2]||'', subDivision: r[3]||'',
@@ -1442,15 +1485,24 @@
                 address: r[8]||'', operatorName: r[9]||'', operatorContact: r[10]||'',
                 newEnrolment: parseFloat(r[11])||0, mbu: parseFloat(r[12])||0,
                 otherUpdation: parseFloat(r[13])||0, totalTransactions: totalTxns,
-                organized: totalTxns > 0  // ✅ Camp organized = transactions > 0
+                organized: totalTxns > 0
             });
         });
         let count = 0;
+        const existingDates = [];
+        for (const iso of Object.keys(byDate)) {
+            if (allRows.some(r => r.date === iso)) existingDates.push(iso);
+        }
+        if (existingDates.length > 0) {
+            if (!confirm(`⚠️ Data for ${existingDates.length} date(s) already exists and will be OVERWRITTEN.\n\nDates: ${existingDates.map(isoToDisplay).join(', ')}\n\nContinue?`)) {
+                return;
+            }
+        }
         for (const [iso, rows] of Object.entries(byDate)) {
             await db.collection(COLLECTION).doc(iso).set({ date: iso, rows, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
             count++;
         }
-        document.getElementById('saveMsg').innerHTML = '<div class="msg ok">✅ Saved ' + count + ' date(s) to Firebase!</div>';
+        document.getElementById('saveMsg').innerHTML = `<div class="msg ok">✅ Saved ${count} date(s) to Firebase!${existingDates.length > 0 ? ' (Overwrote: ' + existingDates.map(isoToDisplay).join(', ') + ')' : ''}</div>`;
         await loadFirebaseData();
         const latest = getLatestDate();
         if (latest) renderDashboard(latest);
@@ -1701,6 +1753,7 @@
             renderMonthlySummary(`${year}-${month}`);
         }
         setText('connectionStatus', '🟢 Ready');
+        updateDataRangeInfo();
     }
 
     init();
