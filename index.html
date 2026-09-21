@@ -175,7 +175,6 @@
                 <span id="dashboardDateLabel" style="font-weight:600;color:#0f2138;margin-left:10px;"></span>
             </div>
         </div>
-        <!-- Report Header for Dashboard (visible on print) -->
         <div class="report-header" id="dashboardPrintHeader" style="display:none;">
             <h2>📊 GCAMIS Dashboard</h2>
             <p id="dashboardPrintDate">Date: --</p>
@@ -204,7 +203,6 @@
         </div>
         <div class="card">
             <h2>📊 Region-wise Camp Productivity <span class="badge">Txns per Camp</span></h2>
-            <div class="desc">Average transactions per camp across each region for the selected date.</div>
             <div class="table-wrap"><table class="data" id="regionProductivityTable"></table></div>
         </div>
         <div class="card" style="background:#f8f9fa;">
@@ -217,7 +215,7 @@
     <section class="section" id="tab-entry">
         <div class="card">
             <h2>📥 Data Entry <span class="badge">Supports bulk historical data</span></h2>
-            <div class="desc">Paste your Excel data below (tab-separated, including header). Supports multiple dates (April, May, June, etc.)</div>
+            <div class="desc">Paste your Excel data below (tab-separated, including header). Supports multiple dates.</div>
             <textarea class="data-entry-area" id="pasteArea" placeholder="Paste tab-separated data here…"></textarea>
             <div class="toolbar">
                 <button class="success" id="parseBtn">▶ Parse Data</button>
@@ -258,7 +256,6 @@
     <section class="section" id="tab-report">
         <div class="card no-print">
             <h2>📋 Reports <span class="badge">Custom Date Range &amp; Filters</span></h2>
-            <div class="desc">Generate reports for any date range with region/division/sub-division filters.</div>
             <div class="filter-group" style="margin-bottom:14px;">
                 <label>📅 From:</label>
                 <input type="date" id="reportStartDate">
@@ -369,7 +366,6 @@
     <section class="section" id="tab-lowtxn">
         <div class="card no-print">
             <h2>📉 Low Transaction Sub-Divisions <span class="badge">&lt; 10 per camp</span></h2>
-            <div class="desc">Sub-divisions with average transactions per camp less than 10.</div>
             <div class="filter-group" style="margin-bottom:10px;">
                 <label>📅 From:</label>
                 <input type="date" id="lowTxnStartDate">
@@ -397,7 +393,6 @@
     <section class="section" id="tab-benchmark">
         <div class="card no-print">
             <h2>🎯 Benchmark Performance <span class="badge">≥ 25 transactions per camp</span></h2>
-            <div class="desc">Sub-divisions meeting or exceeding the benchmark of 25 transactions per camp.</div>
             <div class="filter-group" style="margin-bottom:10px;">
                 <label>📅 From:</label>
                 <input type="date" id="benchmarkStartDate">
@@ -453,7 +448,6 @@
     <section class="section" id="tab-monthly">
         <div class="card no-print">
             <h2>📅 Monthly Circle Summary <span class="badge">Day-wise Camp Data</span></h2>
-            <div class="desc">Circle-wide summary showing number of camps arranged, total transactions, and MBU transactions broken down by day for the selected month.</div>
             <div class="month-selector" style="margin-bottom:14px;">
                 <label>📆 Select Month:</label>
                 <input type="month" id="monthPicker">
@@ -624,13 +618,10 @@
     function parseDateFlexible(raw) {
         if(!raw) return null;
         raw = raw.trim();
-        // Try DD.MM.YYYY
         let m = raw.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
         if(m) { const dd=m[1].padStart(2,'0'), mm=m[2].padStart(2,'0'), yyyy=m[3]; return yyyy+'-'+mm+'-'+dd; }
-        // Try YYYY-MM-DD
         m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
         if(m) { return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'); }
-        // Try Excel serial number
         if(/^\d+(\.\d+)?$/.test(raw)) {
             const serial = parseFloat(raw);
             if(serial > 20000 && serial < 60000) {
@@ -1091,7 +1082,7 @@
     }
 
     // ================================================================
-    // RENDER OFFENDERS
+    // RENDER OFFENDERS – with count summary
     // ================================================================
     function renderOffenders(startDate, endDate, regFilter, divFilter) {
         const rows = getRowsForDateRange(startDate, endDate);
@@ -1101,21 +1092,79 @@
         
         const headerEl = document.getElementById('offenderReportHeader');
         const dateEl = document.getElementById('offenderReportDate');
+        
+        // Calculate counts
+        const totalSD = agg.length;
+        const organizedSD = agg.filter(s => s.organized).length;
+        const notOrganizedSD = agg.filter(s => s.hasRows && !s.organized).length;
+        const noDataSD = agg.filter(s => !s.hasRows).length;
+        
         if (headerEl) headerEl.style.display = 'block';
         if (dateEl) {
             const label = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
-            dateEl.textContent = 'Date: ' + label;
+            let filterText = '';
+            if (regFilter && regFilter !== 'all') filterText += ' · Region: ' + regFilter;
+            if (divFilter && divFilter !== 'all') filterText += ' · Division: ' + divFilter;
+            dateEl.textContent = `📅 ${label}${filterText}`;
         }
-        if(!agg || agg.length === 0) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">No data</td></tr>'); return; }
+        
+        // Update the badge with count
+        const badgeEl = document.getElementById('offenderBadge');
+        if (badgeEl) {
+            badgeEl.textContent = `${notOrganizedSD} Not Organized · ${organizedSD} Organized · ${noDataSD} No Data`;
+        }
+        
+        if(!agg || agg.length === 0) { 
+            setHTML('offenderTable', '<tr><td colspan="6" class="empty">No data available</td></tr>'); 
+            return; 
+        }
+        
         const list = agg.filter(s => s.hasRows && !s.organized);
-        if(list.length === 0) { setHTML('offenderTable', '<tr><td colspan="5" class="empty">🎉 All sub-divisions organized at least one camp!</td></tr>'); return; }
-        let html = `<tr><th>#</th><th>Sub-Division</th><th>Division</th><th>Region</th><th class="num">Rows</th></tr>`;
+        
+        if(list.length === 0) { 
+            setHTML('offenderTable', `
+                <tr><td colspan="6" style="text-align:center;padding:20px;color:#1c7a45;font-weight:700;font-size:16px;">
+                    ✅ All ${organizedSD} sub-divisions organized at least one camp!
+                </td></tr>
+                <tr class="sub-total">
+                    <td colspan="3"><strong>Summary</strong></td>
+                    <td class="num"><strong>${organizedSD}</strong></td>
+                    <td class="num"><strong>0</strong></td>
+                    <td class="num"><strong>${noDataSD}</strong></td>
+                </tr>
+            `);
+            return; 
+        }
+        
+        let html = `
+            <tr>
+                <th>#</th>
+                <th>Sub-Division</th>
+                <th>Division</th>
+                <th>Region</th>
+                <th class="num">Rows</th>
+                <th class="num">Status</th>
+            </tr>
+            <tr class="sub-total">
+                <td colspan="3"><strong>📊 Summary</strong></td>
+                <td class="num"><strong>${organizedSD} Organized</strong></td>
+                <td class="num"><strong>${list.length} Not Organized</strong></td>
+                <td class="num"><strong>${noDataSD} No Data</strong></td>
+            </tr>
+        `;
+        
         list.forEach((s, i) => {
-            html += `<tr><td>${i+1}</td><td><strong>${s.subDivision}</strong></td><td>${s.division}</td><td>${s.region}</td><td class="num">${s.hasRows}</td></tr>`;
+            html += `<tr>
+                <td>${i+1}</td>
+                <td><strong>${s.subDivision}</strong></td>
+                <td>${s.division}</td>
+                <td>${s.region}</td>
+                <td class="num">${s.hasRows}</td>
+                <td><span class="status-pill red">🔴 Not Organized</span></td>
+            </tr>`;
         });
+        
         setHTML('offenderTable', html);
-        const label = (startDate && endDate) ? formatDateRange(startDate, endDate) : 'All Dates';
-        setText('offenderBadge', label);
     }
 
     // ================================================================
@@ -1419,9 +1468,8 @@
     });
 
     // ================================================================
-    // DATA ENTRY – Supports bulk historical data
+    // DATA ENTRY
     // ================================================================
-    // Sample data loader
     document.getElementById('loadSampleBtn').addEventListener('click', function() {
         const sampleData = `Date	Region	Division	Sub Division	Head	Mobile	Station ID	Machine ID	Address	Operator	Operator Contact	New Enrolment	MBU	Other Updation	Total Transactions
 15.04.2026	Vadodara Region	Valsad Division	Dharampur Sub Division	Shri Rohan Sharma	6395047549	ST123	MC456	Camp at Dharampur	Rahul	9876543210	5	10	2	17
@@ -1441,12 +1489,11 @@
         const lines = text.split('\n').filter(l => l.trim());
         if (lines.length < 2) { msgEl.innerHTML = '<div class="msg err">Not enough rows.</div>'; return; }
         
-        // Detect header and parse
         const rows = lines.slice(1).map(l => l.split('\t'));
         const dates = new Set();
         rows.forEach(r => { if (r[0]) dates.add(parseDateFlexible(r[0])); });
         const dateArray = Array.from(dates).filter(d => d);
-        if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found. Check your date format.</div>'; return; }
+        if (dateArray.length === 0) { msgEl.innerHTML = '<div class="msg err">No valid dates found.</div>'; return; }
         
         msgEl.innerHTML = '<div class="msg ok">✅ Parsed ' + rows.length + ' rows across ' + dateArray.length + ' date(s).</div>';
         document.getElementById('previewCard').style.display = 'block';
